@@ -2,6 +2,17 @@ import { z } from 'zod'
 
 export const SUBJECTS = ['高数', '英语', '408', '政治'] as const
 export type Subject = (typeof SUBJECTS)[number]
+export const KINDS = ['knowledge', 'exercise', 'word', 'sentence'] as const
+export type Kind = (typeof KINDS)[number]
+export const KIND_NAMES: Record<Kind, string> = {
+  knowledge: '知识点',
+  exercise: '练习题',
+  word: '单词',
+  sentence: '句子',
+}
+export function kindsForSubject(subject: Subject): readonly Kind[] {
+  return subject === '英语' ? ['word', 'sentence'] : ['knowledge', 'exercise']
+}
 export const DATA_VERSION = 2
 const time = z.number().finite().min(0).max(8640000000000000)
 const count = z.number().int().nonnegative().max(10000000)
@@ -33,7 +44,7 @@ export const cardSchema = z
   .object({
     id,
     subject: z.enum(SUBJECTS),
-    kind: z.enum(['knowledge', 'exercise']),
+    kind: z.enum(KINDS),
     status: z.enum(['draft', 'ready']),
     question: contentSchema,
     answer: contentSchema,

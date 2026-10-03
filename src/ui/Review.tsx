@@ -1,11 +1,24 @@
 import { useEffect, useRef, useState } from 'react'
 import type { Grade } from 'ts-fsrs'
 import { rateCard, undoReview } from '../core/db'
-import { friendlyError, type Snapshot, type StudyCard, type Subject } from '../core/model'
+import {
+  friendlyError,
+  KIND_NAMES,
+  type Kind,
+  type Snapshot,
+  type StudyCard,
+  type Subject,
+} from '../core/model'
 import { formatTime, intervalLabel, previewDue, queueFor } from '../core/scheduler'
 import { ContentView, Empty, Icon, Notice } from './shared'
 
 const ratingNames = ['忘了', '困难', '记得', '轻松']
+const REVIEW_INSTRUCTIONS: Record<Kind, string> = {
+  knowledge: '先在脑海中完整地回答。',
+  exercise: '先在纸上独立做，再查看解析。',
+  word: '先回忆释义与用法，再展开。',
+  sentence: '先自己翻译，再展开对照。',
+}
 function ReviewFace({
   card,
   data,
@@ -72,12 +85,10 @@ function ReviewFace({
       <article className="review-paper">
         <div className="review-meta">
           <span>{card.subject}</span>
-          <span>{card.kind === 'knowledge' ? '知识点' : '练习题'}</span>
+          <span>{KIND_NAMES[card.kind]}</span>
           <span>{card.schedule.state === 0 ? '新内容' : '到期复习'}</span>
         </div>
-        <p className="review-instruction">
-          {card.kind === 'knowledge' ? '先在脑海中完整地回答。' : '先在纸上独立做，再查看解析。'}
-        </p>
+        <p className="review-instruction">{REVIEW_INSTRUCTIONS[card.kind]}</p>
         <h1 className="sr-only" ref={questionHeading} tabIndex={-1}>
           当前问题
         </h1>

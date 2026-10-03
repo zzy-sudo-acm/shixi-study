@@ -2,8 +2,11 @@ import { useEffect, useRef, useState, type ClipboardEvent, type DragEvent } from
 import {
   cardSchema,
   friendlyError,
+  KIND_NAMES,
+  kindsForSubject,
   SUBJECTS,
   type Content,
+  type Kind,
   type Snapshot,
   type StoredImage,
   type StudyCard,
@@ -215,6 +218,12 @@ function hasDraftContent(card: StudyCard) {
     card.tags.length,
   )
 }
+const EDITOR_KIND_HINTS: Record<Kind, string> = {
+  knowledge: '试着只问一件事：定义是什么？成立条件有哪些？这两种方法如何区分？',
+  exercise: '留下题目与解析。复习时先在纸上独立做，再查看答案。',
+  word: '一词一卡：正面写单词或短语，背面放释义、搭配或例句。',
+  sentence: '正面写英文句子，背面放翻译或结构分析。复习时先自己译一遍。',
+}
 export function Editor({
   data,
   existing,
@@ -233,7 +242,7 @@ export function Editor({
       existing ?? {
         id: crypto.randomUUID(),
         subject: subject ?? data.settings.lastSubject,
-        kind: 'knowledge',
+        kind: kindsForSubject(subject ?? data.settings.lastSubject)[0],
         status: 'ready',
         question: { text: '', images: [] },
         answer: { text: '', images: [] },
@@ -422,7 +431,11 @@ export function Editor({
               <select
                 aria-label="科目"
                 value={card.subject}
-                onChange={(e) => change({ subject: e.target.value as Subject })}
+                onChange={(e) => {
+                  const subject = e.target.value as Subject
+                  const kinds = kindsForSubject(subject)
+                  change(kinds.includes(card.kind) ? { subject } : { subject, kind: kinds[0] })
+                }}
               >
                 {SUBJECTS.map((s) => (
                   <option key={s}>{s}</option>
@@ -431,7 +444,10 @@ export function Editor({
             </label>
             <fieldset className="type-picker">
               <legend>内容类型</legend>
-              {(['knowledge', 'exercise'] as const).map((kind) => (
+              {(kindsForSubject(card.subject).includes(card.kind)
+                ? kindsForSubject(card.subject)
+                : [...kindsForSubject(card.subject), card.kind]
+              ).map((kind) => (
                 <label key={kind}>
                   <input
                     type="radio"
@@ -440,16 +456,12 @@ export function Editor({
                     checked={card.kind === kind}
                     onChange={() => change({ kind })}
                   />
-                  {kind === 'knowledge' ? '知识点' : '练习题'}
+                  {KIND_NAMES[kind]}
                 </label>
               ))}
             </fieldset>
           </div>
-          <p className="editor-hint">
-            {card.kind === 'knowledge'
-              ? '试着只问一件事：定义是什么？成立条件有哪些？这两种方法如何区分？'
-              : '留下题目与解析。复习时先在纸上独立做，再查看答案。'}
-          </p>
+          <p className="editor-hint">{EDITOR_KIND_HINTS[card.kind]}</p>
           <ContentEditor
             label="问题"
             content={card.question}

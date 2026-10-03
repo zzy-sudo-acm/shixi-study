@@ -359,3 +359,13 @@ describe('录入草稿', () => {
     expect(await loadDraft()).toBeUndefined()
   })
 })
+
+describe('内容类型', () => {
+  it('英语单词与句子类型可保存，与既有类型共存', async () => {
+    await add(card({ subject: '英语', kind: 'word' }))
+    await add(card({ subject: '英语', kind: 'sentence' }))
+    await add(card({ subject: '高数', kind: 'exercise' }))
+    const snapshot = await readSnapshot()
+    expect(new Set(snapshot.cards.map((c) => c.kind))).toEqual(new Set(['word', 'sentence', 'exercise']))
+  })
+})

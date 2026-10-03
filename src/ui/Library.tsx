@@ -1,5 +1,5 @@
 import { useDeferredValue, useState } from 'react'
-import { SUBJECTS, type Snapshot, type StudyCard } from '../core/model'
+import { KIND_NAMES, SUBJECTS, type Snapshot, type StudyCard } from '../core/model'
 import { formatTime } from '../core/scheduler'
 import { ContentView, Empty, Icon, PageHead } from './shared'
 
@@ -39,7 +39,7 @@ function Item({ card, data, now }: { card: StudyCard; data: Snapshot; now: numbe
       >
         <div className="item-meta">
           <span>{card.subject}</span>
-          <span>{card.kind === 'knowledge' ? '知识点' : '练习题'}</span>
+          <span>{KIND_NAMES[card.kind]}</span>
           <span className={card.status === 'draft' ? 'draft-label' : ''}>{status}</span>
         </div>
         <h2>
