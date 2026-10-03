@@ -652,6 +652,19 @@ dialog::backdrop {
   border-bottom: 0;
   padding: 16px 18px;
 }
+.content-editor > input[type='text'] {
+  display: block;
+  width: 100%;
+  border-radius: 8px 8px 0 0;
+  border-bottom: 0;
+  padding: 12px 16px;
+}
+.quick-entry {
+  display: grid;
+  grid-template-columns: 1fr 1.3fr;
+  gap: 20px;
+  align-items: start;
+}
 .attachment-bar {
   display: flex;
   gap: 18px;
@@ -1599,6 +1612,14 @@ dialog::backdrop {
   .content-editor textarea {
     padding: 13px;
     font-size: 16px;
+  }
+  .content-editor > input[type='text'] {
+    padding: 11px 13px;
+    font-size: 16px;
+  }
+  .quick-entry {
+    grid-template-columns: 1fr;
+    gap: 0;
   }
   .field-head label {
     font-size: 15px;

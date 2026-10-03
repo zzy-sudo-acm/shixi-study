@@ -206,7 +206,7 @@ export default function App() {
             />
           )
         ) : page === 'library' ? (
-          <Library key={route} data={data} now={now} draftOnly={argument === 'draft'} />
+          <Library key={route} data={data} now={now} refresh={refresh} draftOnly={argument === 'draft'} />
         ) : page === 'settings' ? (
           <SettingsPage data={data} refresh={refresh} />
         ) : reviewing ? (

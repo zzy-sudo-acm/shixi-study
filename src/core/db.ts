@@ -139,6 +139,21 @@ export async function saveCard(card: StudyCard, images: StoredImage[], revision:
       if (!used.has(key)) await tx.objectStore('images').delete(key)
   })
 }
+export async function deleteCard(cardId: string, revision: number) {
+  return mutate(revision, async (tx) => {
+    const card = await tx.objectStore('cards').get(cardId)
+    if (!card) throw new Error('内容不存在，请返回后刷新。')
+    await tx.objectStore('cards').delete(cardId)
+    const reviewIds = await tx.objectStore('reviews').index('by-card').getAllKeys(cardId)
+    for (const id of reviewIds) await tx.objectStore('reviews').delete(id)
+    const undoId = (await tx.objectStore('meta').get('undoId')) as string | null
+    if (undoId && reviewIds.includes(undoId)) await tx.objectStore('meta').put(null, 'undoId')
+    const allCards = await tx.objectStore('cards').getAll()
+    const used = new Set(allCards.flatMap((c) => [...c.question.images, ...c.answer.images]))
+    for (const key of await tx.objectStore('images').getAllKeys())
+      if (!used.has(key)) await tx.objectStore('images').delete(key)
+  })
+}
 export async function saveSettings(settings: Settings, revision: number) {
   const valid = settingsSchema.parse(settings)
   return mutate(revision, async (tx) => {

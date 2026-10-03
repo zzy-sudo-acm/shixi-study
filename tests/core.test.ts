@@ -6,6 +6,7 @@ import {
   closeDatabase,
   database,
   DB_NAME,
+  deleteCard,
   rateCard,
   readAllData,
   readSnapshot,
@@ -367,5 +368,31 @@ describe('内容类型', () => {
     await add(card({ subject: '高数', kind: 'exercise' }))
     const snapshot = await readSnapshot()
     expect(new Set(snapshot.cards.map((c) => c.kind))).toEqual(new Set(['word', 'sentence', 'exercise']))
+  })
+})
+
+describe('删除内容', () => {
+  it('删除同时清除复习历史、撤销引用与未引用图片', async () => {
+    const image = {
+      id: 'delete-image',
+      blob: new Blob([png], { type: 'image/png' }),
+      width: 1,
+      height: 1,
+      name: 'delete.png',
+    }
+    const victim = card({ question: { text: '要删除的', images: [image.id] } })
+    await saveCard(victim, [image], (await readSnapshot()).revision)
+    const keeper = await add()
+    let snapshot = await readSnapshot()
+    const review = await rateCard(victim.id, 3, now, 1000, snapshot)
+    snapshot = await readSnapshot()
+    expect(snapshot.undoId).toBe(review.id)
+    await deleteCard(victim.id, snapshot.revision)
+    snapshot = await readSnapshot()
+    expect(snapshot.cards.map((c) => c.id)).toEqual([keeper.id])
+    expect(snapshot.reviews).toHaveLength(0)
+    expect(snapshot.undoId).toBeNull()
+    expect((await readAllData()).images).toHaveLength(0)
+    await expect(deleteCard(victim.id, snapshot.revision)).rejects.toThrow('不存在')
   })
 })

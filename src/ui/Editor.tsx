@@ -23,6 +23,8 @@ function ContentEditor({
   label,
   placeholder,
   rows,
+  singleLine = false,
+  onEnterKey,
   content,
   images,
   original,
@@ -35,6 +37,8 @@ function ContentEditor({
   label: string
   placeholder: string
   rows: number
+  singleLine?: boolean
+  onEnterKey?: () => void
   content: Content
   images: StoredImage[]
   original: boolean
@@ -112,11 +116,13 @@ function ContentEditor({
     >
       <div className="field-head">
         <label htmlFor={`input-${label}`}>{label}</label>
-        <button type="button" className="text-button" onClick={() => setPreview((value) => !value)}>
-          {preview ? '继续编辑' : '预览公式'}
-        </button>
+        {!singleLine && (
+          <button type="button" className="text-button" onClick={() => setPreview((value) => !value)}>
+            {preview ? '继续编辑' : '预览公式'}
+          </button>
+        )}
       </div>
-      {preview ? (
+      {preview && !singleLine ? (
         <div className="editor-preview">
           {content.text ? (
             <FormulaText text={content.text} />
@@ -124,6 +130,22 @@ function ContentEditor({
             <p className="muted">还没有文字，返回编辑后输入。</p>
           )}
         </div>
+      ) : singleLine ? (
+        <input
+          id={`input-${label}`}
+          type="text"
+          value={content.text}
+          maxLength={100000}
+          onChange={(e) => update({ ...content, text: e.target.value })}
+          onPaste={paste}
+          placeholder={placeholder}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' && !e.nativeEvent.isComposing && onEnterKey) {
+              e.preventDefault()
+              onEnterKey()
+            }
+          }}
+        />
       ) : (
         <textarea
           id={`input-${label}`}
@@ -222,7 +244,7 @@ function hasDraftContent(card: StudyCard) {
 const EDITOR_KIND_HINTS: Record<Kind, string> = {
   knowledge: '试着只问一件事：定义是什么？成立条件有哪些？这两种方法如何区分？',
   exercise: '留下题目与解析。复习时先在纸上独立做，再查看答案。',
-  word: '一词一卡：正面写单词或短语，背面放释义、搭配或例句。',
+  word: '一词一卡：正面写单词或短语，背面放释义、搭配或例句。回车换到背面，再回车直接存下一条。',
   sentence: '正面写英文句子，背面放翻译或结构分析。复习时先自己译一遍。',
 }
 const EDITOR_FACES: Record<
@@ -244,8 +266,8 @@ const EDITOR_FACES: Record<
     answer: { placeholder: '写下判断依据、关键步骤或贴上解析图片。复习时默认隐藏。', rows: 5 },
   },
   word: {
-    question: { placeholder: '例如：abandon\n也可以粘贴或拖入词汇截图。', rows: 2 },
-    answer: { placeholder: '词性、释义、常用搭配或例句。复习时默认隐藏。', rows: 4 },
+    question: { placeholder: '例如：abandon', rows: 2 },
+    answer: { placeholder: '词性、释义、搭配或例句', rows: 4 },
   },
   sentence: {
     question: { placeholder: '例如：The show must go on.\n也可以粘贴或拖入阅读截图。', rows: 3 },
@@ -490,44 +512,54 @@ export function Editor({
             </fieldset>
           </div>
           <p className="editor-hint">{EDITOR_KIND_HINTS[card.kind]}</p>
-          <ContentEditor
-            label={FACE_NAMES[card.kind].question}
-            placeholder={EDITOR_FACES[card.kind].question.placeholder}
-            rows={EDITOR_FACES[card.kind].question.rows}
-            content={card.question}
-            images={images}
-            original={original}
-            update={(question, added) => {
-              change({ question })
-              if (added) setImages((items) => [...items, ...added])
-            }}
-            onProcessing={(value) => {
-              if (value) setDirty(true)
-              setProcessing((n) => n + (value ? 1 : -1))
-            }}
-            onReuse={(id) => reuseImage('question', id)}
-            reuseTargets={card.answer.images}
-            reuseLabel="用到背面"
-          />
-          <ContentEditor
-            label={FACE_NAMES[card.kind].answer}
-            placeholder={EDITOR_FACES[card.kind].answer.placeholder}
-            rows={EDITOR_FACES[card.kind].answer.rows}
-            content={card.answer}
-            images={images}
-            original={original}
-            update={(answer, added) => {
-              change({ answer })
-              if (added) setImages((items) => [...items, ...added])
-            }}
-            onProcessing={(value) => {
-              if (value) setDirty(true)
-              setProcessing((n) => n + (value ? 1 : -1))
-            }}
-            onReuse={(id) => reuseImage('answer', id)}
-            reuseTargets={card.question.images}
-            reuseLabel="用到正面"
-          />
+          <div className={card.kind === 'word' ? 'quick-entry' : undefined}>
+            <ContentEditor
+              label={FACE_NAMES[card.kind].question}
+              placeholder={EDITOR_FACES[card.kind].question.placeholder}
+              rows={EDITOR_FACES[card.kind].question.rows}
+              singleLine={card.kind === 'word'}
+              onEnterKey={
+                card.kind === 'word'
+                  ? () => document.getElementById(`input-${FACE_NAMES[card.kind].answer}`)?.focus()
+                  : undefined
+              }
+              content={card.question}
+              images={images}
+              original={original}
+              update={(question, added) => {
+                change({ question })
+                if (added) setImages((items) => [...items, ...added])
+              }}
+              onProcessing={(value) => {
+                if (value) setDirty(true)
+                setProcessing((n) => n + (value ? 1 : -1))
+              }}
+              onReuse={(id) => reuseImage('question', id)}
+              reuseTargets={card.answer.images}
+              reuseLabel="用到背面"
+            />
+            <ContentEditor
+              label={FACE_NAMES[card.kind].answer}
+              placeholder={EDITOR_FACES[card.kind].answer.placeholder}
+              rows={EDITOR_FACES[card.kind].answer.rows}
+              singleLine={card.kind === 'word'}
+              onEnterKey={card.kind === 'word' ? () => void save('ready', true) : undefined}
+              content={card.answer}
+              images={images}
+              original={original}
+              update={(answer, added) => {
+                change({ answer })
+                if (added) setImages((items) => [...items, ...added])
+              }}
+              onProcessing={(value) => {
+                if (value) setDirty(true)
+                setProcessing((n) => n + (value ? 1 : -1))
+              }}
+              onReuse={(id) => reuseImage('answer', id)}
+              reuseTargets={card.question.images}
+              reuseLabel="用到正面"
+            />
+          </div>
           <div className="editor-options">
             <span>
               公式写法：<code>{'$x^2$'}</code> 行内，<code>{'$$\\int_0^1 x\\,dx$$'}</code> 独立一行。

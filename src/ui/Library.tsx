@@ -1,10 +1,21 @@
 import { useDeferredValue, useState } from 'react'
-import { KIND_NAMES, SUBJECTS, type Snapshot, type StudyCard } from '../core/model'
+import { deleteCard } from '../core/db'
+import { FACE_NAMES, KIND_NAMES, SUBJECTS, type Snapshot, type StudyCard } from '../core/model'
 import { formatTime } from '../core/scheduler'
 import { ContentView, Empty, Icon, PageHead } from './shared'
 
 const stateNames = ['未开始', '学习中', '复习中', '重新学习']
-function Item({ card, data, now }: { card: StudyCard; data: Snapshot; now: number }) {
+function Item({
+  card,
+  data,
+  now,
+  onDeleted,
+}: {
+  card: StudyCard
+  data: Snapshot
+  now: number
+  onDeleted: () => Promise<void>
+}) {
   const [expanded, setExpanded] = useState(false),
     [answer, setAnswer] = useState(false)
   const reviews = data.reviews
@@ -69,10 +80,19 @@ function Item({ card, data, now }: { card: StudyCard; data: Snapshot; now: numbe
             <a className="button subtle" href={`#edit/${card.id}`}>
               编辑内容
             </a>
+            <button
+              className="danger"
+              onClick={() => {
+                if (!window.confirm('确定删除这条内容吗？它的复习历史会一并删除，不可恢复。')) return
+                void deleteCard(card.id, data.revision).then(onDeleted)
+              }}
+            >
+              删除
+            </button>
           </div>
           {answer && (
             <section className="answer-block">
-              <h3>答案与解析</h3>
+              <h3>{FACE_NAMES[card.kind].answer}</h3>
               {card.answer.text || card.answer.images.length ? (
                 <ContentView content={card.answer} label="答案图片" />
               ) : (
@@ -110,10 +130,12 @@ function Item({ card, data, now }: { card: StudyCard; data: Snapshot; now: numbe
 export function Library({
   data,
   now,
+  refresh,
   draftOnly = false,
 }: {
   data: Snapshot
   now: number
+  refresh: () => Promise<void>
   draftOnly?: boolean
 }) {
   const [search, setSearch] = useState(''),
@@ -201,7 +223,13 @@ export function Library({
       {cards.length ? (
         <div className="library-list">
           {cards.slice(0, limit).map((card) => (
-            <Item key={`${card.id}-${card.updatedAt}`} card={card} data={data} now={now} />
+            <Item
+              key={`${card.id}-${card.updatedAt}`}
+              card={card}
+              data={data}
+              now={now}
+              onDeleted={refresh}
+            />
           ))}
         </div>
       ) : (
