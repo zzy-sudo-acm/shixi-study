@@ -1,17 +1,21 @@
-import { useDeferredValue, useState } from 'react'
-import { deleteCard, setFamiliarity } from '../core/db'
+import { useDeferredValue, useState, type ReactNode } from 'react'
+import { addCategory, deleteCard, deleteCategory, renameCategory, setFamiliarity } from '../core/db'
 import {
-  categoriesFor,
+  categoryParent,
+  categoryPaths,
+  categoryUnder,
   FACE_NAMES,
   FAMILIARITY_NAMES,
+  friendlyError,
   KIND_NAMES,
+  normalizeCategoryPath,
   SUBJECTS,
   type Snapshot,
   type StudyCard,
   type Subject,
 } from '../core/model'
 import { formatTime } from '../core/scheduler'
-import { ContentView, Empty, Icon, PageHead } from './shared'
+import { ContentView, Empty, Icon, Notice, PageHead } from './shared'
 
 const stateNames = ['未开始', '学习中', '复习中', '重新学习']
 function Item({
@@ -155,6 +159,239 @@ function Item({
     </article>
   )
 }
+interface CategoryNode {
+  path: string
+  name: string
+  children: CategoryNode[]
+}
+function buildCategoryTree(paths: string[]): CategoryNode[] {
+  const roots: CategoryNode[] = []
+  const byPath = new Map<string, CategoryNode>()
+  for (const path of paths) {
+    let parent = ''
+    for (const segment of path.split('/')) {
+      const full = parent ? `${parent}/${segment}` : segment
+      let node = byPath.get(full)
+      if (!node) {
+        node = { path: full, name: segment, children: [] }
+        byPath.set(full, node)
+        if (parent) byPath.get(parent)!.children.push(node)
+        else roots.push(node)
+      }
+      parent = full
+    }
+  }
+  const sortNodes = (nodes: CategoryNode[]) => {
+    nodes.sort((a, b) => a.name.localeCompare(b.name, 'zh'))
+    for (const node of nodes) sortNodes(node.children)
+  }
+  sortNodes(roots)
+  return roots
+}
+function CategoryTree({
+  data,
+  subject,
+  category,
+  onFilter,
+  onChanged,
+}: {
+  data: Snapshot
+  subject: Subject
+  category: string
+  onFilter: (value: string) => void
+  onChanged: () => Promise<void>
+}) {
+  const [collapsed, setCollapsed] = useState<string[]>([]),
+    [managing, setManaging] = useState(false),
+    [editing, setEditing] = useState<{ type: 'add' | 'rename' | 'root'; path: string } | null>(null),
+    [editText, setEditText] = useState(''),
+    [error, setError] = useState('')
+  const roots = buildCategoryTree(categoryPaths(data, subject))
+  const counts = new Map<string, number>()
+  for (const card of data.cards)
+    if (card.subject === subject && card.category)
+      for (let path = card.category; path; path = categoryParent(path))
+        counts.set(path, (counts.get(path) ?? 0) + 1)
+  async function submitEdit() {
+    if (!editing) return
+    setError('')
+    try {
+      if (editing.type === 'rename') {
+        const from = editing.path
+        await renameCategory(subject, from, editText, data.revision)
+        const to = normalizeCategoryPath(editText)
+        if (category !== 'all' && category !== '__none__' && categoryUnder(category, from))
+          onFilter(to ? to + category.slice(from.length) : 'all')
+      } else {
+        await addCategory(
+          subject,
+          editing.type === 'add' ? `${editing.path}/${editText}` : editText,
+          data.revision,
+        )
+      }
+      setEditing(null)
+      await onChanged()
+    } catch (err) {
+      setError(friendlyError(err))
+    }
+  }
+  async function removeNode(path: string) {
+    if (!window.confirm('删除后该分类及其子分类下的内容将变为未分类，确定删除？')) return
+    setError('')
+    try {
+      await deleteCategory(subject, path, data.revision)
+      if (category !== 'all' && category !== '__none__' && categoryUnder(category, path)) onFilter('all')
+      await onChanged()
+    } catch (err) {
+      setError(friendlyError(err))
+    }
+  }
+  function editRow(depth: number, rename: boolean) {
+    return (
+      <div className="cat-edit" style={{ paddingInlineStart: `${depth * 20 + 24}px` }}>
+        <input
+          aria-label={rename ? '新分类路径' : editing?.type === 'root' ? '新建顶级分类' : '新子类名称'}
+          value={editText}
+          maxLength={100}
+          autoFocus
+          placeholder={rename ? '输入新路径，可改变层级' : '分类名称'}
+          onChange={(e) => setEditText(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' && !e.nativeEvent.isComposing) {
+              e.preventDefault()
+              void submitEdit()
+            }
+            if (e.key === 'Escape') setEditing(null)
+          }}
+        />
+        <button type="button" className="text-button" onClick={() => void submitEdit()}>
+          确定
+        </button>
+      </div>
+    )
+  }
+  function renderNode(node: CategoryNode, depth: number): ReactNode {
+    const isCollapsed = collapsed.includes(node.path)
+    return (
+      <div key={node.path}>
+        <div className="cat-node" style={{ paddingInlineStart: `${depth * 20}px` }}>
+          {node.children.length ? (
+            <button
+              type="button"
+              className="cat-toggle"
+              aria-label={`${isCollapsed ? '展开' : '收起'} ${node.path}`}
+              aria-expanded={!isCollapsed}
+              onClick={() =>
+                setCollapsed((list) =>
+                  isCollapsed ? list.filter((p) => p !== node.path) : [...list, node.path],
+                )
+              }
+            >
+              {isCollapsed ? '▸' : '▾'}
+            </button>
+          ) : (
+            <span className="cat-toggle" aria-hidden="true" />
+          )}
+          <button
+            type="button"
+            className={`cat-name${category === node.path ? ' cat-active' : ''}`}
+            onClick={() => onFilter(category === node.path ? 'all' : node.path)}
+          >
+            {node.name}
+          </button>
+          <span className="cat-count">{counts.get(node.path) ?? 0}</span>
+          {managing && (
+            <span className="cat-manage">
+              <button
+                type="button"
+                aria-label={`在 ${node.path} 下新增子类`}
+                onClick={() => {
+                  setEditing({ type: 'add', path: node.path })
+                  setEditText('')
+                }}
+              >
+                ＋
+              </button>
+              <button
+                type="button"
+                aria-label={`重命名 ${node.path}`}
+                onClick={() => {
+                  setEditing({ type: 'rename', path: node.path })
+                  setEditText(node.path)
+                }}
+              >
+                ✎
+              </button>
+              <button
+                type="button"
+                aria-label={`删除 ${node.path}`}
+                onClick={() => void removeNode(node.path)}
+              >
+                ✕
+              </button>
+            </span>
+          )}
+        </div>
+        {editing &&
+          ((editing.type === 'add' && editing.path === node.path) ||
+            (editing.type === 'rename' && editing.path === node.path)) &&
+          editRow(depth + 1, editing.type === 'rename')}
+        {!isCollapsed && node.children.map((child) => renderNode(child, depth + 1))}
+      </div>
+    )
+  }
+  return (
+    <div className="cat-tree">
+      <div className="cat-head">
+        <button
+          type="button"
+          className={`cat-all${category === 'all' ? ' cat-active' : ''}`}
+          onClick={() => onFilter('all')}
+        >
+          全部
+        </button>
+        <button
+          type="button"
+          className={`cat-none${category === '__none__' ? ' cat-active' : ''}`}
+          onClick={() => onFilter('__none__')}
+        >
+          未分类
+        </button>
+        <button
+          type="button"
+          className="text-button cat-manage-toggle"
+          aria-pressed={managing}
+          onClick={() => {
+            setManaging((value) => !value)
+            setEditing(null)
+          }}
+        >
+          {managing ? '完成' : '管理'}
+        </button>
+      </div>
+      {roots.length === 0 && !managing && (
+        <p className="cat-empty muted">还没有分类。录入时填写分类，或点「管理」搭建自己的知识树。</p>
+      )}
+      {roots.map((node) => renderNode(node, 0))}
+      {managing &&
+        (editing?.type === 'root' ? (
+          editRow(0, false)
+        ) : (
+          <button
+            type="button"
+            className="text-button cat-add-root"
+            onClick={() => {
+              setEditing({ type: 'root', path: '' })
+              setEditText('')
+            }}
+          >
+            ＋ 新建顶级分类
+          </button>
+        ))}
+      {error && <Notice error>{error}</Notice>}
+    </div>
+  )
+}
 export function Library({
   data,
   now,
@@ -177,7 +414,7 @@ export function Library({
       (c) =>
         (subject === '全部' || c.subject === subject) &&
         (category === 'all' ||
-          (category === '__none__' ? !(c.category ?? '') : (c.category ?? '') === category)) &&
+          (category === '__none__' ? !(c.category ?? '') : categoryUnder(c.category ?? '', category))) &&
         (status === 'all' ||
           (status === 'draft'
             ? c.status === 'draft'
@@ -233,26 +470,6 @@ export function Library({
             ))}
           </select>
         </label>
-        {subject !== '全部' && !!categoriesFor(subject as Subject).length && (
-          <label>
-            <span className="sr-only">筛选分类</span>
-            <select
-              value={category}
-              onChange={(e) => {
-                setCategory(e.target.value)
-                setLimit(30)
-              }}
-            >
-              <option value="all">全部分类</option>
-              {categoriesFor(subject as Subject).map((topic) => (
-                <option key={topic} value={topic}>
-                  {topic}
-                </option>
-              ))}
-              <option value="__none__">未分类</option>
-            </select>
-          </label>
-        )}
         <label>
           <span className="sr-only">筛选状态</span>
           <select
@@ -269,6 +486,18 @@ export function Library({
           </select>
         </label>
       </div>
+      {subject !== '全部' && (
+        <CategoryTree
+          data={data}
+          subject={subject as Subject}
+          category={category}
+          onFilter={(value) => {
+            setCategory(value)
+            setLimit(30)
+          }}
+          onChanged={refresh}
+        />
+      )}
       <p className="result-count">
         {cards.length} 条结果 <span>图片中的文字不会被自动识别或搜索</span>
       </p>

@@ -602,7 +602,14 @@ dialog::backdrop {
   gap: 9px;
 }
 .editor-top > .category-field {
-  grid-template-columns: 40px minmax(150px, 190px);
+  grid-template-columns: 40px minmax(180px, 230px);
+}
+.category-hint {
+  grid-column: 2;
+  font-size: 11px;
+  color: var(--muted);
+  font-weight: 400;
+  line-height: 1.6;
 }
 .type-picker {
   display: flex;
@@ -937,6 +944,124 @@ dialog::backdrop {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 110px 125px;
   gap: 12px;
+}
+.cat-tree {
+  margin-top: 14px;
+  padding: 13px 16px 15px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  font-size: 13px;
+}
+.cat-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 6px;
+}
+.cat-head .cat-manage-toggle {
+  margin-left: auto;
+  font-size: 12px;
+}
+.cat-all,
+.cat-none,
+.cat-name {
+  min-height: 34px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  border-color: transparent;
+  background: transparent;
+  font-weight: 400;
+}
+.cat-all:hover,
+.cat-none:hover,
+.cat-name:hover {
+  background: var(--soft);
+  border-color: transparent;
+}
+.cat-active,
+.cat-active:hover {
+  background: var(--ink);
+  color: #fff;
+  border-color: var(--ink);
+}
+.cat-empty {
+  font-size: 12px;
+  padding: 6px 0;
+}
+.cat-node {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  min-width: 0;
+}
+.cat-toggle {
+  min-height: 30px;
+  min-width: 24px;
+  width: 24px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font-size: 11px;
+  flex-shrink: 0;
+}
+span.cat-toggle {
+  display: inline-block;
+}
+.cat-name {
+  max-width: 100%;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.cat-count {
+  font-size: 11px;
+  color: var(--muted);
+  padding: 0 4px;
+  font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+}
+.cat-manage {
+  display: inline-flex;
+  gap: 2px;
+  flex-shrink: 0;
+}
+.cat-manage button {
+  min-height: 30px;
+  min-width: 30px;
+  padding: 2px 6px;
+  border-color: transparent;
+  background: transparent;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 400;
+}
+.cat-manage button:hover {
+  background: var(--soft);
+  color: var(--ink);
+  border-color: transparent;
+}
+.cat-edit {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 3px 0;
+}
+.cat-edit input {
+  flex: 1;
+  min-width: 0;
+  min-height: 36px;
+  padding: 6px 10px;
+  font-size: 13px;
+}
+.cat-edit .text-button {
+  font-size: 12px;
+  flex-shrink: 0;
+}
+.cat-add-root {
+  font-size: 12px;
 }
 .library-filters input,
 .library-filters select {
@@ -1733,6 +1858,19 @@ dialog::backdrop {
   .library-filters {
     grid-template-columns: 1fr 1fr;
     gap: 9px;
+  }
+  .cat-tree {
+    padding: 11px 12px 13px;
+    font-size: 12px;
+  }
+  .cat-all,
+  .cat-none,
+  .cat-name {
+    min-height: 38px;
+  }
+  .cat-manage button {
+    min-height: 38px;
+    min-width: 36px;
   }
   .library-filters .search-field {
     grid-column: 1/-1;

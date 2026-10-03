@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState, type ClipboardEvent, type DragEvent } from 'react'
 import {
   cardSchema,
-  categoriesFor,
-  CATEGORY_GROUPS,
+  categoryPaths,
   FACE_NAMES,
   friendlyError,
   KIND_NAMES,
   kindsForSubject,
+  normalizeCategoryPath,
   SUBJECTS,
   type Content,
   type Kind,
@@ -344,6 +344,7 @@ export function Editor({
   }, [existing, pendingDraft, card, tagsText, original, images])
   const books = [...new Set(data.cards.map((c) => c.book).filter(Boolean))].sort()
   const chapters = [...new Set(data.cards.map((c) => c.chapter).filter(Boolean))].sort()
+  const categories = categoryPaths(data, card.subject)
   const currentTags = tagsText.split(/[,，\s]+/).filter(Boolean)
   const knownTags = [...new Set(data.cards.flatMap((c) => c.tags))]
     .filter((tag) => !currentTags.includes(tag))
@@ -396,6 +397,7 @@ export function Editor({
     try {
       const candidate = cardSchema.parse({
         ...card,
+        category: normalizeCategoryPath(card.category),
         tags: [...new Set(tagsText.split(/[,，\s]+/).filter(Boolean))],
         status,
         updatedAt: Date.now(),
@@ -493,7 +495,9 @@ export function Editor({
                   change({
                     subject,
                     ...(kinds.includes(card.kind) ? {} : { kind: kinds[0] }),
-                    ...(categoriesFor(subject).includes(card.category) ? {} : { category: '' }),
+                    ...(categoryPaths(data, subject).includes(normalizeCategoryPath(card.category))
+                      ? {}
+                      : { category: '' }),
                   })
                 }}
               >
@@ -502,27 +506,23 @@ export function Editor({
                 ))}
               </select>
             </label>
-            {!!CATEGORY_GROUPS[card.subject]?.length && (
-              <label className="category-field">
-                分类
-                <select
-                  aria-label="分类"
-                  value={card.category}
-                  onChange={(e) => change({ category: e.target.value })}
-                >
-                  <option value="">未分类</option>
-                  {(CATEGORY_GROUPS[card.subject] ?? []).map((g) => (
-                    <optgroup key={g.group} label={g.group}>
-                      {g.topics.map((topic) => (
-                        <option key={topic} value={topic}>
-                          {topic}
-                        </option>
-                      ))}
-                    </optgroup>
-                  ))}
-                </select>
-              </label>
-            )}
+            <label className="category-field">
+              分类
+              <input
+                aria-label="分类"
+                value={card.category}
+                maxLength={100}
+                list="category-options"
+                onChange={(e) => change({ category: e.target.value })}
+                placeholder="如 高等数学/极限"
+              />
+              <datalist id="category-options">
+                {categories.map((path) => (
+                  <option key={path} value={path} />
+                ))}
+              </datalist>
+              <span className="category-hint">选择已有分类，或输入新分类；用 / 分层，如 高等数学/极限</span>
+            </label>
             <fieldset className="type-picker">
               <legend>内容类型</legend>
               {(kindsForSubject(card.subject).includes(card.kind)

@@ -19,45 +19,33 @@ export const FACE_NAMES: Record<Kind, { question: string; answer: string }> = {
   word: { question: '单词或短语', answer: '释义与用法' },
   sentence: { question: '英文句子', answer: '翻译与解析' },
 }
-export const CATEGORY_GROUPS: Partial<Record<Subject, { group: string; topics: string[] }[]>> = {
-  高数: [
-    {
-      group: '高等数学',
-      topics: [
-        '函数与极限',
-        '导数与微分',
-        '微分中值定理与导数应用',
-        '不定积分',
-        '定积分及其应用',
-        '常微分方程',
-        '多元函数微分学',
-        '重积分',
-        '无穷级数',
-        '向量代数与空间解析几何',
-      ],
-    },
-    {
-      group: '线性代数',
-      topics: ['行列式', '矩阵', '向量', '线性方程组', '特征值与特征向量', '二次型'],
-    },
-    {
-      group: '概率论与数理统计',
-      topics: [
-        '随机事件与概率',
-        '随机变量及其分布',
-        '多维随机变量',
-        '数字特征',
-        '大数定律与中心极限定理',
-        '数理统计',
-      ],
-    },
-  ],
-  '408': [{ group: '408', topics: ['数据结构', '计算机组成原理', '操作系统', '计算机网络'] }],
-  政治: [{ group: '政治', topics: ['马原', '毛中特', '史纲', '思修与法基', '时政'] }],
+export const CATEGORY_MAX_DEPTH = 5
+// 分类是用户自建的路径，段间以 / 分隔，如 高等数学/极限/泰勒公式。
+export function normalizeCategoryPath(input: string): string {
+  return input
+    .replace(/[／\\]/g, '/')
+    .split('/')
+    .map((segment) => segment.trim())
+    .filter(Boolean)
+    .join('/')
 }
-export function categoriesFor(subject: Subject): string[] {
-  return (CATEGORY_GROUPS[subject] ?? []).flatMap((g) => g.topics)
+export function categoryParent(path: string): string {
+  const index = path.lastIndexOf('/')
+  return index === -1 ? '' : path.slice(0, index)
 }
+export function categoryUnder(path: string, ancestor: string): boolean {
+  return path === ancestor || path.startsWith(`${ancestor}/`)
+}
+// 某科目已有的分类路径：目录树条目与卡片分类的并集，按深度再按字典序排列。
+export function categoryPaths(data: Pick<Snapshot, 'cards' | 'categories'>, subject: Subject): string[] {
+  const paths = new Set(data.categories.filter((e) => e.subject === subject).map((e) => e.path))
+  for (const card of data.cards) if (card.subject === subject && card.category) paths.add(card.category)
+  return [...paths].sort((a, b) => a.split('/').length - b.split('/').length || a.localeCompare(b, 'zh'))
+}
+export const categoryEntrySchema = z
+  .object({ subject: z.enum(SUBJECTS), path: z.string().min(1).max(100) })
+  .strict()
+export type CategoryEntry = z.infer<typeof categoryEntrySchema>
 export const FAMILIARITY_NAMES = ['未标记', '陌生', '眼熟', '熟练'] as const
 export const DATA_VERSION = 2
 const time = z.number().finite().min(0).max(8640000000000000)
@@ -201,6 +189,7 @@ export interface Snapshot {
   algorithm: Algorithm
   revision: number
   undoId: string | null
+  categories: CategoryEntry[]
 }
 export function friendlyError(error: unknown): string {
   if (error instanceof DOMException && error.name === 'QuotaExceededError')

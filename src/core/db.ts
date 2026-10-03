@@ -1,15 +1,22 @@
 import { openDB, type DBSchema, type IDBPDatabase, type IDBPTransaction } from 'idb'
 import {
   cardSchema,
+  categoryEntrySchema,
+  categoryUnder,
+  normalizeCategoryPath,
+  CATEGORY_MAX_DEPTH,
   settingsSchema,
   reviewSchema,
+  type CategoryEntry,
   type StudyCard,
   type StoredImage,
   type Review,
   type Settings,
   type Snapshot,
+  type Subject,
   DEFAULT_SETTINGS,
 } from './model'
+import { z } from 'zod'
 import { DEFAULT_ALGORITHM, nextReview, queueFor } from './scheduler'
 import type { Grade } from 'ts-fsrs'
 
@@ -70,13 +77,14 @@ export async function closeDatabase() {
 export async function readSnapshot(): Promise<Snapshot> {
   const db = await database()
   const tx = db.transaction(['cards', 'reviews', 'meta'], 'readonly')
-  const [cards, reviews, settings, algorithm, revision, undoId] = await Promise.all([
+  const [cards, reviews, settings, algorithm, revision, undoId, categories] = await Promise.all([
     tx.objectStore('cards').getAll(),
     tx.objectStore('reviews').getAll(),
     tx.objectStore('meta').get('settings'),
     tx.objectStore('meta').get('algorithm'),
     tx.objectStore('meta').get('revision'),
     tx.objectStore('meta').get('undoId'),
+    tx.objectStore('meta').get('categories'),
   ])
   await tx.done
   return {
@@ -86,7 +94,13 @@ export async function readSnapshot(): Promise<Snapshot> {
     algorithm: (algorithm ?? DEFAULT_ALGORITHM) as Snapshot['algorithm'],
     revision: (revision ?? 0) as number,
     undoId: (undoId ?? null) as string | null,
+    categories: parseCategories(categories),
   }
+}
+const categoryListSchema = z.array(categoryEntrySchema).max(2000)
+function parseCategories(value: unknown): CategoryEntry[] {
+  const result = categoryListSchema.safeParse(value ?? [])
+  return result.success ? result.data : []
 }
 async function guard(tx: WriteTx, revision: number) {
   const current = (await tx.objectStore('meta').get('revision')) ?? 0
@@ -132,6 +146,14 @@ export async function saveCard(card: StudyCard, images: StoredImage[], revision:
     const settings = ((await tx.objectStore('meta').get('settings')) ?? DEFAULT_SETTINGS) as Settings
     await tx.objectStore('meta').put({ ...settings, lastSubject: card.subject }, 'settings')
     await tx.objectStore('meta').put(null, 'undoId')
+    // The category tree grows as cards are entered, within the same transaction.
+    if (valid.category) {
+      const categories = parseCategories(await tx.objectStore('meta').get('categories'))
+      if (!categories.some((e) => e.subject === valid.subject && e.path === valid.category)) {
+        categories.push({ subject: valid.subject, path: valid.category })
+        await tx.objectStore('meta').put(categories, 'categories')
+      }
+    }
     // Release unreferenced images only in this successful content transaction.
     const allCards = await tx.objectStore('cards').getAll()
     const used = new Set(allCards.flatMap((c) => [...c.question.images, ...c.answer.images]))
@@ -159,6 +181,64 @@ export async function setFamiliarity(cardId: string, level: number, revision: nu
     const card = await tx.objectStore('cards').get(cardId)
     if (!card) throw new Error('内容不存在，请返回后刷新。')
     await tx.objectStore('cards').put(cardSchema.parse({ ...card, familiarity: level }))
+  })
+}
+function validCategoryPath(path: string): string {
+  const normalized = normalizeCategoryPath(path)
+  if (!normalized) throw new Error('分类名称不能为空。')
+  if (normalized.length > 100) throw new Error('分类最长 100 字。')
+  if (normalized.split('/').length > CATEGORY_MAX_DEPTH)
+    throw new Error(`分类最多支持 ${CATEGORY_MAX_DEPTH} 层。`)
+  return normalized
+}
+async function readCategories(tx: WriteTx): Promise<CategoryEntry[]> {
+  return parseCategories(await tx.objectStore('meta').get('categories'))
+}
+export async function addCategory(subject: Subject, path: string, revision: number) {
+  const valid = validCategoryPath(path)
+  return mutate(revision, async (tx) => {
+    const categories = await readCategories(tx)
+    if (!categories.some((e) => e.subject === subject && e.path === valid)) {
+      categories.push({ subject, path: valid })
+      await tx.objectStore('meta').put(categories, 'categories')
+    }
+  })
+}
+export async function renameCategory(subject: Subject, oldPath: string, newPath: string, revision: number) {
+  const from = normalizeCategoryPath(oldPath)
+  const to = validCategoryPath(newPath)
+  if (!from || to === from) return
+  return mutate(revision, async (tx) => {
+    const renamed = await readCategories(tx)
+    for (const [index, entry] of renamed.entries())
+      if (entry.subject === subject && categoryUnder(entry.path, from))
+        renamed[index] = { subject, path: to + entry.path.slice(from.length) }
+    const seen = new Set<string>()
+    const deduped = renamed.filter((e) => {
+      const key = `${e.subject}${e.path}`
+      if (seen.has(key)) return false
+      seen.add(key)
+      return true
+    })
+    await tx.objectStore('meta').put(deduped, 'categories')
+    for (const card of await tx.objectStore('cards').getAll())
+      if (card.subject === subject && categoryUnder(card.category, from))
+        await tx
+          .objectStore('cards')
+          .put(cardSchema.parse({ ...card, category: to + card.category.slice(from.length) }))
+  })
+}
+export async function deleteCategory(subject: Subject, path: string, revision: number) {
+  const target = normalizeCategoryPath(path)
+  if (!target) return
+  return mutate(revision, async (tx) => {
+    const categories = (await readCategories(tx)).filter(
+      (e) => !(e.subject === subject && categoryUnder(e.path, target)),
+    )
+    await tx.objectStore('meta').put(categories, 'categories')
+    for (const card of await tx.objectStore('cards').getAll())
+      if (card.subject === subject && categoryUnder(card.category, target))
+        await tx.objectStore('cards').put(cardSchema.parse({ ...card, category: '' }))
   })
 }
 export async function saveSettings(settings: Settings, revision: number) {
@@ -210,13 +290,14 @@ export async function readImage(id: string) {
 export async function readAllData() {
   const db = await database()
   const tx = db.transaction(stores, 'readonly')
-  const [cards, images, reviews, settings, algorithm, undoId] = await Promise.all([
+  const [cards, images, reviews, settings, algorithm, undoId, categories] = await Promise.all([
     tx.objectStore('cards').getAll(),
     tx.objectStore('images').getAll(),
     tx.objectStore('reviews').getAll(),
     tx.objectStore('meta').get('settings'),
     tx.objectStore('meta').get('algorithm'),
     tx.objectStore('meta').get('undoId'),
+    tx.objectStore('meta').get('categories'),
   ])
   await tx.done
   return {
@@ -226,6 +307,7 @@ export async function readAllData() {
     settings: (settings ?? DEFAULT_SETTINGS) as Settings,
     algorithm: (algorithm ?? DEFAULT_ALGORITHM) as Snapshot['algorithm'],
     undoId: (undoId ?? null) as string | null,
+    categories: parseCategories(categories),
   }
 }
 export async function replaceAll(data: Awaited<ReturnType<typeof readAllData>>, revision: number) {
@@ -237,5 +319,6 @@ export async function replaceAll(data: Awaited<ReturnType<typeof readAllData>>, 
     await tx.objectStore('meta').put(data.settings, 'settings')
     await tx.objectStore('meta').put(data.algorithm, 'algorithm')
     await tx.objectStore('meta').put(data.undoId, 'undoId')
+    await tx.objectStore('meta').put(data.categories, 'categories')
   })
 }

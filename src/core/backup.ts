@@ -2,6 +2,7 @@ import { z } from 'zod'
 import {
   algorithmSchema,
   cardSchema,
+  categoryEntrySchema,
   DATA_VERSION,
   DEFAULT_SETTINGS,
   reviewSchema,
@@ -32,6 +33,7 @@ const payloadSchema = z
     settings: settingsSchema,
     algorithm: algorithmSchema,
     undoId: z.string().max(100).nullable(),
+    categories: z.array(categoryEntrySchema).max(2000).default([]),
   })
   .strict()
 const envelopeSchema = z

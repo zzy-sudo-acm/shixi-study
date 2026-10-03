@@ -3,13 +3,16 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { deleteDB, openDB } from 'idb'
 import { fsrs, type Grade } from 'ts-fsrs'
 import {
+  addCategory,
   closeDatabase,
   database,
   DB_NAME,
   deleteCard,
+  deleteCategory,
   rateCard,
   readAllData,
   readSnapshot,
+  renameCategory,
   saveCard,
   saveSettings,
   setFamiliarity,
@@ -17,7 +20,15 @@ import {
 } from '../src/core/db'
 import { blobToBase64, exportBackup, restoreBackup, sha256, validateBackup } from '../src/core/backup'
 import { clearDraft, closeDraftDatabase, DRAFT_DB_NAME, loadDraft, saveDraft } from '../src/core/draft'
-import { cardSchema, DEFAULT_SETTINGS, type StudyCard } from '../src/core/model'
+import {
+  cardSchema,
+  categoryParent,
+  categoryPaths,
+  categoryUnder,
+  DEFAULT_SETTINGS,
+  normalizeCategoryPath,
+  type StudyCard,
+} from '../src/core/model'
 import {
   DEFAULT_ALGORITHM,
   deserializeCard,
@@ -406,6 +417,93 @@ describe('分类与熟悉程度', () => {
     const parsed = cardSchema.parse(legacy)
     expect(parsed.category).toBe('')
     expect(parsed.familiarity).toBe(0)
+  })
+  it('分类路径规范化：全角斜杠、反斜杠、多余斜杠与首尾空格', () => {
+    expect(normalizeCategoryPath('高等数学／极限／泰勒公式')).toBe('高等数学/极限/泰勒公式')
+    expect(normalizeCategoryPath('高等数学\\极限\\泰勒公式')).toBe('高等数学/极限/泰勒公式')
+    expect(normalizeCategoryPath(' 高等数学 // 极限 / /泰勒公式/ ')).toBe('高等数学/极限/泰勒公式')
+    expect(normalizeCategoryPath('')).toBe('')
+    expect(normalizeCategoryPath(' ／/ \\ ／ ')).toBe('')
+  })
+  it('categoryParent 去掉最后一段，顶级返回空；categoryUnder 含自身与后代', () => {
+    expect(categoryParent('高等数学/极限/泰勒公式')).toBe('高等数学/极限')
+    expect(categoryParent('高等数学')).toBe('')
+    expect(categoryUnder('高等数学', '高等数学')).toBe(true)
+    expect(categoryUnder('高等数学/极限', '高等数学')).toBe(true)
+    expect(categoryUnder('高等数学', '高等数学/极限')).toBe(false)
+    expect(categoryUnder('高等数学上', '高等数学')).toBe(false)
+    expect(categoryUnder('线性代数', '高等数学')).toBe(false)
+  })
+  it('分类路径并集来自目录与卡片，按深度再按字典序排列', () => {
+    const snapshot = {
+      categories: [
+        { subject: '高数' as const, path: '高等数学/极限' },
+        { subject: '英语' as const, path: '阅读' },
+      ],
+      cards: [card({ category: '线性代数' }), card({ category: '高等数学/极限' })],
+    }
+    expect(categoryPaths(snapshot, '高数')).toEqual(['线性代数', '高等数学/极限'])
+    expect(categoryPaths(snapshot, '英语')).toEqual(['阅读'])
+    expect(categoryPaths(snapshot, '政治')).toEqual([])
+  })
+  it('addCategory 校验层级与去重，非法路径给出中文错误', async () => {
+    let snapshot = await readSnapshot()
+    await addCategory('高数', ' 高等数学／极限 ', snapshot.revision)
+    snapshot = await readSnapshot()
+    expect(snapshot.categories).toEqual([{ subject: '高数', path: '高等数学/极限' }])
+    await addCategory('高数', '高等数学/极限', snapshot.revision)
+    expect((await readSnapshot()).categories).toHaveLength(1)
+    snapshot = await readSnapshot()
+    await expect(addCategory('高数', ' ', snapshot.revision)).rejects.toThrow('不能为空')
+    await expect(addCategory('高数', 'a/b/c/d/e/f', snapshot.revision)).rejects.toThrow('最多支持 5 层')
+  })
+  it('renameCategory 连同后代与卡片一起做前缀替换，并去重', async () => {
+    const inner = card({ category: '高等数学/极限/泰勒公式' })
+    await add(inner)
+    await add(card({ category: '高等数学/导数' }))
+    const other = await add(card({ subject: '408', category: '高等数学/极限' }))
+    let snapshot = await readSnapshot()
+    await renameCategory('高数', '高等数学', '高数上', snapshot.revision)
+    snapshot = await readSnapshot()
+    const byId = (id: string) => snapshot.cards.find((c) => c.id === id)!
+    expect(byId(inner.id).category).toBe('高数上/极限/泰勒公式')
+    expect(byId(other.id).category).toBe('高等数学/极限')
+    expect(snapshot.categories).toEqual([
+      { subject: '高数', path: '高数上/极限/泰勒公式' },
+      { subject: '高数', path: '高数上/导数' },
+      { subject: '408', path: '高等数学/极限' },
+    ])
+    // 重命名后保存时间不变
+    expect(byId(inner.id).updatedAt).toBe(inner.updatedAt)
+  })
+  it('deleteCategory 删除子树条目，卡片变为未分类', async () => {
+    const moved = card({ category: '高等数学/极限' })
+    await add(moved)
+    await add(card({ category: '线性代数' }))
+    let snapshot = await readSnapshot()
+    await deleteCategory('高数', '高等数学', snapshot.revision)
+    snapshot = await readSnapshot()
+    expect(snapshot.cards.find((c) => c.id === moved.id)!.category).toBe('')
+    expect(snapshot.cards.filter((c) => c.category === '线性代数')).toHaveLength(1)
+    expect(snapshot.categories).toEqual([{ subject: '高数', path: '线性代数' }])
+  })
+  it('保存卡片时自动注册新分类，重复保存不重复注册', async () => {
+    await add(card({ category: '高等数学/常微分方程' }))
+    await add(card({ category: '高等数学/常微分方程' }))
+    await add(card({ subject: '英语', category: '' }))
+    const snapshot = await readSnapshot()
+    expect(snapshot.categories).toEqual([{ subject: '高数', path: '高等数学/常微分方程' }])
+  })
+  it('备份包含分类目录，恢复后完整保留', async () => {
+    await add(card({ category: '高等数学/极限' }))
+    const backup = await validateBackup(await exportBackup())
+    expect(backup.categories).toEqual([{ subject: '高数', path: '高等数学/极限' }])
+    await deleteCategory('高数', '高等数学', (await readSnapshot()).revision)
+    expect((await readSnapshot()).categories).toEqual([])
+    await restoreBackup(backup, (await readSnapshot()).revision)
+    const snapshot = await readSnapshot()
+    expect(snapshot.categories).toEqual([{ subject: '高数', path: '高等数学/极限' }])
+    expect(snapshot.cards[0].category).toBe('高等数学/极限')
   })
   it('熟悉程度可设置与修改，不影响调度状态', async () => {
     const c = await add()
