@@ -1,6 +1,15 @@
 import { useDeferredValue, useState } from 'react'
-import { deleteCard } from '../core/db'
-import { FACE_NAMES, KIND_NAMES, SUBJECTS, type Snapshot, type StudyCard } from '../core/model'
+import { deleteCard, setFamiliarity } from '../core/db'
+import {
+  categoriesFor,
+  FACE_NAMES,
+  FAMILIARITY_NAMES,
+  KIND_NAMES,
+  SUBJECTS,
+  type Snapshot,
+  type StudyCard,
+  type Subject,
+} from '../core/model'
 import { formatTime } from '../core/scheduler'
 import { ContentView, Empty, Icon, PageHead } from './shared'
 
@@ -9,12 +18,12 @@ function Item({
   card,
   data,
   now,
-  onDeleted,
+  onChanged,
 }: {
   card: StudyCard
   data: Snapshot
   now: number
-  onDeleted: () => Promise<void>
+  onChanged: () => Promise<void>
 }) {
   const [expanded, setExpanded] = useState(false),
     [answer, setAnswer] = useState(false)
@@ -22,6 +31,7 @@ function Item({
     .filter((r) => r.cardId === card.id)
     .sort((a, b) => b.reviewedAt - a.reviewedAt)
     .slice(0, 8)
+  const familiarity = card.familiarity ?? 0
   const source = [
     card.book,
     card.chapter,
@@ -51,7 +61,11 @@ function Item({
         <div className="item-meta">
           <span>{card.subject}</span>
           <span>{KIND_NAMES[card.kind]}</span>
+          {!!card.category && <span>{card.category}</span>}
           <span className={card.status === 'draft' ? 'draft-label' : ''}>{status}</span>
+          {familiarity > 0 && (
+            <span className={`fam-badge fam-${familiarity}`}>{FAMILIARITY_NAMES[familiarity]}</span>
+          )}
         </div>
         <h2>
           {card.question.text ||
@@ -73,6 +87,20 @@ function Item({
               ))}
             </div>
           )}
+          <div className="familiarity-row">
+            <span>熟悉程度</span>
+            {FAMILIARITY_NAMES.map((name, level) => (
+              <button
+                key={name}
+                type="button"
+                className={`fam-option fam-${level} ${familiarity === level ? 'active' : ''}`}
+                aria-pressed={familiarity === level}
+                onClick={() => void setFamiliarity(card.id, level, data.revision).then(onChanged)}
+              >
+                {name}
+              </button>
+            ))}
+          </div>
           <div className="actions">
             <button className="secondary" onClick={() => setAnswer((value) => !value)}>
               {answer ? '隐藏答案' : '显示答案'}
@@ -84,7 +112,7 @@ function Item({
               className="danger"
               onClick={() => {
                 if (!window.confirm('确定删除这条内容吗？它的复习历史会一并删除，不可恢复。')) return
-                void deleteCard(card.id, data.revision).then(onDeleted)
+                void deleteCard(card.id, data.revision).then(onChanged)
               }}
             >
               删除
@@ -140,6 +168,7 @@ export function Library({
 }) {
   const [search, setSearch] = useState(''),
     [subject, setSubject] = useState('全部'),
+    [category, setCategory] = useState('all'),
     [status, setStatus] = useState(draftOnly ? 'draft' : 'all')
   const query = useDeferredValue(search).toLocaleLowerCase().trim()
   const [limit, setLimit] = useState(30)
@@ -147,6 +176,8 @@ export function Library({
     .filter(
       (c) =>
         (subject === '全部' || c.subject === subject) &&
+        (category === 'all' ||
+          (category === '__none__' ? !(c.category ?? '') : (c.category ?? '') === category)) &&
         (status === 'all' ||
           (status === 'draft'
             ? c.status === 'draft'
@@ -155,7 +186,7 @@ export function Library({
                 ? c.schedule.state === 0
                 : c.schedule.state !== 0 && c.schedule.due <= now))) &&
         (!query ||
-          [c.question.text, c.answer.text, c.book, c.chapter, c.page, c.number, ...c.tags]
+          [c.question.text, c.answer.text, c.book, c.chapter, c.category, c.page, c.number, ...c.tags]
             .join(' ')
             .toLocaleLowerCase()
             .includes(query)),
@@ -192,6 +223,7 @@ export function Library({
             value={subject}
             onChange={(e) => {
               setSubject(e.target.value)
+              setCategory('all')
               setLimit(30)
             }}
           >
@@ -201,6 +233,26 @@ export function Library({
             ))}
           </select>
         </label>
+        {subject !== '全部' && !!categoriesFor(subject as Subject).length && (
+          <label>
+            <span className="sr-only">筛选分类</span>
+            <select
+              value={category}
+              onChange={(e) => {
+                setCategory(e.target.value)
+                setLimit(30)
+              }}
+            >
+              <option value="all">全部分类</option>
+              {categoriesFor(subject as Subject).map((topic) => (
+                <option key={topic} value={topic}>
+                  {topic}
+                </option>
+              ))}
+              <option value="__none__">未分类</option>
+            </select>
+          </label>
+        )}
         <label>
           <span className="sr-only">筛选状态</span>
           <select
@@ -228,7 +280,7 @@ export function Library({
               card={card}
               data={data}
               now={now}
-              onDeleted={refresh}
+              onChanged={refresh}
             />
           ))}
         </div>

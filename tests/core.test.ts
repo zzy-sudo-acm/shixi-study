@@ -12,6 +12,7 @@ import {
   readSnapshot,
   saveCard,
   saveSettings,
+  setFamiliarity,
   undoReview,
 } from '../src/core/db'
 import { blobToBase64, exportBackup, restoreBackup, sha256, validateBackup } from '../src/core/backup'
@@ -394,5 +395,28 @@ describe('删除内容', () => {
     expect(snapshot.undoId).toBeNull()
     expect((await readAllData()).images).toHaveLength(0)
     await expect(deleteCard(victim.id, snapshot.revision)).rejects.toThrow('不存在')
+  })
+})
+
+describe('分类与熟悉程度', () => {
+  it('缺少新字段的旧卡片按默认值解析', () => {
+    const legacy = card() as Record<string, unknown>
+    delete legacy.category
+    delete legacy.familiarity
+    const parsed = cardSchema.parse(legacy)
+    expect(parsed.category).toBe('')
+    expect(parsed.familiarity).toBe(0)
+  })
+  it('熟悉程度可设置与修改，不影响调度状态', async () => {
+    const c = await add()
+    let snapshot = await readSnapshot()
+    await setFamiliarity(c.id, 1, snapshot.revision)
+    snapshot = await readSnapshot()
+    expect(snapshot.cards[0].familiarity).toBe(1)
+    expect(snapshot.cards[0].schedule).toEqual(c.schedule)
+    await setFamiliarity(c.id, 3, snapshot.revision)
+    snapshot = await readSnapshot()
+    expect(snapshot.cards[0].familiarity).toBe(3)
+    await expect(setFamiliarity('missing', 1, snapshot.revision)).rejects.toThrow('不存在')
   })
 })

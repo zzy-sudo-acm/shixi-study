@@ -154,6 +154,13 @@ export async function deleteCard(cardId: string, revision: number) {
       if (!used.has(key)) await tx.objectStore('images').delete(key)
   })
 }
+export async function setFamiliarity(cardId: string, level: number, revision: number) {
+  return mutate(revision, async (tx) => {
+    const card = await tx.objectStore('cards').get(cardId)
+    if (!card) throw new Error('内容不存在，请返回后刷新。')
+    await tx.objectStore('cards').put(cardSchema.parse({ ...card, familiarity: level }))
+  })
+}
 export async function saveSettings(settings: Settings, revision: number) {
   const valid = settingsSchema.parse(settings)
   return mutate(revision, async (tx) => {

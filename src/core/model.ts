@@ -19,6 +19,46 @@ export const FACE_NAMES: Record<Kind, { question: string; answer: string }> = {
   word: { question: '单词或短语', answer: '释义与用法' },
   sentence: { question: '英文句子', answer: '翻译与解析' },
 }
+export const CATEGORY_GROUPS: Partial<Record<Subject, { group: string; topics: string[] }[]>> = {
+  高数: [
+    {
+      group: '高等数学',
+      topics: [
+        '函数与极限',
+        '导数与微分',
+        '微分中值定理与导数应用',
+        '不定积分',
+        '定积分及其应用',
+        '常微分方程',
+        '多元函数微分学',
+        '重积分',
+        '无穷级数',
+        '向量代数与空间解析几何',
+      ],
+    },
+    {
+      group: '线性代数',
+      topics: ['行列式', '矩阵', '向量', '线性方程组', '特征值与特征向量', '二次型'],
+    },
+    {
+      group: '概率论与数理统计',
+      topics: [
+        '随机事件与概率',
+        '随机变量及其分布',
+        '多维随机变量',
+        '数字特征',
+        '大数定律与中心极限定理',
+        '数理统计',
+      ],
+    },
+  ],
+  '408': [{ group: '408', topics: ['数据结构', '计算机组成原理', '操作系统', '计算机网络'] }],
+  政治: [{ group: '政治', topics: ['马原', '毛中特', '史纲', '思修与法基', '时政'] }],
+}
+export function categoriesFor(subject: Subject): string[] {
+  return (CATEGORY_GROUPS[subject] ?? []).flatMap((g) => g.topics)
+}
+export const FAMILIARITY_NAMES = ['未标记', '陌生', '眼熟', '熟练'] as const
 export const DATA_VERSION = 2
 const time = z.number().finite().min(0).max(8640000000000000)
 const count = z.number().int().nonnegative().max(10000000)
@@ -55,6 +95,8 @@ export const cardSchema = z
     question: contentSchema,
     answer: contentSchema,
     chapter: z.string().max(200),
+    category: z.string().max(100).default(''),
+    familiarity: z.number().int().min(0).max(3).default(0),
     tags: z.array(z.string().max(100)).max(30),
     book: z.string().max(200),
     page: z.string().max(100),

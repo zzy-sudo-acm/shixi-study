@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState, type ClipboardEvent, type DragEvent } from 'react'
 import {
   cardSchema,
+  categoriesFor,
+  CATEGORY_GROUPS,
   FACE_NAMES,
   friendlyError,
   KIND_NAMES,
@@ -297,6 +299,8 @@ export function Editor({
         question: { text: '', images: [] },
         answer: { text: '', images: [] },
         chapter: '',
+        category: '',
+        familiarity: 0,
         tags: [],
         book: '',
         page: '',
@@ -412,6 +416,8 @@ export function Editor({
           question: { text: '', images: [] },
           answer: { text: '', images: [] },
           chapter: card.chapter,
+          category: card.category,
+          familiarity: 0,
           tags: [],
           book: card.book,
           page: '',
@@ -484,7 +490,11 @@ export function Editor({
                 onChange={(e) => {
                   const subject = e.target.value as Subject
                   const kinds = kindsForSubject(subject)
-                  change(kinds.includes(card.kind) ? { subject } : { subject, kind: kinds[0] })
+                  change({
+                    subject,
+                    ...(kinds.includes(card.kind) ? {} : { kind: kinds[0] }),
+                    ...(categoriesFor(subject).includes(card.category) ? {} : { category: '' }),
+                  })
                 }}
               >
                 {SUBJECTS.map((s) => (
@@ -492,6 +502,27 @@ export function Editor({
                 ))}
               </select>
             </label>
+            {!!CATEGORY_GROUPS[card.subject]?.length && (
+              <label className="category-field">
+                分类
+                <select
+                  aria-label="分类"
+                  value={card.category}
+                  onChange={(e) => change({ category: e.target.value })}
+                >
+                  <option value="">未分类</option>
+                  {(CATEGORY_GROUPS[card.subject] ?? []).map((g) => (
+                    <optgroup key={g.group} label={g.group}>
+                      {g.topics.map((topic) => (
+                        <option key={topic} value={topic}>
+                          {topic}
+                        </option>
+                      ))}
+                    </optgroup>
+                  ))}
+                </select>
+              </label>
+            )}
             <fieldset className="type-picker">
               <legend>内容类型</legend>
               {(kindsForSubject(card.subject).includes(card.kind)
