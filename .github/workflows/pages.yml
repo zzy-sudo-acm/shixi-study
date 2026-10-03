@@ -1,0 +1,57 @@
+name: 检查并部署 GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: '24'
+      - name: 安装包管理器
+        run: npm install --global pnpm@11.19.0
+      - name: 安装锁定依赖
+        run: pnpm install --frozen-lockfile
+      - name: 类型与核心测试
+        run: pnpm check
+      - name: 构建
+        # Relative asset paths + hash routes work under /repository/ and custom domains.
+        run: pnpm build
+      - name: 在静态项目子路径下运行浏览器测试
+        run: |
+          pnpm exec playwright install --with-deps chromium
+          TEST_PRODUCTION=1 pnpm test:e2e
+      - name: 上传静态站点
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5
+        with:
+          path: dist
+  deploy:
+    if: github.event_name != 'pull_request'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6
+      - name: 发布
+        id: deployment
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5

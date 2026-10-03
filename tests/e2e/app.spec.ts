@@ -1,0 +1,291 @@
+import { test, expect, type Page } from '@playwright/test'
+
+async function snapshot(page: Page) {
+  return page.evaluate(async () => {
+    const databases = await indexedDB.databases()
+    const name = databases.find((d) => d.name?.startsWith('shixi:'))!.name!
+    const db = await new Promise<IDBDatabase>((resolve, reject) => {
+      const request = indexedDB.open(name)
+      request.onsuccess = () => resolve(request.result)
+      request.onerror = () => reject(request.error)
+    })
+    const tx = db.transaction(['cards', 'reviews', 'images', 'meta'], 'readonly')
+    const read = (store: string) =>
+      new Promise<any[]>((resolve, reject) => {
+        const request = tx.objectStore(store).getAll()
+        request.onsuccess = () => resolve(request.result)
+        request.onerror = () => reject(request.error)
+      })
+    const [cards, reviews, images, meta] = await Promise.all([
+      read('cards'),
+      read('reviews'),
+      read('images'),
+      read('meta'),
+    ])
+    const imageBytes = await Promise.all(
+      images.map(async (image) => ({
+        ...image,
+        blob: Array.from(new Uint8Array(await image.blob.arrayBuffer())),
+      })),
+    )
+    db.close()
+    return { cards, reviews, images: imageBytes, meta }
+  })
+}
+async function addText(page: Page, question: string, answer = '测试答案：先检查使用条件。', draft = false) {
+  await page.goto('#add')
+  await page.getByLabel('问题', { exact: true }).fill(question)
+  if (answer) await page.getByLabel('答案与解析', { exact: true }).fill(answer)
+  await page.getByRole('button', { name: draft ? '暂存为待整理' : '保存并加入新学', exact: true }).click()
+  await expect(page.getByRole('heading', { name: '我的内容', exact: true })).toBeVisible()
+}
+async function noOverflow(page: Page) {
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true)
+}
+async function fixtureImage(page: Page) {
+  const base64 = await page.evaluate(() => {
+    const canvas = document.createElement('canvas')
+    canvas.width = 1200
+    canvas.height = 430
+    const ctx = canvas.getContext('2d')!
+    ctx.fillStyle = 'white'
+    ctx.fillRect(0, 0, 1200, 430)
+    ctx.fillStyle = '#263e58'
+    ctx.font = '32px serif'
+    ctx.fillText('TEST ONLY - temporary image', 50, 80)
+    ctx.font = '48px serif'
+    ctx.fillText('f(x) = x²     lim (sin x)/x = ?', 50, 180)
+    ctx.font = '28px serif'
+    ctx.fillText('Synthetic fixture; no personal study data.', 50, 280)
+    return canvas.toDataURL('image/png').split(',')[1]
+  })
+  return { name: 'synthetic-test.png', mimeType: 'image/png', buffer: Buffer.from(base64, 'base64') }
+}
+
+test('完整流程：文字图片、刷新、复习、撤销、导出与覆盖恢复', async ({ page }, testInfo) => {
+  const errors: string[] = []
+  page.on('pageerror', (error) => errors.push(error.message))
+  const externalRequests: string[] = []
+  const origin = new URL(testInfo.project.use.baseURL!).origin
+  page.on('request', (request) => {
+    if (/^https?:/.test(request.url()) && new URL(request.url()).origin !== origin)
+      externalRequests.push(request.url())
+  })
+  await page.goto('')
+  await expect(page.getByRole('heading', { name: '今天复习', exact: true })).toBeVisible()
+  await expect(page.getByRole('link', { name: '添加第一条' })).toBeVisible()
+  await noOverflow(page)
+  await page.screenshot({ path: testInfo.outputPath('01-home-empty.png'), fullPage: true })
+  await page.getByRole('link', { name: '添加第一条' }).click()
+  await page
+    .getByLabel('问题', { exact: true })
+    .fill('测试题：求这个极限，并说明所用条件。\n$$\\lim_{x\\to0}\\frac{\\sin x}{x}$$')
+  await page
+    .getByLabel('答案与解析', { exact: true })
+    .fill('测试解析：极限等于 1。\n先辨认未定式，再检查使用条件。')
+  await page.getByLabel('练习题', { exact: true }).check()
+  const image = await fixtureImage(page)
+  await page.getByLabel('问题图片文件', { exact: true }).setInputFiles(image)
+  await expect(page.getByRole('button', { name: '放大问题图片 1' })).toBeVisible()
+  await page.getByLabel('答案与解析图片文件', { exact: true }).setInputFiles(image)
+  await expect(page.getByRole('button', { name: '放大答案与解析图片 1' })).toBeVisible()
+  await page.getByText('补充来源与标签', { exact: false }).click()
+  await page.getByLabel('章节', { exact: true }).fill('极限与连续')
+  await page.getByLabel('书名', { exact: true }).fill('测试用书')
+  await page.getByLabel('页码', { exact: true }).fill('42')
+  await page.getByLabel('标签', { exact: true }).fill('条件，易忘')
+  await noOverflow(page)
+  await page.screenshot({ path: testInfo.outputPath('02-editor.png'), fullPage: true })
+  await page.getByRole('button', { name: '保存并加入新学', exact: true }).click()
+  await expect(page.getByRole('heading', { name: '我的内容', exact: true })).toBeVisible()
+  await page.reload()
+  await expect(page.getByRole('heading', { name: /测试题/ })).toBeVisible()
+  const before = await snapshot(page)
+  expect(before.cards).toHaveLength(1)
+  expect(before.images).toHaveLength(2)
+  expect(before.reviews).toHaveLength(0)
+  await page.getByLabel('搜索内容').fill('测试用书')
+  await expect(page.getByRole('heading', { name: /测试题/ })).toBeVisible()
+  await page.getByLabel('搜索内容').fill('不存在的内容')
+  await expect(page.getByRole('heading', { name: '没有找到符合条件的内容' })).toBeVisible()
+  await page.goto('#today')
+  await page.screenshot({ path: testInfo.outputPath('03-home-content.png'), fullPage: true })
+  await page.getByRole('link', { name: '开始全部复习' }).click()
+  await expect(page.getByText('先在纸上独立做，再查看解析。')).toBeVisible()
+  await expect(page.getByText('测试解析：极限等于 1。', { exact: false })).toHaveCount(0)
+  await expect(page.locator('.katex').first()).toBeVisible()
+  await page.getByRole('button', { name: '放大问题图片', exact: true }).click()
+  await expect(page.getByRole('dialog')).toBeVisible()
+  await page.getByRole('button', { name: '原尺寸查看' }).click()
+  await page.getByRole('button', { name: '关闭图片' }).click()
+  await noOverflow(page)
+  await page.screenshot({ path: testInfo.outputPath('04-review-question.png'), fullPage: true })
+  await page.getByRole('button', { name: '显示答案', exact: true }).click()
+  await expect(page.getByText('测试解析：极限等于 1。', { exact: false })).toBeVisible()
+  await page.screenshot({ path: testInfo.outputPath('05-review-answer.png'), fullPage: true })
+  await noOverflow(page)
+  await page.getByRole('button', { name: /记得/ }).click()
+  await expect(page.getByRole('heading', { name: '这一轮先到这里' })).toBeVisible()
+  expect((await snapshot(page)).reviews).toHaveLength(1)
+  await page.reload()
+  await page.getByRole('button', { name: '撤销上次评分' }).click()
+  await expect(page.getByRole('button', { name: '显示答案', exact: true })).toBeVisible()
+  const undone = await snapshot(page)
+  expect(undone.cards).toEqual(before.cards)
+  expect(undone.reviews).toEqual(before.reviews)
+  expect(undone.images).toEqual(before.images)
+  await page.getByRole('button', { name: '显示答案', exact: true }).click()
+  await page.getByRole('button', { name: /轻松/ }).click()
+  await expect(page.getByRole('heading', { name: '这一轮先到这里' })).toBeVisible()
+  const rated = await snapshot(page)
+  await page.goto('#settings')
+  const downloadPromise = page.waitForEvent('download')
+  await page.getByRole('button', { name: '导出完整备份', exact: true }).click()
+  const download = await downloadPromise,
+    backupPath = testInfo.outputPath('synthetic.backup.json')
+  await download.saveAs(backupPath)
+  await addText(page, '仅暂存的内容', '', true)
+  expect((await snapshot(page)).cards).toHaveLength(2)
+  await page.goto('#settings')
+  await page.getByLabel('选择备份文件').setInputFiles(backupPath)
+  await expect(page.getByRole('heading', { name: '覆盖恢复本机数据？' })).toBeVisible()
+  await expect(page.getByRole('button', { name: '确认覆盖恢复' })).toBeDisabled()
+  const existingDownload = page.waitForEvent('download')
+  await page.getByRole('button', { name: '先导出现有数据' }).click()
+  await existingDownload
+  await page.getByLabel('我已保存需要的备份，确认覆盖当前数据').check()
+  await page.getByRole('button', { name: '确认覆盖恢复' }).click()
+  await expect(page.getByText('恢复完成。', { exact: false })).toBeVisible()
+  const restored = await snapshot(page)
+  expect(restored.cards).toEqual(rated.cards)
+  expect(restored.reviews).toEqual(rated.reviews)
+  expect(restored.images).toEqual(rated.images)
+  await page.reload()
+  await page.getByRole('link', { name: '我的内容', exact: true }).click()
+  await page.getByRole('button', { name: /测试题/ }).click()
+  await expect(page.getByText('测试解析：极限等于 1。', { exact: false })).toHaveCount(0)
+  await page.getByRole('link', { name: '编辑内容', exact: true }).click()
+  await page.getByLabel('问题', { exact: true }).fill('已编辑的测试问题')
+  await page.getByRole('button', { name: '保存并加入复习', exact: true }).click()
+  await expect(page.getByRole('heading', { name: '已编辑的测试问题' })).toBeVisible()
+  expect((await snapshot(page)).cards[0].schedule).toEqual(rated.cards[0].schedule)
+  expect(errors).toEqual([])
+  expect(externalRequests).toEqual([])
+})
+
+test('粘贴、拖放、待整理排除、沿用科目与非法备份', async ({ page }) => {
+  await page.goto('#add/英语')
+  const file = await fixtureImage(page)
+  const base64 = file.buffer.toString('base64')
+  await page.getByLabel('问题', { exact: true }).evaluate((element, b64) => {
+    const data = new DataTransfer()
+    data.items.add(
+      new File([Uint8Array.from(atob(b64), (c) => c.charCodeAt(0))], 'paste.png', { type: 'image/png' }),
+    )
+    element.dispatchEvent(
+      new ClipboardEvent('paste', { clipboardData: data, bubbles: true, cancelable: true }),
+    )
+  }, base64)
+  await expect(page.getByRole('button', { name: '放大问题图片 1' })).toBeVisible()
+  await page
+    .locator('.content-editor')
+    .nth(1)
+    .evaluate((element, b64) => {
+      const data = new DataTransfer()
+      data.items.add(
+        new File([Uint8Array.from(atob(b64), (c) => c.charCodeAt(0))], 'drop.png', { type: 'image/png' }),
+      )
+      element.dispatchEvent(new DragEvent('drop', { dataTransfer: data, bubbles: true, cancelable: true }))
+    }, base64)
+  await expect(page.getByRole('button', { name: '放大答案与解析图片 1' })).toBeVisible()
+  await page.getByRole('button', { name: '暂存为待整理' }).click()
+  await expect(page.getByRole('heading', { name: '我的内容' })).toBeVisible()
+  await page.goto('#today')
+  await expect(page.getByRole('link', { name: '开始全部复习' })).toHaveCount(0)
+  await expect(page.getByRole('link', { name: '整理 1 条暂存内容' })).toBeVisible()
+  await page.goto('#add')
+  await expect(page.getByLabel('科目', { exact: true })).toHaveValue('英语')
+  await page.goto('#settings')
+  await page
+    .getByLabel('选择备份文件')
+    .setInputFiles({ name: 'bad.json', mimeType: 'application/json', buffer: Buffer.from('{bad') })
+  await expect(page.getByRole('alert')).toContainText('不是有效的 JSON')
+  expect((await snapshot(page)).cards).toHaveLength(1)
+  await page.getByLabel('每日新学上限').fill('0')
+  await page.getByLabel('希望复习的时间').fill('21:10')
+  await page.getByRole('button', { name: '保存设置' }).click()
+  await expect(page.getByText('设置已保存。')).toBeVisible()
+  await page.reload()
+  await expect(page.getByLabel('每日新学上限')).toHaveValue('0')
+  await expect(page.getByLabel('希望复习的时间')).toHaveValue('21:10')
+  await noOverflow(page)
+})
+
+test('保存失败保留表单并清楚报错，键盘可完成复习', async ({ page }) => {
+  await page.goto('#add')
+  await page.getByLabel('问题', { exact: true }).fill('配额失败时必须保留这句话')
+  await page.getByLabel('答案与解析', { exact: true }).fill('测试答案')
+  await page.evaluate(() => {
+    const original = IDBObjectStore.prototype.put
+    ;(window as any).__restorePut = () => {
+      IDBObjectStore.prototype.put = original
+    }
+    IDBObjectStore.prototype.put = function (...args: Parameters<IDBObjectStore['put']>) {
+      if (this.name === 'cards') throw new DOMException('test quota', 'QuotaExceededError')
+      return original.apply(this, args)
+    }
+  })
+  await page.getByRole('button', { name: '保存并加入新学' }).click()
+  await expect(page.getByRole('alert')).toContainText('存储空间不足，未保存')
+  await expect(page.getByLabel('问题', { exact: true })).toHaveValue('配额失败时必须保留这句话')
+  expect((await snapshot(page)).cards).toHaveLength(0)
+  await page.evaluate(() => (window as any).__restorePut())
+  await page.getByRole('button', { name: '保存并加入新学' }).click()
+  await expect(page.getByRole('heading', { name: '我的内容' })).toBeVisible()
+  await page.goto('#review/all')
+  await page.keyboard.press('Space')
+  await expect(page.getByRole('heading', { name: '答案与解析' })).toBeFocused()
+  await page.keyboard.press('3')
+  await expect(page.getByRole('heading', { name: '这一轮先到这里' })).toBeVisible()
+  expect((await snapshot(page)).reviews).toHaveLength(1)
+})
+
+test('午夜重开网页恢复新学额度，逾期内容仍然在队列', async ({ page }) => {
+  await page.clock.setFixedTime(new Date('2026-10-03T23:50:00+08:00'))
+  await page.goto('#settings')
+  await page.getByLabel('每日新学上限').fill('1')
+  await page.getByRole('button', { name: '保存设置' }).click()
+  await expect(page.getByText('设置已保存。')).toBeVisible()
+  await addText(page, '跨天第一题')
+  await addText(page, '跨天第二题')
+  await page.goto('#review/all')
+  await page.getByRole('button', { name: '显示答案' }).click()
+  await page.getByRole('button', { name: /忘了/ }).click()
+  await expect(page.getByText('今日新学额度已用完', { exact: false })).toBeVisible()
+  const before = await snapshot(page)
+  await page.clock.setFixedTime(new Date('2026-10-04T00:01:00+08:00'))
+  await page.reload()
+  await expect(page.getByText('剩余到期 1 条 · 本次可新学 1 条')).toBeVisible()
+  expect((await snapshot(page)).cards).toEqual(before.cards)
+  expect((await snapshot(page)).reviews).toEqual(before.reviews)
+})
+
+test('窄屏长公式不撑破页面，公式与原文不触发外部请求', async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 740 })
+  await page.goto('')
+  await noOverflow(page)
+  await addText(
+    page,
+    '窄屏测试\n' + '很长的问题'.repeat(40) + '\n$$' + 'x_1+'.repeat(50) + 'x_{51}$$',
+    '<img src="https://example.com/tracker.png"> 只是文字',
+  )
+  await page.goto('#review/all')
+  await expect(page.locator('.katex').first()).toBeVisible()
+  await noOverflow(page)
+  await page.getByRole('button', { name: '显示答案' }).click()
+  await expect(
+    page.getByText('<img src="https://example.com/tracker.png"> 只是文字', { exact: true }),
+  ).toBeVisible()
+  await expect(page.locator('img[src^="https:"]')).toHaveCount(0)
+  await noOverflow(page)
+})
