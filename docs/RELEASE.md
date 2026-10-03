@@ -1,6 +1,8 @@
-# 待发布清单
+# 发布记录
 
-建议目标仓库：`zzy-sudo-acm/shixi-study`，建议公开源码仓库，以便使用 GitHub Pages。尚未创建远程仓库、推送或修改 Pages 设置。
+已发布：源码公开在 `zzy-sudo-acm/shixi-study`，GitHub Pages 由 Actions 工作流发布，线上地址 <https://zzy-sudo-acm.github.io/shixi-study/>。推送 `main` 即自动检查、构建并重新部署。
+
+以下为首次发布时的范围确认，留作记录。
 
 准备上传：
 
