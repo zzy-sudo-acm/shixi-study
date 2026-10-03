@@ -20,6 +20,8 @@ import { saveCard } from '../core/db'
 import { clearDraft, loadDraft, saveDraft, type EditorDraft } from '../core/draft'
 import { prepareImage } from '../core/images'
 import { FormulaText, Icon, ImageView, Notice, PageHead } from './shared'
+import { KnowledgeTree } from './KnowledgeTree'
+import { RelationPicker } from './KnowledgeGraph'
 
 function ContentEditor({
   label,
@@ -280,12 +282,14 @@ export function Editor({
   data,
   existing,
   subject,
+  initialCategory,
   onSaved,
   setDirty,
 }: {
   data: Snapshot
   existing?: StudyCard
   subject?: Subject
+  initialCategory?: string
   onSaved: () => Promise<void>
   setDirty: (value: boolean) => void
 }) {
@@ -299,7 +303,7 @@ export function Editor({
         question: { text: '', images: [] },
         answer: { text: '', images: [] },
         chapter: '',
-        category: '',
+        category: initialCategory ?? '',
         familiarity: 0,
         tags: [],
         book: '',
@@ -344,7 +348,6 @@ export function Editor({
   }, [existing, pendingDraft, card, tagsText, original, images])
   const books = [...new Set(data.cards.map((c) => c.book).filter(Boolean))].sort()
   const chapters = [...new Set(data.cards.map((c) => c.chapter).filter(Boolean))].sort()
-  const categories = categoryPaths(data, card.subject)
   const currentTags = tagsText.split(/[,，\s]+/).filter(Boolean)
   const knownTags = [...new Set(data.cards.flatMap((c) => c.tags))]
     .filter((tag) => !currentTags.includes(tag))
@@ -397,7 +400,7 @@ export function Editor({
     try {
       const candidate = cardSchema.parse({
         ...card,
-        category: normalizeCategoryPath(card.category),
+        category: card.subject === '英语' ? '' : normalizeCategoryPath(card.category),
         tags: [...new Set(tagsText.split(/[,，\s]+/).filter(Boolean))],
         status,
         updatedAt: Date.now(),
@@ -494,6 +497,7 @@ export function Editor({
                   const kinds = kindsForSubject(subject)
                   change({
                     subject,
+                    relatedIds: [],
                     ...(kinds.includes(card.kind) ? {} : { kind: kinds[0] }),
                     ...(categoryPaths(data, subject).includes(normalizeCategoryPath(card.category))
                       ? {}
@@ -505,23 +509,6 @@ export function Editor({
                   <option key={s}>{s}</option>
                 ))}
               </select>
-            </label>
-            <label className="category-field">
-              分类
-              <input
-                aria-label="分类"
-                value={card.category}
-                maxLength={100}
-                list="category-options"
-                onChange={(e) => change({ category: e.target.value })}
-                placeholder="如 高等数学/极限"
-              />
-              <datalist id="category-options">
-                {categories.map((path) => (
-                  <option key={path} value={path} />
-                ))}
-              </datalist>
-              <span className="category-hint">选择已有分类，或输入新分类；用 / 分层，如 高等数学/极限</span>
             </label>
             <fieldset className="type-picker">
               <legend>内容类型</legend>
@@ -543,6 +530,18 @@ export function Editor({
             </fieldset>
           </div>
           <p className="editor-hint">{EDITOR_KIND_HINTS[card.kind]}</p>
+          {card.subject !== '英语' && (
+            <KnowledgeTree
+              key={card.subject}
+              data={data}
+              subject={card.subject}
+              value={card.category ?? ''}
+              picker
+              onSelect={(category) => change({ category })}
+              onChanged={onSaved}
+              onBusy={(value) => setProcessing((n) => n + (value ? 1 : -1))}
+            />
+          )}
           <div className={card.kind === 'word' ? 'quick-entry' : undefined}>
             <ContentEditor
               label={FACE_NAMES[card.kind].question}
@@ -591,6 +590,9 @@ export function Editor({
               reuseLabel="用到正面"
             />
           </div>
+          {card.subject === '高数' && (
+            <RelationPicker data={data} card={card} onChange={(relatedIds) => change({ relatedIds })} />
+          )}
           <div className="editor-options">
             <span>
               公式写法：<code>{'$x^2$'}</code> 行内，<code>{'$$\\int_0^1 x\\,dx$$'}</code> 独立一行。

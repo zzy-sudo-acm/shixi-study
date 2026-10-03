@@ -34,7 +34,6 @@ export function Home({ data, now }: { data: Snapshot; now: number }) {
       />
       <section className="today-panel" aria-labelledby="today-title">
         <div className="today-copy">
-          <span className="quiet-label">{q.due.length ? '先回忆，再看答案' : '把学过的，再想一遍'}</span>
           <h2 id="today-title">
             {q.due.length ? (
               <>
@@ -84,6 +83,16 @@ export function Home({ data, now }: { data: Snapshot; now: number }) {
           <span>答案由你主动展开</span>
         </div>
       </section>
+      <a className="graph-entry" href="#library/高数?view=graph">
+        <span className="graph-entry-icon">
+          <Icon name="tree" size={24} />
+        </span>
+        <span>
+          <strong>我的数学知识图谱</strong>
+          <small>把零散的知识，连成自己的理解。</small>
+        </span>
+        <Icon name="arrow" size={19} />
+      </a>
       {reminder && q.due.length > 0 && (
         <p className="reminder" role="status">
           已到你设定的 {data.settings.reminderTime}，现在有 {q.due.length} 条内容待复习。

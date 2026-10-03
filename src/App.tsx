@@ -1,4 +1,13 @@
-import { Component, useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
+import {
+  Component,
+  memo,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  useTransition,
+  type ReactNode,
+} from 'react'
 import { DB_NAME, readSnapshot } from './core/db'
 import { friendlyError, SUBJECTS, type Snapshot, type Subject } from './core/model'
 import { Home } from './ui/Home'
@@ -7,6 +16,11 @@ import { Library } from './ui/Library'
 import { ReviewPage } from './ui/Review'
 import { SettingsPage } from './ui/Settings'
 import { Icon, Notice, type IconName } from './ui/shared'
+const MemoEditor = memo(Editor)
+const MemoSettings = memo(SettingsPage)
+const MemoHome = memo(Home)
+const MemoLibrary = memo(Library)
+const MemoReview = memo(ReviewPage)
 
 export class ErrorBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
   state = { failed: false }
@@ -27,7 +41,8 @@ export class ErrorBoundary extends Component<{ children: ReactNode }, { failed: 
 }
 function routeValue() {
   try {
-    return decodeURIComponent(location.hash.slice(1)) || 'today'
+    const [path, ...query] = location.hash.slice(1).split('?')
+    return (decodeURIComponent(path) || 'today') + (query.length ? `?${query.join('?')}` : '')
   } catch {
     return 'today'
   }
@@ -38,10 +53,24 @@ export default function App() {
     [route, setRoute] = useState(routeValue),
     [now, setNow] = useState(Date.now()),
     [external, setExternal] = useState(false)
+  const [navRoute, setNavRoute] = useState(route)
+  const [pending, startTransition] = useTransition()
   const dirty = useRef(false),
     previousRoute = useRef(route)
   const setDirty = useCallback((value: boolean) => {
     dirty.current = value
+  }, [])
+  const navigate = useCallback((next: string, fromHash = false) => {
+    if (next === previousRoute.current) return
+    if (dirty.current && !window.confirm('有尚未保存的编辑，确定离开吗？')) {
+      if (fromHash) history.replaceState(null, '', `#${previousRoute.current}`)
+      return
+    }
+    dirty.current = false
+    previousRoute.current = next
+    if (!fromHash) history.pushState(null, '', `#${next}`)
+    setNavRoute(next)
+    startTransition(() => setRoute(next))
   }, [])
   const refresh = useCallback(async () => {
     const next = await readSnapshot()
@@ -56,16 +85,7 @@ export default function App() {
   useEffect(load, [load])
   useEffect(() => {
     function hash() {
-      const next = routeValue()
-      if (next === previousRoute.current) return
-      if (dirty.current && !window.confirm('有尚未保存的编辑，确定离开吗？')) {
-        history.replaceState(null, '', `#${previousRoute.current}`)
-        return
-      }
-      dirty.current = false
-      previousRoute.current = next
-      setRoute(next)
-      window.scrollTo(0, 0)
+      navigate(routeValue(), true)
     }
     function beforeUnload(event: BeforeUnloadEvent) {
       if (dirty.current) {
@@ -74,7 +94,7 @@ export default function App() {
       }
     }
     function tick() {
-      setNow(Date.now())
+      if (!document.hidden) setNow(Date.now())
     }
     function blocked() {
       setFatal('数据库升级被其他页面阻塞。请关闭其他时习页面后重新加载。')
@@ -96,8 +116,9 @@ export default function App() {
       window.removeEventListener('shixi-db-blocked', blocked)
       channel?.close()
     }
-  }, [])
+  }, [navigate])
   useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'instant' })
     document.title = `${route.startsWith('review') ? '专注复习' : route.startsWith('library') ? '我的内容' : route.startsWith('settings') ? '设置与备份' : route.startsWith('add') || route.startsWith('edit') ? '添加与编辑' : '今天复习'} · 时习`
     if (!route.startsWith('review')) document.querySelector<HTMLElement>('h1')?.focus()
   }, [route, !!data])
@@ -116,7 +137,10 @@ export default function App() {
         正在打开你的复习本…
       </main>
     )
-  const [page, argument] = route.split('/')
+  const [routePath, routeQuery = ''] = route.split('?')
+  const [page, argument] = routePath.split('/')
+  const activePage = navRoute.split('/')[0].split('?')[0]
+  const params = new URLSearchParams(routeQuery)
   const subject = SUBJECTS.includes(argument as Subject) ? (argument as Subject) : undefined
   const reviewing = page === 'review'
   const nav: { key: string; name: string; icon: IconName }[] = [
@@ -154,8 +178,19 @@ export default function App() {
                 <a
                   key={item.key}
                   href={`#${item.key}`}
-                  className={page === item.key || (page === 'edit' && item.key === 'add') ? 'active' : ''}
-                  aria-current={page === item.key ? 'page' : undefined}
+                  className={
+                    activePage === item.key || (activePage === 'edit' && item.key === 'add') ? 'active' : ''
+                  }
+                  aria-current={
+                    activePage === item.key || (activePage === 'edit' && item.key === 'add')
+                      ? 'page'
+                      : undefined
+                  }
+                  onClick={(event) => {
+                    if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return
+                    event.preventDefault()
+                    navigate(item.key)
+                  }}
                 >
                   <Icon name={item.icon} />
                   <span>{item.name}</span>
@@ -192,28 +227,39 @@ export default function App() {
             )}
           </Notice>
         )}
-        {page === 'add' || page === 'edit' ? (
-          page === 'edit' && !editing ? (
-            <Notice error>没有找到这条内容，请返回“我的内容”。</Notice>
-          ) : (
-            <Editor
+        <div className="page-surface" key={page} aria-busy={pending}>
+          {page === 'add' || page === 'edit' ? (
+            page === 'edit' && !editing ? (
+              <Notice error>没有找到这条内容，请返回“我的内容”。</Notice>
+            ) : (
+              <MemoEditor
+                key={route}
+                data={data}
+                existing={page === 'edit' ? editing : undefined}
+                subject={subject}
+                initialCategory={params.get('category') ?? undefined}
+                setDirty={setDirty}
+                onSaved={refresh}
+              />
+            )
+          ) : page === 'library' ? (
+            <MemoLibrary
               key={route}
               data={data}
-              existing={page === 'edit' ? editing : undefined}
-              subject={subject}
-              setDirty={setDirty}
-              onSaved={refresh}
+              now={now}
+              refresh={refresh}
+              draftOnly={argument === 'draft'}
+              initialSubject={subject}
+              initialGraph={params.get('view') === 'graph'}
             />
-          )
-        ) : page === 'library' ? (
-          <Library key={route} data={data} now={now} refresh={refresh} draftOnly={argument === 'draft'} />
-        ) : page === 'settings' ? (
-          <SettingsPage data={data} refresh={refresh} />
-        ) : reviewing ? (
-          <ReviewPage key={route} data={data} now={now} subject={subject} refresh={refresh} />
-        ) : (
-          <Home data={data} now={now} />
-        )}
+          ) : page === 'settings' ? (
+            <MemoSettings data={data} refresh={refresh} />
+          ) : reviewing ? (
+            <MemoReview key={route} data={data} now={now} subject={subject} refresh={refresh} />
+          ) : (
+            <MemoHome data={data} now={now} />
+          )}
+        </div>
         {!reviewing && (
           <footer className="page-footer">无需登录 · 内容仅保存在当前浏览器 · 设备之间不自动同步</footer>
         )}

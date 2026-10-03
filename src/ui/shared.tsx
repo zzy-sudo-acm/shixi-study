@@ -15,7 +15,40 @@ export type IconName =
   | 'close'
   | 'undo'
   | 'download'
+  | 'tree'
+  | 'branch'
+  | 'chevron'
+  | 'link'
+  | 'cards'
 const paths: Record<IconName, ReactNode> = {
+  tree: (
+    <>
+      <circle cx="5" cy="12" r="3" />
+      <circle cx="19" cy="5" r="3" />
+      <circle cx="19" cy="19" r="3" />
+      <path d="M8 12h4V5h4m-4 7v7h4" />
+    </>
+  ),
+  branch: (
+    <>
+      <circle cx="6" cy="4" r="2" />
+      <circle cx="6" cy="20" r="2" />
+      <circle cx="18" cy="6" r="2" />
+      <path d="M6 6v12m0-5h6a6 6 0 0 0 6-5" />
+    </>
+  ),
+  chevron: <path d="m9 5 7 7-7 7" />,
+  link: (
+    <>
+      <path d="m10 13 4-4m-6 6-2 2a3 3 0 0 1-4-4l4-4a3 3 0 0 1 4 0m4 0 2-2a3 3 0 0 1 4 4l-4 4a3 3 0 0 1-4 0" />
+    </>
+  ),
+  cards: (
+    <>
+      <rect x="7" y="5" width="13" height="16" rx="2" />
+      <path d="M4 17V3a1 1 0 0 1 1-1h11M11 10h5m-5 4h3" />
+    </>
+  ),
   today: (
     <>
       <rect x="4" y="5" width="16" height="16" rx="3" />

@@ -1,0 +1,770 @@
+/* Knowledge surfaces share the notebook palette and typography. */
+.page-surface {
+  animation: page-arrive 240ms var(--ease-out);
+}
+@keyframes page-arrive {
+  from {
+    opacity: 0.65;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes content-reveal {
+  from {
+    opacity: 0.45;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.item-detail,
+.graph-inspector,
+.answer-block {
+  animation: content-reveal 220ms var(--ease-out);
+}
+.sidebar nav a {
+  transition:
+    background-color 160ms ease,
+    color 160ms ease;
+}
+.sidebar nav a:active > svg {
+  transform: scale(0.88);
+}
+.sidebar nav svg {
+  transition: transform 180ms var(--ease-out);
+}
+.graph-entry {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  padding: 22px 4px;
+  border-bottom: 1px solid var(--line);
+  text-decoration: none;
+}
+.graph-entry strong {
+  display: block;
+  font-size: 15px;
+  font-weight: 500;
+}
+.graph-entry small {
+  display: block;
+  color: var(--muted);
+  margin-top: 3px;
+  font-size: 12px;
+}
+.graph-entry > svg {
+  margin-left: auto;
+  transition: transform 180ms var(--ease-out);
+}
+.graph-entry:hover > svg {
+  transform: translateX(4px);
+}
+.graph-entry-icon {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  color: var(--accent);
+}
+.library-view-tools {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin: 22px 0;
+}
+.segmented {
+  display: inline-flex;
+  padding: 4px;
+  border-radius: 10px;
+  background: #e7edf3;
+  gap: 3px;
+}
+.segmented button {
+  min-height: 40px;
+  padding: 8px 14px;
+  background: transparent;
+  border: 0;
+  font-size: 13px;
+  color: #54697f;
+}
+.segmented button[aria-pressed='true'] {
+  background: white;
+  color: var(--ink);
+  box-shadow: 0 2px 5px #263e580c;
+}
+.library-workspace {
+  display: grid;
+  grid-template-columns: 250px minmax(0, 1fr);
+  gap: 26px;
+  align-items: start;
+}
+.library-results {
+  min-width: 0;
+}
+.library-workspace .result-count {
+  margin-top: 0;
+}
+.result-count {
+  font-variant-numeric: tabular-nums;
+}
+.item-meta {
+  align-items: center;
+  gap: 6px 12px;
+}
+.item-meta span:first-child {
+  background: #eaf0f7;
+  border-radius: 5px;
+  padding: 3px 9px;
+}
+.library-item[data-subject='英语'] .item-meta span:first-child {
+  color: #3f6757;
+  background: #eaf2ed;
+}
+.library-item[data-subject='408'] .item-meta span:first-child {
+  color: #6c5e88;
+  background: #f0edf5;
+}
+.library-item[data-subject='政治'] .item-meta span:first-child {
+  color: #805f38;
+  background: #f5efe5;
+}
+.item-meta span {
+  overflow-wrap: anywhere;
+}
+.item-trigger {
+  white-space: normal;
+}
+.item-trigger > p {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.item-trigger:focus-visible {
+  outline-offset: -4px;
+}
+.expanded .item-trigger h2 {
+  -webkit-line-clamp: unset;
+  min-height: 0;
+}
+.expanded .expand-label {
+  margin-top: 12px;
+}
+.related-links {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  margin-top: 22px;
+}
+.related-links h3 {
+  font-size: 13px;
+  margin-bottom: 4px;
+}
+.related-links a,
+.related-links button {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 9px;
+  font-size: 13px;
+  white-space: normal;
+  text-align: left;
+  overflow-wrap: anywhere;
+}
+.related-links a {
+  text-decoration: none;
+  min-height: 36px;
+}
+
+/* Branch lines are structural: they describe the parent of each node. */
+.knowledge-tree {
+  min-width: 0;
+  padding: 21px 18px;
+  border-radius: 14px;
+  background: #edf2f6;
+}
+.tree-heading {
+  display: flex;
+  gap: 9px;
+  align-items: center;
+}
+.tree-heading h2 {
+  font-size: 16px;
+}
+.tree-heading > button {
+  margin-left: auto;
+  font-size: 12px;
+}
+.tree-description {
+  font-size: 12px;
+  color: var(--muted);
+  margin: 8px 0 16px;
+}
+.tree-scope {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.tree-scope button {
+  background: transparent;
+  border-color: transparent;
+  padding: 6px 12px;
+  font-size: 12px;
+  min-height: 40px;
+}
+.tree-scope button[aria-pressed='true'] {
+  background: white;
+  color: var(--accent);
+}
+.tree-branches,
+.tree-branches ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.tree-branches {
+  max-height: 480px;
+  overflow: auto;
+  padding: 3px;
+  margin-inline: -3px;
+}
+.tree-branches ul {
+  margin-left: 15px;
+  padding-left: 10px;
+  border-left: 1px solid #b8c9d8;
+}
+.tree-branches li {
+  position: relative;
+  min-width: 0;
+}
+.tree-branches ul > li::before {
+  content: '';
+  position: absolute;
+  width: 11px;
+  height: 1px;
+  background: #b8c9d8;
+  top: 23px;
+  left: -11px;
+}
+.tree-row {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  min-height: 46px;
+}
+.tree-toggle {
+  border: 0;
+  background: transparent;
+  min-width: 28px;
+  min-height: 44px;
+  padding: 0;
+}
+.tree-toggle svg {
+  transition: transform 180ms var(--ease-out);
+}
+.tree-toggle[aria-expanded='true'] svg {
+  transform: rotate(90deg);
+}
+.tree-leaf {
+  flex: 0 0 28px;
+  display: grid;
+  place-items: center;
+}
+.tree-leaf::before {
+  content: '';
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #7892aa;
+}
+.tree-name {
+  flex: 1;
+  min-width: 0;
+  text-align: left;
+  justify-content: space-between;
+  gap: 7px;
+  padding: 9px 10px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  white-space: normal;
+  font-size: 13px;
+}
+.tree-name span {
+  overflow-wrap: anywhere;
+}
+.tree-name small {
+  color: var(--muted);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+.tree-name.selected {
+  background: #365d86;
+  color: white;
+}
+.tree-name.selected small {
+  color: #e1eaf4;
+}
+.tree-name:not(.selected):hover {
+  background: #dfe8f1;
+}
+.tree-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px 15px;
+  margin-top: 10px;
+}
+.tree-tools .text-button {
+  min-height: 44px;
+  font-size: 12px;
+}
+.tree-selection {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #d1dce7;
+}
+.tree-selection > span {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+.tree-selection .tree-tools {
+  margin-top: 0;
+}
+.tree-empty {
+  color: var(--muted);
+  font-size: 13px;
+  padding: 16px 0;
+}
+.tree-edit {
+  margin-top: 14px;
+}
+.tree-edit label {
+  display: grid;
+  gap: 8px;
+  font-size: 13px;
+}
+.tree-edit input,
+.tree-edit select {
+  width: 100%;
+  min-width: 0;
+}
+.tree-edit .actions {
+  gap: 6px;
+  margin-top: 12px;
+}
+.tree-picker {
+  margin-bottom: 26px;
+  padding: 20px 22px;
+}
+.tree-picker .tree-branches {
+  max-height: 260px;
+}
+.tree-picker .tree-name {
+  flex: 0 1 520px;
+}
+.tree-picker .tree-description {
+  margin-bottom: 6px;
+}
+.tree-picker .tree-selection {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.tree-picker .tree-edit {
+  max-width: 460px;
+}
+
+/* Deterministic graph layout: no simulation, continuous repaint or canvas loop. */
+.knowledge-graph {
+  min-width: 0;
+}
+.graph-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 14px;
+  padding: 4px 0 18px;
+}
+.graph-toolbar h2 {
+  font-size: 18px;
+}
+.graph-toolbar p {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 4px;
+}
+.graph-zoom {
+  display: flex;
+  gap: 3px;
+}
+.graph-zoom button {
+  min-width: 40px;
+  min-height: 40px;
+  padding: 6px 9px;
+  font-size: 12px;
+}
+.graph-scroll {
+  overflow: auto;
+  max-height: 620px;
+  min-height: 320px;
+  background: white;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  overscroll-behavior: contain;
+  touch-action: pan-x pan-y;
+}
+.graph-canvas {
+  position: relative;
+  transform-origin: top left;
+}
+.graph-lines {
+  position: absolute;
+  inset: 0;
+  overflow: visible;
+  pointer-events: none;
+  fill: none;
+  stroke: #b5c7d7;
+  stroke-width: 1.5;
+}
+.graph-relation {
+  stroke: #6d9486;
+  stroke-dasharray: 5 5;
+  opacity: 0.6;
+}
+.graph-relation.highlighted {
+  stroke: #367861;
+  opacity: 1;
+  stroke-width: 2.5;
+}
+.graph-node {
+  position: absolute;
+  width: 184px;
+  height: 80px;
+  padding: 10px 14px;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 3px;
+  white-space: normal;
+  text-align: left;
+  border-radius: 10px;
+  font-size: 13px;
+}
+.graph-node span {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+  line-height: 1.4;
+  flex-shrink: 0;
+}
+.graph-node small {
+  font-size: 10px;
+  color: var(--muted);
+}
+.graph-card {
+  background: white;
+  border-color: #c7d5e2;
+}
+.graph-category {
+  background: #eef3f8;
+  border-color: transparent;
+}
+.graph-root {
+  background: var(--ink);
+  color: white;
+}
+.graph-root small {
+  color: #d5e2ee;
+}
+.graph-root:hover {
+  background: #365d86;
+}
+.graph-node.selected {
+  outline: 2px solid #365d86;
+  outline-offset: 3px;
+}
+.graph-node.connected {
+  border-color: #568f79;
+  background: #f0f7f3;
+}
+.graph-caption {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  color: var(--muted);
+  font-size: 11px;
+  margin-top: 12px;
+}
+.graph-inspector {
+  margin-top: 22px;
+  padding: 22px;
+  background: white;
+  border-radius: 14px;
+  box-shadow: var(--card-shadow);
+}
+.graph-inspector .actions {
+  margin-top: 20px;
+}
+.graph-empty {
+  margin-top: 20px;
+  font-size: 13px;
+  color: var(--muted);
+}
+.relation-picker {
+  padding: 22px 0;
+  margin-bottom: 24px;
+  border-block: 1px solid var(--line);
+}
+.relation-picker h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+}
+.relation-picker p,
+.relation-picker .muted {
+  font-size: 12px;
+}
+.relation-picker p {
+  color: var(--muted);
+  margin: 7px 0 14px;
+}
+.relation-picker > input {
+  width: 100%;
+}
+.relation-selected {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 14px 0;
+}
+.relation-selected button {
+  font-size: 12px;
+  background: #e6efeb;
+  border: 0;
+  color: #345f4c;
+  min-width: 0;
+  max-width: 100%;
+  min-height: 40px;
+  padding: 8px 12px;
+}
+.relation-selected span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.relation-results {
+  display: grid;
+  gap: 0;
+  max-height: 280px;
+  overflow: auto;
+  margin-top: 8px;
+}
+.relation-results button {
+  justify-content: flex-start;
+  text-align: left;
+  white-space: normal;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  padding: 11px 6px;
+  font-size: 13px;
+}
+.relation-results button:hover {
+  background: var(--soft);
+}
+.relation-results span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.relation-results small {
+  display: block;
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 3px;
+}
+.content-editor .field-head label {
+  font-weight: 600;
+}
+.content-editor textarea,
+.content-editor > input[type='text'] {
+  background: #fff;
+}
+.save-bar .primary:active,
+.rating:active {
+  transform: translateY(1px);
+}
+
+@media (max-width: 1100px) {
+  .library-workspace {
+    grid-template-columns: 220px minmax(0, 1fr);
+    gap: 20px;
+  }
+}
+@media (max-width: 900px) {
+  .library-workspace {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 22px;
+  }
+  .library-workspace .tree-branches {
+    max-height: 250px;
+  }
+}
+@media (max-width: 640px) {
+  .sidebar {
+    contain: layout paint;
+    padding: 6px 12px calc(8px + env(safe-area-inset-bottom));
+  }
+  .sidebar nav a {
+    font-size: 11px;
+    min-height: 56px;
+    color: #566e83;
+  }
+  .sidebar nav a.active {
+    background: #e8eff7;
+    color: #254c75;
+  }
+  .sidebar nav a.active svg {
+    stroke-width: 2;
+  }
+  .sidebar nav a:not(.active):hover {
+    background: transparent;
+  }
+  .main-content {
+    padding: 28px 18px calc(110px + env(safe-area-inset-bottom));
+  }
+  .mobile-brand {
+    background: #f5f7f9;
+    padding-inline: 20px;
+  }
+  .library-list {
+    gap: 15px;
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .item-detail {
+    padding-inline: 20px;
+  }
+  .item-trigger h2 {
+    min-height: 0;
+    -webkit-line-clamp: 3;
+  }
+  .expand-label {
+    font-size: 12px;
+  }
+  .item-meta {
+    gap: 6px 10px;
+  }
+  .item-meta span:last-child {
+    font-size: 11px;
+  }
+  .graph-entry {
+    padding-block: 20px;
+    gap: 10px;
+  }
+  .graph-entry small {
+    font-size: 11px;
+  }
+  .knowledge-tree {
+    padding: 18px 14px;
+  }
+  .tree-picker {
+    margin-bottom: 22px;
+  }
+  .tree-name {
+    min-height: 44px;
+  }
+  .tree-edit input,
+  .tree-edit select,
+  .relation-picker input {
+    font-size: 16px;
+  }
+  .tree-selection {
+    margin-top: 8px;
+  }
+  .library-view-tools {
+    margin: 18px 0;
+    gap: 10px;
+  }
+  .segmented {
+    max-width: 100%;
+  }
+  .segmented button {
+    padding-inline: 10px;
+    min-height: 44px;
+    font-size: 12px;
+  }
+  .graph-scroll {
+    max-height: 440px;
+  }
+  .graph-toolbar {
+    gap: 12px;
+  }
+  .graph-toolbar h2 {
+    font-size: 17px;
+  }
+  .graph-zoom button {
+    min-height: 44px;
+  }
+  .graph-inspector {
+    padding: 18px;
+  }
+  .result-count {
+    font-size: 12px;
+  }
+  .result-count span {
+    display: none;
+  }
+  .page-head p {
+    font-size: 13px;
+  }
+  .today-copy p {
+    font-size: 13px;
+  }
+  .attachment-bar {
+    flex-wrap: wrap;
+    gap: 4px 14px;
+  }
+  .attachment-bar > span {
+    margin: 0;
+  }
+  .save-bar {
+    padding-bottom: 8px;
+  }
+  .familiarity-row {
+    gap: 8px;
+  }
+  .fam-option {
+    min-height: 40px;
+    padding-inline: 10px;
+  }
+  .relation-picker {
+    padding-block: 18px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .page-surface,
+  .item-detail,
+  .graph-inspector,
+  .answer-block {
+    animation: none;
+  }
+  .sidebar nav a,
+  .sidebar nav svg,
+  .graph-entry > svg,
+  .tree-toggle svg {
+    transition: none;
+  }
+}

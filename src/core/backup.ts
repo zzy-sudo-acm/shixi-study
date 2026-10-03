@@ -85,6 +85,19 @@ function validateReferences(data: ValidBackup) {
   const cards = uniqueIds(data.cards, '内容')
   const images = uniqueIds(data.images, '图片')
   const reviews = uniqueIds(data.reviews, '复习记录')
+  const byId = new Map(data.cards.map((card) => [card.id, card]))
+  for (const card of data.cards) {
+    const related = card.relatedIds ?? []
+    if (new Set(related).size !== related.length) throw new Error('备份中存在重复的知识关联，未导入。')
+    for (const id of related)
+      if (
+        id === card.id ||
+        card.subject !== '高数' ||
+        byId.get(id)?.subject !== '高数' ||
+        !byId.get(id)?.relatedIds?.includes(card.id)
+      )
+        throw new Error('备份中的知识关联不完整，未导入。')
+  }
   for (const card of data.cards)
     for (const imageId of [...card.question.images, ...card.answer.images]) {
       if (!images.has(imageId)) throw new Error('备份缺少引用的图片，未导入。')

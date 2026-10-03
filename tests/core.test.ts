@@ -42,6 +42,47 @@ import {
 } from '../src/core/scheduler'
 
 const now = new Date(2026, 9, 3, 12).getTime()
+describe('知识图谱关联', () => {
+  it('保存双向关联，备份恢复后保留，取消与删除清理另一端', async () => {
+    const a = card(),
+      b = card(),
+      c = card()
+    await saveCard(a, [], 0)
+    await saveCard(b, [], 1)
+    await saveCard({ ...c, relatedIds: [a.id, b.id] }, [], 2)
+    let data = await readSnapshot()
+    expect(data.cards.find((item) => item.id === a.id)?.relatedIds).toEqual([c.id])
+    const backup = await validateBackup(await exportBackup())
+    expect(backup.cards.find((item) => item.id === c.id)?.relatedIds).toEqual([a.id, b.id])
+    await restoreBackup(backup, data.revision)
+    data = await readSnapshot()
+    await saveCard({ ...data.cards.find((item) => item.id === c.id)!, relatedIds: [b.id] }, [], data.revision)
+    data = await readSnapshot()
+    expect(data.cards.find((item) => item.id === a.id)?.relatedIds).toEqual([])
+    await deleteCard(b.id, data.revision)
+    expect((await readSnapshot()).cards.find((item) => item.id === c.id)?.relatedIds).toEqual([])
+  })
+  it('关联失效、跨科目与自关联时回滚，旧内容不受影响', async () => {
+    const a = card(),
+      english = card({ subject: '英语', kind: 'word' })
+    await saveCard(a, [], 0)
+    await saveCard(english, [], 1)
+    for (const id of [a.id, english.id, 'missing']) {
+      await expect(saveCard({ ...a, relatedIds: [id] }, [], 2)).rejects.toThrow()
+      expect((await readSnapshot()).revision).toBe(2)
+    }
+    expect((await readSnapshot()).cards.find((c) => c.id === a.id)?.relatedIds).toBeUndefined()
+  })
+  it('移动整棵子树，拒绝移入后代或超出深度', async () => {
+    await addCategory('高数', '数学/极限/重要极限', 0)
+    const a = card({ category: '数学/极限/重要极限' })
+    await saveCard(a, [], 1)
+    await expect(renameCategory('高数', '数学/极限', '数学/极限/重要极限/循环', 2)).rejects.toThrow('后代')
+    await expect(renameCategory('高数', '数学/极限', '一/二/三/四/五', 2)).rejects.toThrow('5 层')
+    await renameCategory('高数', '数学/极限', '基础/极限', 2)
+    expect((await readSnapshot()).cards[0].category).toBe('基础/极限/重要极限')
+  })
+})
 const png = Uint8Array.from(
   atob('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jN1cAAAAASUVORK5CYII='),
   (c) => c.charCodeAt(0),

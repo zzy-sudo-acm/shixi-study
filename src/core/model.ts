@@ -85,6 +85,8 @@ export const cardSchema = z
     chapter: z.string().max(200),
     category: z.string().max(100).default(''),
     familiarity: z.number().int().min(0).max(3).default(0),
+    // Optional for backwards compatibility with existing cards and v1/v2 backups.
+    relatedIds: z.array(id).max(100).optional(),
     tags: z.array(z.string().max(100)).max(30),
     book: z.string().max(200),
     page: z.string().max(100),

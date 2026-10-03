@@ -136,7 +136,24 @@ async function mutate<T>(revision: number, action: (tx: WriteTx) => Promise<T>):
 }
 export async function saveCard(card: StudyCard, images: StoredImage[], revision: number) {
   const valid = cardSchema.parse(card)
+  if (valid.category) valid.category = validCategoryPath(valid.category)
   return mutate(revision, async (tx) => {
+    const all = await tx.objectStore('cards').getAll()
+    const related = new Set(valid.subject === '高数' ? (valid.relatedIds ?? []) : [])
+    if (related.has(valid.id)) throw new Error('知识点不能与自己关联。')
+    for (const id of related)
+      if (!all.some((c) => c.id === id && c.subject === '高数'))
+        throw new Error('关联的数学内容已不存在，请重新选择。')
+    // A relation is undirected. Update both ends atomically, also when changing subject.
+    if (valid.relatedIds || related.size) valid.relatedIds = [...related]
+    for (const other of all) {
+      if (other.id === valid.id) continue
+      const previous = other.relatedIds ?? []
+      if (related.has(other.id) === previous.includes(valid.id)) continue
+      const next = related.has(other.id) ? [...previous, valid.id] : previous.filter((id) => id !== valid.id)
+      if (next.length > 100) throw new Error('关联内容已达到 100 个连接，请先减少连接。')
+      await tx.objectStore('cards').put({ ...other, relatedIds: next })
+    }
     for (const image of images) await tx.objectStore('images').put(image)
     for (const imageId of [...card.question.images, ...card.answer.images]) {
       if (!(await tx.objectStore('images').getKey(imageId)))
@@ -171,6 +188,11 @@ export async function deleteCard(cardId: string, revision: number) {
     const undoId = (await tx.objectStore('meta').get('undoId')) as string | null
     if (undoId && reviewIds.includes(undoId)) await tx.objectStore('meta').put(null, 'undoId')
     const allCards = await tx.objectStore('cards').getAll()
+    for (const other of allCards)
+      if (other.relatedIds?.includes(cardId))
+        await tx
+          .objectStore('cards')
+          .put({ ...other, relatedIds: other.relatedIds.filter((id) => id !== cardId) })
     const used = new Set(allCards.flatMap((c) => [...c.question.images, ...c.answer.images]))
     for (const key of await tx.objectStore('images').getAllKeys())
       if (!used.has(key)) await tx.objectStore('images').delete(key)
@@ -208,8 +230,15 @@ export async function renameCategory(subject: Subject, oldPath: string, newPath:
   const from = normalizeCategoryPath(oldPath)
   const to = validCategoryPath(newPath)
   if (!from || to === from) return
+  if (categoryUnder(to, from)) throw new Error('不能把节点移动到自己的后代中。')
   return mutate(revision, async (tx) => {
     const renamed = await readCategories(tx)
+    const allCards = await tx.objectStore('cards').getAll()
+    for (const path of [
+      ...renamed.filter((e) => e.subject === subject).map((e) => e.path),
+      ...allCards.filter((c) => c.subject === subject).map((c) => c.category),
+    ])
+      if (categoryUnder(path, from)) validCategoryPath(to + path.slice(from.length))
     for (const [index, entry] of renamed.entries())
       if (entry.subject === subject && categoryUnder(entry.path, from))
         renamed[index] = { subject, path: to + entry.path.slice(from.length) }

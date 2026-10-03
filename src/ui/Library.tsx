@@ -1,14 +1,11 @@
-import { useDeferredValue, useState, type ReactNode } from 'react'
-import { addCategory, deleteCard, deleteCategory, renameCategory, setFamiliarity } from '../core/db'
+import { useDeferredValue, useMemo, useState } from 'react'
+import { deleteCard, setFamiliarity } from '../core/db'
 import {
-  categoryParent,
-  categoryPaths,
   categoryUnder,
   FACE_NAMES,
   FAMILIARITY_NAMES,
   friendlyError,
   KIND_NAMES,
-  normalizeCategoryPath,
   SUBJECTS,
   type Snapshot,
   type StudyCard,
@@ -16,6 +13,8 @@ import {
 } from '../core/model'
 import { formatTime } from '../core/scheduler'
 import { ContentView, Empty, Icon, Notice, PageHead } from './shared'
+import { KnowledgeTree } from './KnowledgeTree'
+import { KnowledgeGraph } from './KnowledgeGraph'
 
 const stateNames = ['未开始', '学习中', '复习中', '重新学习']
 function Item({
@@ -30,11 +29,18 @@ function Item({
   onChanged: () => Promise<void>
 }) {
   const [expanded, setExpanded] = useState(false),
-    [answer, setAnswer] = useState(false)
-  const reviews = data.reviews
-    .filter((r) => r.cardId === card.id)
-    .sort((a, b) => b.reviewedAt - a.reviewedAt)
-    .slice(0, 8)
+    [answer, setAnswer] = useState(false),
+    [error, setError] = useState('')
+  const reviews = useMemo(
+    () =>
+      expanded
+        ? data.reviews
+            .filter((r) => r.cardId === card.id)
+            .sort((a, b) => b.reviewedAt - a.reviewedAt)
+            .slice(0, 8)
+        : [],
+    [expanded, data.reviews, card.id],
+  )
   const familiarity = card.familiarity ?? 0
   const source = [
     card.book,
@@ -53,7 +59,7 @@ function Item({
           ? '已到期'
           : `下次 ${formatTime(card.schedule.due)}`
   return (
-    <article className="library-item">
+    <article className={`library-item ${expanded ? 'expanded' : ''}`} data-subject={card.subject}>
       <button
         className="item-trigger"
         aria-expanded={expanded}
@@ -65,7 +71,7 @@ function Item({
         <div className="item-meta">
           <span>{card.subject}</span>
           <span>{KIND_NAMES[card.kind]}</span>
-          {!!card.category && <span>{card.category}</span>}
+          {card.subject !== '英语' && !!card.category && <span>{card.category}</span>}
           <span className={card.status === 'draft' ? 'draft-label' : ''}>{status}</span>
           {familiarity > 0 && (
             <span className={`fam-badge fam-${familiarity}`}>{FAMILIARITY_NAMES[familiarity]}</span>
@@ -99,7 +105,11 @@ function Item({
                 type="button"
                 className={`fam-option fam-${level} ${familiarity === level ? 'active' : ''}`}
                 aria-pressed={familiarity === level}
-                onClick={() => void setFamiliarity(card.id, level, data.revision).then(onChanged)}
+                onClick={() =>
+                  void setFamiliarity(card.id, level, data.revision)
+                    .then(onChanged)
+                    .catch((err) => setError(friendlyError(err)))
+                }
               >
                 {name}
               </button>
@@ -116,7 +126,9 @@ function Item({
               className="danger"
               onClick={() => {
                 if (!window.confirm('确定删除这条内容吗？它的复习历史会一并删除，不可恢复。')) return
-                void deleteCard(card.id, data.revision).then(onChanged)
+                void deleteCard(card.id, data.revision)
+                  .then(onChanged)
+                  .catch((err) => setError(friendlyError(err)))
               }}
             >
               删除
@@ -131,6 +143,20 @@ function Item({
                 <p className="muted">还没有答案。编辑并补充后即可加入复习。</p>
               )}
             </section>
+          )}
+          {error && <Notice error>{error}</Notice>}
+          {!!card.relatedIds?.length && (
+            <div className="related-links">
+              <h3>关联知识</h3>
+              {data.cards
+                .filter((c) => card.relatedIds?.includes(c.id))
+                .map((related) => (
+                  <a href={`#edit/${related.id}`} key={related.id}>
+                    <Icon name="link" size={15} />
+                    {related.question.text || '图片知识卡片'}
+                  </a>
+                ))}
+            </div>
           )}
           <details className="history">
             <summary>复习记录（{card.schedule.reps} 次）</summary>
@@ -159,276 +185,54 @@ function Item({
     </article>
   )
 }
-interface CategoryNode {
-  path: string
-  name: string
-  children: CategoryNode[]
-}
-function buildCategoryTree(paths: string[]): CategoryNode[] {
-  const roots: CategoryNode[] = []
-  const byPath = new Map<string, CategoryNode>()
-  for (const path of paths) {
-    let parent = ''
-    for (const segment of path.split('/')) {
-      const full = parent ? `${parent}/${segment}` : segment
-      let node = byPath.get(full)
-      if (!node) {
-        node = { path: full, name: segment, children: [] }
-        byPath.set(full, node)
-        if (parent) byPath.get(parent)!.children.push(node)
-        else roots.push(node)
-      }
-      parent = full
-    }
-  }
-  const sortNodes = (nodes: CategoryNode[]) => {
-    nodes.sort((a, b) => a.name.localeCompare(b.name, 'zh'))
-    for (const node of nodes) sortNodes(node.children)
-  }
-  sortNodes(roots)
-  return roots
-}
-function CategoryTree({
-  data,
-  subject,
-  category,
-  onFilter,
-  onChanged,
-}: {
-  data: Snapshot
-  subject: Subject
-  category: string
-  onFilter: (value: string) => void
-  onChanged: () => Promise<void>
-}) {
-  const [collapsed, setCollapsed] = useState<string[]>([]),
-    [managing, setManaging] = useState(false),
-    [editing, setEditing] = useState<{ type: 'add' | 'rename' | 'root'; path: string } | null>(null),
-    [editText, setEditText] = useState(''),
-    [error, setError] = useState('')
-  const roots = buildCategoryTree(categoryPaths(data, subject))
-  const counts = new Map<string, number>()
-  for (const card of data.cards)
-    if (card.subject === subject && card.category)
-      for (let path = card.category; path; path = categoryParent(path))
-        counts.set(path, (counts.get(path) ?? 0) + 1)
-  async function submitEdit() {
-    if (!editing) return
-    setError('')
-    try {
-      if (editing.type === 'rename') {
-        const from = editing.path
-        await renameCategory(subject, from, editText, data.revision)
-        const to = normalizeCategoryPath(editText)
-        if (category !== 'all' && category !== '__none__' && categoryUnder(category, from))
-          onFilter(to ? to + category.slice(from.length) : 'all')
-      } else {
-        await addCategory(
-          subject,
-          editing.type === 'add' ? `${editing.path}/${editText}` : editText,
-          data.revision,
-        )
-      }
-      setEditing(null)
-      await onChanged()
-    } catch (err) {
-      setError(friendlyError(err))
-    }
-  }
-  async function removeNode(path: string) {
-    if (!window.confirm('删除后该分类及其子分类下的内容将变为未分类，确定删除？')) return
-    setError('')
-    try {
-      await deleteCategory(subject, path, data.revision)
-      if (category !== 'all' && category !== '__none__' && categoryUnder(category, path)) onFilter('all')
-      await onChanged()
-    } catch (err) {
-      setError(friendlyError(err))
-    }
-  }
-  function editRow(depth: number, rename: boolean) {
-    return (
-      <div className="cat-edit" style={{ paddingInlineStart: `${depth * 20 + 24}px` }}>
-        <input
-          aria-label={rename ? '新分类路径' : editing?.type === 'root' ? '新建顶级分类' : '新子类名称'}
-          value={editText}
-          maxLength={100}
-          autoFocus
-          placeholder={rename ? '输入新路径，可改变层级' : '分类名称'}
-          onChange={(e) => setEditText(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' && !e.nativeEvent.isComposing) {
-              e.preventDefault()
-              void submitEdit()
-            }
-            if (e.key === 'Escape') setEditing(null)
-          }}
-        />
-        <button type="button" className="text-button" onClick={() => void submitEdit()}>
-          确定
-        </button>
-      </div>
-    )
-  }
-  function renderNode(node: CategoryNode, depth: number): ReactNode {
-    const isCollapsed = collapsed.includes(node.path)
-    return (
-      <div key={node.path}>
-        <div className="cat-node" style={{ paddingInlineStart: `${depth * 20}px` }}>
-          {node.children.length ? (
-            <button
-              type="button"
-              className="cat-toggle"
-              aria-label={`${isCollapsed ? '展开' : '收起'} ${node.path}`}
-              aria-expanded={!isCollapsed}
-              onClick={() =>
-                setCollapsed((list) =>
-                  isCollapsed ? list.filter((p) => p !== node.path) : [...list, node.path],
-                )
-              }
-            >
-              {isCollapsed ? '▸' : '▾'}
-            </button>
-          ) : (
-            <span className="cat-toggle" aria-hidden="true" />
-          )}
-          <button
-            type="button"
-            className={`cat-name${category === node.path ? ' cat-active' : ''}`}
-            onClick={() => onFilter(category === node.path ? 'all' : node.path)}
-          >
-            {node.name}
-          </button>
-          <span className="cat-count">{counts.get(node.path) ?? 0}</span>
-          {managing && (
-            <span className="cat-manage">
-              <button
-                type="button"
-                aria-label={`在 ${node.path} 下新增子类`}
-                onClick={() => {
-                  setEditing({ type: 'add', path: node.path })
-                  setEditText('')
-                }}
-              >
-                ＋
-              </button>
-              <button
-                type="button"
-                aria-label={`重命名 ${node.path}`}
-                onClick={() => {
-                  setEditing({ type: 'rename', path: node.path })
-                  setEditText(node.path)
-                }}
-              >
-                ✎
-              </button>
-              <button
-                type="button"
-                aria-label={`删除 ${node.path}`}
-                onClick={() => void removeNode(node.path)}
-              >
-                ✕
-              </button>
-            </span>
-          )}
-        </div>
-        {editing &&
-          ((editing.type === 'add' && editing.path === node.path) ||
-            (editing.type === 'rename' && editing.path === node.path)) &&
-          editRow(depth + 1, editing.type === 'rename')}
-        {!isCollapsed && node.children.map((child) => renderNode(child, depth + 1))}
-      </div>
-    )
-  }
-  return (
-    <div className="cat-tree">
-      <div className="cat-head">
-        <button
-          type="button"
-          className={`cat-all${category === 'all' ? ' cat-active' : ''}`}
-          onClick={() => onFilter('all')}
-        >
-          全部
-        </button>
-        <button
-          type="button"
-          className={`cat-none${category === '__none__' ? ' cat-active' : ''}`}
-          onClick={() => onFilter('__none__')}
-        >
-          未分类
-        </button>
-        <button
-          type="button"
-          className="text-button cat-manage-toggle"
-          aria-pressed={managing}
-          onClick={() => {
-            setManaging((value) => !value)
-            setEditing(null)
-          }}
-        >
-          {managing ? '完成' : '管理'}
-        </button>
-      </div>
-      {roots.length === 0 && !managing && (
-        <p className="cat-empty muted">还没有分类。录入时填写分类，或点「管理」搭建自己的知识树。</p>
-      )}
-      {roots.map((node) => renderNode(node, 0))}
-      {managing &&
-        (editing?.type === 'root' ? (
-          editRow(0, false)
-        ) : (
-          <button
-            type="button"
-            className="text-button cat-add-root"
-            onClick={() => {
-              setEditing({ type: 'root', path: '' })
-              setEditText('')
-            }}
-          >
-            ＋ 新建顶级分类
-          </button>
-        ))}
-      {error && <Notice error>{error}</Notice>}
-    </div>
-  )
-}
 export function Library({
   data,
   now,
   refresh,
   draftOnly = false,
+  initialSubject,
+  initialGraph = false,
 }: {
   data: Snapshot
   now: number
   refresh: () => Promise<void>
   draftOnly?: boolean
+  initialSubject?: Subject
+  initialGraph?: boolean
 }) {
   const [search, setSearch] = useState(''),
-    [subject, setSubject] = useState('全部'),
+    [subject, setSubject] = useState<string>(initialSubject ?? '全部'),
     [category, setCategory] = useState('all'),
     [status, setStatus] = useState(draftOnly ? 'draft' : 'all')
+  const [view, setView] = useState(initialGraph ? 'graph' : 'cards')
+  const [kind, setKind] = useState('all')
   const query = useDeferredValue(search).toLocaleLowerCase().trim()
   const [limit, setLimit] = useState(30)
-  const cards = data.cards
-    .filter(
-      (c) =>
-        (subject === '全部' || c.subject === subject) &&
-        (category === 'all' ||
-          (category === '__none__' ? !(c.category ?? '') : categoryUnder(c.category ?? '', category))) &&
-        (status === 'all' ||
-          (status === 'draft'
-            ? c.status === 'draft'
-            : c.status === 'ready' &&
-              (status === 'new'
-                ? c.schedule.state === 0
-                : c.schedule.state !== 0 && c.schedule.due <= now))) &&
-        (!query ||
-          [c.question.text, c.answer.text, c.book, c.chapter, c.category, c.page, c.number, ...c.tags]
-            .join(' ')
-            .toLocaleLowerCase()
-            .includes(query)),
-    )
-    .sort((a, b) => b.createdAt - a.createdAt)
+  const cards = useMemo(
+    () =>
+      data.cards
+        .filter(
+          (c) =>
+            (subject === '全部' || c.subject === subject) &&
+            (subject !== '英语' || kind === 'all' || c.kind === kind) &&
+            (category === 'all' ||
+              (category === '__none__' ? !(c.category ?? '') : categoryUnder(c.category ?? '', category))) &&
+            (status === 'all' ||
+              (status === 'draft'
+                ? c.status === 'draft'
+                : c.status === 'ready' &&
+                  (status === 'new'
+                    ? c.schedule.state === 0
+                    : c.schedule.state !== 0 && c.schedule.due <= now))) &&
+            (!query ||
+              [c.question.text, c.answer.text, c.book, c.chapter, c.category, c.page, c.number, ...c.tags]
+                .join(' ')
+                .toLocaleLowerCase()
+                .includes(query)),
+        )
+        .sort((a, b) => b.createdAt - a.createdAt),
+    [data.cards, subject, category, status, kind, query, now],
+  )
   return (
     <>
       <PageHead
@@ -461,6 +265,7 @@ export function Library({
             onChange={(e) => {
               setSubject(e.target.value)
               setCategory('all')
+              setKind('all')
               setLimit(30)
             }}
           >
@@ -486,50 +291,116 @@ export function Library({
           </select>
         </label>
       </div>
-      {subject !== '全部' && (
-        <CategoryTree
-          data={data}
-          subject={subject as Subject}
-          category={category}
-          onFilter={(value) => {
-            setCategory(value)
-            setLimit(30)
-          }}
-          onChanged={refresh}
-        />
-      )}
-      <p className="result-count">
-        {cards.length} 条结果 <span>图片中的文字不会被自动识别或搜索</span>
-      </p>
-      {cards.length ? (
-        <div className="library-list">
-          {cards.slice(0, limit).map((card) => (
-            <Item
-              key={`${card.id}-${card.updatedAt}`}
-              card={card}
-              data={data}
-              now={now}
-              onChanged={refresh}
-            />
-          ))}
-        </div>
-      ) : (
-        <Empty title={data.cards.length ? '没有找到符合条件的内容' : '这里还没有内容'}>
-          <p>
-            {data.cards.length
-              ? '换一个关键词，或试试其他筛选条件。'
-              : '从一道错题或一个知识点开始，也可以先暂存截图。'}
-          </p>
-          <a className="button secondary" href="#add">
-            添加内容
+      <div className="library-view-tools">
+        {subject === '英语' ? (
+          <div className="segmented" aria-label="英语内容类型">
+            {[
+              ['all', '全部'],
+              ['word', '单词'],
+              ['sentence', '句子'],
+            ].map(([value, label]) => (
+              <button
+                type="button"
+                key={value}
+                aria-pressed={kind === value}
+                onClick={() => {
+                  setKind(value)
+                  setLimit(30)
+                }}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        ) : (
+          <div className="segmented" aria-label="内容视图">
+            <button
+              type="button"
+              aria-pressed={view === 'cards' || subject !== '高数'}
+              onClick={() => setView('cards')}
+            >
+              <Icon name="cards" size={17} />
+              卡片
+            </button>
+            <button
+              type="button"
+              aria-pressed={view === 'graph' && subject === '高数'}
+              onClick={() => {
+                if (subject !== '高数') {
+                  setSubject('高数')
+                  setCategory('all')
+                  setKind('all')
+                }
+                setView('graph')
+              }}
+            >
+              <Icon name="tree" size={17} />
+              数学知识图谱
+            </button>
+          </div>
+        )}
+        {subject === '高数' && category !== 'all' && category !== '__none__' && (
+          <a className="button small subtle" href={`#add/高数?category=${encodeURIComponent(category)}`}>
+            <Icon name="add" size={16} />
+            在此节点添加
           </a>
-        </Empty>
-      )}
-      {cards.length > limit && (
-        <button className="load-more secondary" onClick={() => setLimit((n) => n + 30)}>
-          再显示 30 条
-        </button>
-      )}
+        )}
+      </div>
+      <div className={subject !== '全部' && subject !== '英语' ? 'library-workspace' : undefined}>
+        {subject !== '全部' && subject !== '英语' && (
+          <KnowledgeTree
+            key={subject}
+            data={data}
+            subject={subject as Subject}
+            value={category}
+            onSelect={(value) => {
+              setCategory(value)
+              setLimit(30)
+            }}
+            onChanged={refresh}
+          />
+        )}
+        <div className="library-results">
+          {subject === '高数' && view === 'graph' ? (
+            <KnowledgeGraph data={data} cards={cards} category={category} onCategory={setCategory} />
+          ) : (
+            <>
+              <p className="result-count">
+                {cards.length} 条结果 <span>图片中的文字不会被自动识别或搜索</span>
+              </p>
+              {cards.length ? (
+                <div className="library-list">
+                  {cards.slice(0, limit).map((card) => (
+                    <Item
+                      key={`${card.id}-${card.updatedAt}`}
+                      card={card}
+                      data={data}
+                      now={now}
+                      onChanged={refresh}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <Empty title={data.cards.length ? '没有找到符合条件的内容' : '这里还没有内容'}>
+                  <p>
+                    {data.cards.length
+                      ? '换一个关键词，或试试其他筛选条件。'
+                      : '从一道错题或一个知识点开始，也可以先暂存截图。'}
+                  </p>
+                  <a className="button secondary" href="#add">
+                    添加内容
+                  </a>
+                </Empty>
+              )}
+              {cards.length > limit && (
+                <button className="load-more secondary" onClick={() => setLimit((n) => n + 30)}>
+                  再显示 30 条
+                </button>
+              )}
+            </>
+          )}
+        </div>
+      </div>
     </>
   )
 }

@@ -40,7 +40,20 @@ async function addText(
   category = '',
 ) {
   await page.goto('#add')
-  if (category) await page.getByLabel('分类', { exact: true }).fill(category)
+  if (category) {
+    const tree = page.getByRole('region', { name: '选择所属知识节点' })
+    const segments = category.split('/')
+    for (let i = 0; i < segments.length; i++) {
+      const existing = tree.locator('.tree-name').filter({ hasText: segments[i] }).first()
+      if (await existing.count()) await existing.click()
+      else {
+        await tree.getByRole('button', { name: i === 0 ? '新建根节点' : '添加子节点', exact: true }).click()
+        await tree.getByLabel('节点名称', { exact: true }).fill(segments[i])
+        await tree.getByRole('button', { name: '确认保存', exact: true }).click()
+        await expect(tree.getByRole('button', { name: '确认保存', exact: true })).toHaveCount(0)
+      }
+    }
+  }
   await page.getByLabel('问题', { exact: true }).fill(question)
   if (answer) await page.getByLabel('答案与解析', { exact: true }).fill(answer)
   await page.getByRole('button', { name: draft ? '暂存为待整理' : '保存并加入新学', exact: true }).click()
@@ -408,72 +421,92 @@ test('删除内容会同时清除复习历史', async ({ page }) => {
   expect(snap.reviews).toHaveLength(0)
 })
 
-test('数学内容按自建知识树整理，可标记熟悉程度并筛选', async ({ page }) => {
-  page.on('dialog', (dialog) => {
-    if (dialog.type() === 'beforeunload') return void dialog.accept()
-    void dialog.accept()
-  })
+test('知识族谱点选录入、跨分支关联、移动节点与英语简化', async ({ page }, testInfo) => {
+  const errors: string[] = []
+  page.on('pageerror', (error) => errors.push(error.message))
   await addText(
     page,
-    '一阶线性方程的通解公式？',
-    '套通解公式，先写成标准形式。',
+    '连续与可导之间有什么关系？',
+    '可导必连续，连续未必可导。',
     false,
-    '高等数学/常微分方程',
+    '高等数学/极限与连续',
   )
-  await addText(page, '第二个重要极限是什么？', 'lim (1+1/n)^n = e。', false, '高等数学/极限')
-  await expect(page.locator('.item-meta').first()).toContainText('高等数学/极限')
-  await page.getByLabel('筛选科目').selectOption('高数')
-  const tree = page.locator('.cat-tree')
-  await expect(tree).toBeVisible()
-  const row = (name: string) =>
-    tree.locator('.cat-node', { has: page.getByRole('button', { name, exact: true }) })
-  await expect(row('高等数学')).toContainText('2')
-  await expect(row('常微分方程')).toContainText('1')
-  await expect(row('极限')).toContainText('1')
-  // 点击子类只看该子类；点击父类包含后代
-  await tree.getByRole('button', { name: '常微分方程', exact: true }).click()
-  await expect(page.getByText('1 条结果')).toBeVisible()
-  await expect(page.getByRole('button', { name: /一阶线性方程/ })).toBeVisible()
-  await expect(page.getByRole('button', { name: /第二个重要极限/ })).toHaveCount(0)
-  await tree.getByRole('button', { name: '高等数学', exact: true }).click()
-  await expect(page.getByText('2 条结果')).toBeVisible()
-  await tree.getByRole('button', { name: '未分类', exact: true }).click()
-  await expect(page.getByText('没有找到符合条件的内容')).toBeVisible()
-  await tree.getByRole('button', { name: '全部', exact: true }).click()
-  await expect(page.getByText('2 条结果')).toBeVisible()
-  // 管理模式：新增、重命名、删除分类
-  await tree.getByRole('button', { name: '管理', exact: true }).click()
-  await tree.getByRole('button', { name: '在 高等数学 下新增子类', exact: true }).click()
-  await page.getByLabel('新子类名称', { exact: true }).fill('级数')
-  await page.keyboard.press('Enter')
-  await expect(row('级数')).toContainText('0')
-  await tree.getByRole('button', { name: '重命名 高等数学/级数', exact: true }).click()
-  await expect(page.getByLabel('新分类路径', { exact: true })).toHaveValue('高等数学/级数')
-  await page.getByLabel('新分类路径', { exact: true }).fill('高等数学/无穷级数')
-  await page.keyboard.press('Enter')
-  await expect(row('无穷级数')).toBeVisible()
-  await tree.getByRole('button', { name: '删除 高等数学/无穷级数', exact: true }).click()
-  await expect(row('无穷级数')).toHaveCount(0)
-  await tree.getByRole('button', { name: '完成', exact: true }).click()
-  // 熟悉程度标记
-  await page.getByRole('button', { name: /一阶线性方程/ }).click()
-  await page.getByRole('button', { name: '熟练', exact: true }).click()
-  await expect(page.locator('.item-meta .fam-badge').first()).toContainText('熟练')
-  // 复习页显示分类路径
-  await page.goto('#review/all')
-  await expect(page.locator('.review-meta').first()).toContainText('高等数学/')
-  // 英语同样有自己的知识树（无预设，可自建）
-  await page.goto('#library')
-  await page.getByLabel('筛选科目').selectOption('英语')
-  await expect(tree).toBeVisible()
-  await expect(tree.getByText('还没有分类', { exact: false })).toBeVisible()
-  await tree.getByRole('button', { name: '管理', exact: true }).click()
-  await tree.getByRole('button', { name: /新建顶级分类/ }).click()
-  await page.getByLabel('新建顶级分类', { exact: true }).fill('阅读/长难句')
-  await page.keyboard.press('Enter')
-  await expect(tree.getByRole('button', { name: '阅读', exact: true })).toBeVisible()
-  await expect(tree.getByRole('button', { name: '长难句', exact: true })).toBeVisible()
-  // 录入页所有科目都有分类输入框
+  await addText(
+    page,
+    '如何理解导数的几何意义？',
+    '导数是函数图像在该点的切线斜率。',
+    false,
+    '高等数学/导数与微分',
+  )
+  await page.goto('#add/高数')
+  await expect(page.getByLabel('分类', { exact: true })).toHaveCount(0)
+  await page.locator('.tree-name').filter({ hasText: '导数与微分' }).click()
+  await page.getByLabel('问题', { exact: true }).fill('函数在一点可导，需要哪些条件？')
+  await page
+    .getByLabel('答案与解析', { exact: true })
+    .fill('左右导数存在且相等。先检查连续性，再用定义判断。')
+  await page.getByLabel('搜索可关联的知识').fill('连续与可导')
+  await page.locator('.relation-results').getByRole('button').click()
+  await page.getByLabel('搜索可关联的知识').fill('几何意义')
+  await page.locator('.relation-results').getByRole('button').click()
+  await page.getByRole('button', { name: '保存并加入新学', exact: true }).click()
+  await expect(page.getByRole('heading', { name: '我的内容', exact: true })).toBeVisible()
+  const data = await snapshot(page)
+  expect(data.cards.find((c: any) => c.question.text.startsWith('函数在')).relatedIds).toHaveLength(2)
+  expect(data.cards.find((c: any) => c.question.text.startsWith('连续')).relatedIds).toHaveLength(1)
+  await noOverflow(page)
+  await page.screenshot({ path: `test-results/visual/cards-${testInfo.project.name}.png`, fullPage: false })
+  await page.getByRole('button', { name: '数学知识图谱', exact: true }).click()
+  await expect(page.getByRole('region', { name: '知识族谱树' })).toBeVisible()
+  await expect(page.locator('.graph-relation')).toHaveCount(2)
+  await page.locator('.graph-card').filter({ hasText: '函数在一点' }).click()
+  await expect(page.locator('.graph-inspector')).toContainText('函数在一点可导')
+  await expect(page.locator('.graph-inspector')).not.toContainText('左右导数存在且相等')
+  await page.locator('.graph-inspector').getByRole('button', { name: '显示答案', exact: true }).click()
+  await expect(page.locator('.graph-inspector')).toContainText('左右导数存在且相等')
+  await page.getByRole('button', { name: '重置图谱缩放' }).click()
+  await page.getByRole('button', { name: '缩小图谱' }).click()
+  await expect(page.getByRole('button', { name: '重置图谱缩放' })).toHaveText('80%')
+  await page.getByRole('button', { name: '重置图谱缩放' }).click()
+  await page.getByRole('button', { name: '总览', exact: true }).click()
+  await noOverflow(page)
+  await page.screenshot({ path: `test-results/visual/graph-${testInfo.project.name}.png`, fullPage: false })
+  const tree = page.getByRole('region', { name: '知识族谱树' })
+  await tree.locator('.tree-name').filter({ hasText: '导数与微分' }).click()
+  await tree.getByRole('button', { name: '重命名', exact: true }).click()
+  await tree.getByLabel('节点名称').fill('导数 & 微分')
+  await tree.getByRole('button', { name: '确认保存' }).click()
+  await expect(tree.getByRole('button', { name: '确认保存' })).toHaveCount(0)
+  await tree.getByRole('button', { name: '移动节点' }).click()
+  await tree.getByLabel('移动到').selectOption('高等数学/极限与连续')
+  await tree.getByRole('button', { name: '确认移动' }).click()
+  await expect(tree.getByRole('button', { name: '确认移动' })).toHaveCount(0)
+  expect(
+    (await snapshot(page)).cards.filter((c: any) => c.category === '高等数学/极限与连续/导数 & 微分'),
+  ).toHaveLength(2)
+  await page.getByRole('link', { name: '在此节点添加' }).click()
+  await expect(page.locator('.tree-name.selected')).toContainText('导数 & 微分')
+  await page.screenshot({ path: `test-results/visual/editor-${testInfo.project.name}.png`, fullPage: false })
   await page.goto('#add/英语')
-  await expect(page.getByLabel('分类', { exact: true })).toBeVisible()
+  await expect(page.getByRole('region', { name: '选择所属知识节点' })).toHaveCount(0)
+  await expect(page.getByLabel('知识点', { exact: true })).toHaveCount(0)
+  await page.getByLabel('单词或短语', { exact: true }).fill('derive')
+  await page.getByLabel('释义与用法', { exact: true }).fill('v. 获得；推导')
+  await page.getByRole('button', { name: '保存并加入新学', exact: true }).click()
+  await expect(page.getByRole('heading', { name: '我的内容', exact: true })).toBeVisible()
+  await page.getByLabel('筛选科目').selectOption('英语')
+  await expect(page.getByRole('region', { name: '知识族谱树' })).toHaveCount(0)
+  await page.getByRole('button', { name: '单词', exact: true }).click()
+  await expect(page.getByText('1 条结果', { exact: false })).toBeVisible()
+  await page.getByRole('button', { name: '句子', exact: true }).click()
+  await expect(page.getByText('没有找到符合条件的内容')).toBeVisible()
+  await page.setViewportSize({ width: 320, height: 740 })
+  await page.goto('#library/高数?view=graph')
+  await expect(page.locator('.graph-relation')).toHaveCount(2)
+  await noOverflow(page)
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  expect(await page.locator('.page-surface').evaluate((el) => getComputedStyle(el).animationName)).toBe(
+    'none',
+  )
+  expect(errors).toEqual([])
 })
