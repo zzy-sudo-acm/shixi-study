@@ -14,6 +14,7 @@ import {
   undoReview,
 } from '../src/core/db'
 import { blobToBase64, exportBackup, restoreBackup, sha256, validateBackup } from '../src/core/backup'
+import { clearDraft, closeDraftDatabase, DRAFT_DB_NAME, loadDraft, saveDraft } from '../src/core/draft'
 import { cardSchema, DEFAULT_SETTINGS, type StudyCard } from '../src/core/model'
 import {
   DEFAULT_ALGORITHM,
@@ -62,11 +63,15 @@ async function reseal(envelope: any) {
 beforeEach(async () => {
   await closeDatabase()
   await deleteDB(DB_NAME)
+  await closeDraftDatabase()
+  await deleteDB(DRAFT_DB_NAME)
 })
 afterEach(async () => {
   vi.restoreAllMocks()
   await closeDatabase()
   await deleteDB(DB_NAME)
+  await closeDraftDatabase()
+  await deleteDB(DRAFT_DB_NAME)
 })
 
 describe('FSRS 调度与队列', () => {
@@ -330,5 +335,27 @@ describe('备份恢复与迁移', () => {
       return original.apply(this, args)
     })
     await expect(exportBackup()).rejects.toThrow('read failure')
+  })
+})
+
+describe('录入草稿', () => {
+  it('草稿含文字与图片可保存、读取与清除', async () => {
+    const c = card()
+    const image = {
+      id: 'draft-image',
+      blob: new Blob([png], { type: 'image/png' }),
+      width: 1,
+      height: 1,
+      name: 'draft.png',
+    }
+    await saveDraft({ card: c, tagsText: '重点，错题', original: true, images: [image], savedAt: now })
+    const loaded = await loadDraft()
+    expect(loaded?.card).toEqual(c)
+    expect(loaded?.tagsText).toBe('重点，错题')
+    expect(loaded?.original).toBe(true)
+    expect(loaded?.images).toHaveLength(1)
+    expect(new Uint8Array(await loaded!.images[0].blob.arrayBuffer())).toEqual(png)
+    await clearDraft()
+    expect(await loadDraft()).toBeUndefined()
   })
 })

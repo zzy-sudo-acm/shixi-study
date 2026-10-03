@@ -774,6 +774,42 @@ dialog::backdrop {
   box-shadow: 0 1px 4px #10203022;
   z-index: 1;
 }
+.reuse-image {
+  display: block;
+  width: 100%;
+  min-height: 30px;
+  margin-top: 4px;
+  padding: 3px 6px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--muted);
+}
+.reuse-image:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+.tag-suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.tag-chip {
+  min-height: 30px;
+  padding: 3px 12px;
+  border-radius: 999px;
+  background: var(--soft);
+  border-color: transparent;
+  font-size: 12px;
+  font-weight: 400;
+}
+.tag-chip:hover {
+  background: #dce7f2;
+  border-color: transparent;
+}
 .content-view {
   min-width: 0;
 }
@@ -1592,10 +1628,21 @@ dialog::backdrop {
   .metadata-grid input {
     font-size: 16px;
   }
+  .save-bar {
+    position: sticky;
+    bottom: calc(67px + env(safe-area-inset-bottom));
+    padding-block: 10px;
+    background: #f5f7f9;
+    border-top: 1px solid var(--line);
+    z-index: 5;
+  }
   .save-bar .actions {
     gap: 9px;
     display: grid;
-    grid-template-columns: 1.1fr 1fr;
+    grid-template-columns: 1fr 1fr;
+  }
+  .save-bar .actions .primary {
+    grid-column: 1 / -1;
   }
   .save-bar button {
     font-size: 12px;

@@ -11,6 +11,7 @@ import {
 } from '../core/model'
 import { emptySchedule } from '../core/scheduler'
 import { saveCard } from '../core/db'
+import { clearDraft, loadDraft, saveDraft, type EditorDraft } from '../core/draft'
 import { prepareImage } from '../core/images'
 import { FormulaText, Icon, ImageView, Notice, PageHead } from './shared'
 
@@ -21,6 +22,9 @@ function ContentEditor({
   original,
   update,
   onProcessing,
+  onReuse,
+  reuseTargets = [],
+  reuseLabel = '',
 }: {
   label: string
   content: Content
@@ -28,6 +32,9 @@ function ContentEditor({
   original: boolean
   update: (value: Content, added?: StoredImage[]) => void
   onProcessing: (value: boolean) => void
+  onReuse?: (id: string) => void
+  reuseTargets?: string[]
+  reuseLabel?: string
 }) {
   const [busy, setBusy] = useState(false),
     [error, setError] = useState(''),
@@ -141,6 +148,16 @@ function ContentEditor({
             >
               <Icon name="close" size={16} />
             </button>
+            {onReuse && (
+              <button
+                type="button"
+                className="reuse-image"
+                disabled={busy || reuseTargets.includes(id)}
+                onClick={() => onReuse(id)}
+              >
+                {reuseTargets.includes(id) ? '已在另一面' : reuseLabel}
+              </button>
+            )}
           </div>
         ))}
       </div>
@@ -189,6 +206,15 @@ function ContentEditor({
     </section>
   )
 }
+function hasDraftContent(card: StudyCard) {
+  return Boolean(
+    card.question.text.trim() ||
+    card.answer.text.trim() ||
+    card.question.images.length ||
+    card.answer.images.length ||
+    card.tags.length,
+  )
+}
 export function Editor({
   data,
   existing,
@@ -227,14 +253,61 @@ export function Editor({
     [error, setError] = useState(''),
     [busy, setBusy] = useState(false)
   const [processing, setProcessing] = useState(0),
-    [tagsText, setTagsText] = useState(card.tags.join('，'))
+    [tagsText, setTagsText] = useState(card.tags.join('，')),
+    [savedCount, setSavedCount] = useState(0),
+    [pendingDraft, setPendingDraft] = useState<EditorDraft | null>(null)
   const saving = useRef(false)
   useEffect(() => () => setDirty(false), [setDirty])
+  useEffect(() => {
+    revision.current = data.revision
+  }, [data.revision])
+  useEffect(() => {
+    if (existing) return
+    let cancelled = false
+    void loadDraft().then((draft) => {
+      if (!cancelled && draft && hasDraftContent(draft.card)) setPendingDraft(draft)
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [existing])
+  useEffect(() => {
+    if (existing || pendingDraft) return
+    const timer = setTimeout(() => {
+      if (hasDraftContent(card)) void saveDraft({ card, tagsText, original, images, savedAt: Date.now() })
+      else void clearDraft()
+    }, 800)
+    return () => clearTimeout(timer)
+  }, [existing, pendingDraft, card, tagsText, original, images])
+  const books = [...new Set(data.cards.map((c) => c.book).filter(Boolean))].sort()
+  const chapters = [...new Set(data.cards.map((c) => c.chapter).filter(Boolean))].sort()
+  const currentTags = tagsText.split(/[,，\s]+/).filter(Boolean)
+  const knownTags = [...new Set(data.cards.flatMap((c) => c.tags))]
+    .filter((tag) => !currentTags.includes(tag))
+    .sort()
   function change(patch: Partial<StudyCard>) {
     setCard((c) => ({ ...c, ...patch }))
     setDirty(true)
   }
-  async function save(status: 'draft' | 'ready') {
+  function restoreDraft(draft: EditorDraft) {
+    setCard(draft.card)
+    setTagsText(draft.tagsText)
+    setOriginal(draft.original)
+    setImages(draft.images)
+    setPendingDraft(null)
+    setDirty(true)
+  }
+  function reuseImage(from: 'question' | 'answer', id: string) {
+    const to = from === 'question' ? 'answer' : 'question'
+    const target = card[to]
+    if (target.images.includes(id)) return
+    if (target.images.length >= 30) {
+      setError('每一面最多添加 30 张图片。')
+      return
+    }
+    change({ [to]: { ...target, images: [...target.images, id] } })
+  }
+  async function save(status: 'draft' | 'ready', keepAdding = false) {
     if (saving.current || processing > 0) return
     if (
       ![
@@ -247,6 +320,13 @@ export function Editor({
       setError('先写下一点内容，或添加一张截图。')
       return
     }
+    const questionText = card.question.text.trim()
+    if (
+      questionText &&
+      data.cards.some((c) => c.id !== card.id && c.question.text.trim() === questionText) &&
+      !window.confirm('已有一条问题完全相同的内容。确定再保存一条吗？')
+    )
+      return
     saving.current = true
     setBusy(true)
     setError('')
@@ -258,9 +338,35 @@ export function Editor({
         updatedAt: Date.now(),
       })
       await saveCard(candidate, images, revision.current)
+      revision.current += 1
       setDirty(false)
+      void clearDraft()
       await onSaved()
-      location.hash = '#library'
+      if (keepAdding && !existing) {
+        setImages([])
+        setTagsText('')
+        setCard({
+          id: crypto.randomUUID(),
+          subject: card.subject,
+          kind: card.kind,
+          status: 'ready',
+          question: { text: '', images: [] },
+          answer: { text: '', images: [] },
+          chapter: card.chapter,
+          tags: [],
+          book: card.book,
+          page: '',
+          number: '',
+          createdAt: Date.now(),
+          updatedAt: Date.now(),
+          schedule: emptySchedule(),
+        })
+        setSavedCount((n) => n + 1)
+        window.scrollTo(0, 0)
+        document.getElementById('input-问题')?.focus()
+      } else {
+        location.hash = '#library'
+      }
     } catch (err) {
       setError(friendlyError(err))
     } finally {
@@ -280,7 +386,34 @@ export function Editor({
           e.preventDefault()
           void save('ready')
         }}
+        onKeyDown={(e) => {
+          if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+            e.preventDefault()
+            void save('ready')
+          }
+        }}
       >
+        {pendingDraft && (
+          <Notice>
+            发现上次没来得及保存的内容。
+            <button type="button" className="text-button" onClick={() => restoreDraft(pendingDraft)}>
+              恢复
+            </button>
+            <button
+              type="button"
+              className="text-button"
+              onClick={() => {
+                setPendingDraft(null)
+                void clearDraft()
+              }}
+            >
+              丢弃
+            </button>
+          </Notice>
+        )}
+        {!existing && savedCount > 0 && (
+          <Notice>已保存 {savedCount} 条，科目、类型、章节与书名已沿用，可以直接录下一条。</Notice>
+        )}
         <fieldset disabled={busy}>
           <legend className="sr-only">内容编辑</legend>
           <div className="editor-top">
@@ -330,6 +463,9 @@ export function Editor({
               if (value) setDirty(true)
               setProcessing((n) => n + (value ? 1 : -1))
             }}
+            onReuse={(id) => reuseImage('question', id)}
+            reuseTargets={card.answer.images}
+            reuseLabel="用到答案面"
           />
           <ContentEditor
             label="答案与解析"
@@ -344,6 +480,9 @@ export function Editor({
               if (value) setDirty(true)
               setProcessing((n) => n + (value ? 1 : -1))
             }}
+            onReuse={(id) => reuseImage('answer', id)}
+            reuseTargets={card.question.images}
+            reuseLabel="用到问题面"
           />
           <div className="editor-options">
             <span>
@@ -368,18 +507,30 @@ export function Editor({
                 <input
                   value={card.chapter}
                   maxLength={200}
+                  list="chapter-options"
                   onChange={(e) => change({ chapter: e.target.value })}
                   placeholder="例如：极限与连续"
                 />
+                <datalist id="chapter-options">
+                  {chapters.map((chapter) => (
+                    <option key={chapter} value={chapter} />
+                  ))}
+                </datalist>
               </label>
               <label>
                 书名
                 <input
                   value={card.book}
                   maxLength={200}
+                  list="book-options"
                   onChange={(e) => change({ book: e.target.value })}
                   placeholder="例如：1000题"
                 />
+                <datalist id="book-options">
+                  {books.map((book) => (
+                    <option key={book} value={book} />
+                  ))}
+                </datalist>
               </label>
               <label>
                 页码
@@ -411,6 +562,24 @@ export function Editor({
                   placeholder="用逗号或空格分隔，例如：易忘条件，错题"
                 />
               </label>
+              {knownTags.length > 0 && (
+                <div className="tag-suggestions full-width">
+                  <span>常用标签：</span>
+                  {knownTags.slice(0, 12).map((tag) => (
+                    <button
+                      type="button"
+                      key={tag}
+                      className="tag-chip"
+                      onClick={() => {
+                        setTagsText(tagsText.trim() ? `${tagsText.replace(/[,，\s]+$/, '')}，${tag}` : tag)
+                        setDirty(true)
+                      }}
+                    >
+                      {tag}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           </details>
         </fieldset>
@@ -420,6 +589,16 @@ export function Editor({
             <button type="submit" className="primary" disabled={busy || processing > 0}>
               {busy ? '正在保存…' : existing ? '保存并加入复习' : '保存并加入新学'}
             </button>
+            {!existing && (
+              <button
+                type="button"
+                className="secondary"
+                disabled={busy || processing > 0}
+                onClick={() => void save('ready', true)}
+              >
+                保存并继续下一条
+              </button>
+            )}
             <button
               type="button"
               className="secondary"
@@ -429,7 +608,7 @@ export function Editor({
               暂存为待整理
             </button>
           </div>
-          <p>待整理内容不进入复习队列。{existing && '编辑不会重置已有进度。'}</p>
+          <p>待整理内容不进入复习队列。{existing && '编辑不会重置已有进度。'}按 Ctrl+Enter 快速保存。</p>
         </div>
       </form>
     </>
