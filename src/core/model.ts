@@ -13,6 +13,12 @@ export const KIND_NAMES: Record<Kind, string> = {
 export function kindsForSubject(subject: Subject): readonly Kind[] {
   return subject === '英语' ? ['word', 'sentence'] : ['knowledge', 'exercise']
 }
+export const FACE_NAMES: Record<Kind, { question: string; answer: string }> = {
+  knowledge: { question: '问题', answer: '答案与解析' },
+  exercise: { question: '问题', answer: '答案与解析' },
+  word: { question: '单词或短语', answer: '释义与用法' },
+  sentence: { question: '英文句子', answer: '翻译与解析' },
+}
 export const DATA_VERSION = 2
 const time = z.number().finite().min(0).max(8640000000000000)
 const count = z.number().int().nonnegative().max(10000000)

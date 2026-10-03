@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type ClipboardEvent, type DragEvent } from 'react'
 import {
   cardSchema,
+  FACE_NAMES,
   friendlyError,
   KIND_NAMES,
   kindsForSubject,
@@ -20,6 +21,8 @@ import { FormulaText, Icon, ImageView, Notice, PageHead } from './shared'
 
 function ContentEditor({
   label,
+  placeholder,
+  rows,
   content,
   images,
   original,
@@ -30,6 +33,8 @@ function ContentEditor({
   reuseLabel = '',
 }: {
   label: string
+  placeholder: string
+  rows: number
   content: Content
   images: StoredImage[]
   original: boolean
@@ -126,12 +131,8 @@ function ContentEditor({
           maxLength={100000}
           onChange={(e) => update({ ...content, text: e.target.value })}
           onPaste={paste}
-          rows={label === '问题' ? 4 : 5}
-          placeholder={
-            label === '问题'
-              ? '例如：使用洛必达法则前，需要检查哪些条件？\n也可以直接粘贴或拖入题目截图。'
-              : '写下判断依据、关键步骤或贴上解析图片。复习时默认隐藏。'
-          }
+          rows={rows}
+          placeholder={placeholder}
         />
       )}
       <div className="image-list editor-images">
@@ -223,6 +224,33 @@ const EDITOR_KIND_HINTS: Record<Kind, string> = {
   exercise: '留下题目与解析。复习时先在纸上独立做，再查看答案。',
   word: '一词一卡：正面写单词或短语，背面放释义、搭配或例句。',
   sentence: '正面写英文句子，背面放翻译或结构分析。复习时先自己译一遍。',
+}
+const EDITOR_FACES: Record<
+  Kind,
+  { question: { placeholder: string; rows: number }; answer: { placeholder: string; rows: number } }
+> = {
+  knowledge: {
+    question: {
+      placeholder: '例如：使用洛必达法则前，需要检查哪些条件？\n也可以直接粘贴或拖入题目截图。',
+      rows: 4,
+    },
+    answer: { placeholder: '写下判断依据、关键步骤或贴上解析图片。复习时默认隐藏。', rows: 5 },
+  },
+  exercise: {
+    question: {
+      placeholder: '例如：使用洛必达法则前，需要检查哪些条件？\n也可以直接粘贴或拖入题目截图。',
+      rows: 4,
+    },
+    answer: { placeholder: '写下判断依据、关键步骤或贴上解析图片。复习时默认隐藏。', rows: 5 },
+  },
+  word: {
+    question: { placeholder: '例如：abandon\n也可以粘贴或拖入词汇截图。', rows: 2 },
+    answer: { placeholder: '词性、释义、常用搭配或例句。复习时默认隐藏。', rows: 4 },
+  },
+  sentence: {
+    question: { placeholder: '例如：The show must go on.\n也可以粘贴或拖入阅读截图。', rows: 3 },
+    answer: { placeholder: '翻译、结构分析或生词笔记。复习时默认隐藏。', rows: 4 },
+  },
 }
 export function Editor({
   data,
@@ -372,7 +400,7 @@ export function Editor({
         })
         setSavedCount((n) => n + 1)
         window.scrollTo(0, 0)
-        document.getElementById('input-问题')?.focus()
+        document.getElementById(`input-${FACE_NAMES[card.kind].question}`)?.focus()
       } else {
         location.hash = '#library'
       }
@@ -463,7 +491,9 @@ export function Editor({
           </div>
           <p className="editor-hint">{EDITOR_KIND_HINTS[card.kind]}</p>
           <ContentEditor
-            label="问题"
+            label={FACE_NAMES[card.kind].question}
+            placeholder={EDITOR_FACES[card.kind].question.placeholder}
+            rows={EDITOR_FACES[card.kind].question.rows}
             content={card.question}
             images={images}
             original={original}
@@ -477,10 +507,12 @@ export function Editor({
             }}
             onReuse={(id) => reuseImage('question', id)}
             reuseTargets={card.answer.images}
-            reuseLabel="用到答案面"
+            reuseLabel="用到背面"
           />
           <ContentEditor
-            label="答案与解析"
+            label={FACE_NAMES[card.kind].answer}
+            placeholder={EDITOR_FACES[card.kind].answer.placeholder}
+            rows={EDITOR_FACES[card.kind].answer.rows}
             content={card.answer}
             images={images}
             original={original}
@@ -494,7 +526,7 @@ export function Editor({
             }}
             onReuse={(id) => reuseImage('answer', id)}
             reuseTargets={card.question.images}
-            reuseLabel="用到问题面"
+            reuseLabel="用到正面"
           />
           <div className="editor-options">
             <span>

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import type { Grade } from 'ts-fsrs'
 import { rateCard, undoReview } from '../core/db'
 import {
+  FACE_NAMES,
   friendlyError,
   KIND_NAMES,
   type Kind,
@@ -18,6 +19,12 @@ const REVIEW_INSTRUCTIONS: Record<Kind, string> = {
   exercise: '先在纸上独立做，再查看解析。',
   word: '先回忆释义与用法，再展开。',
   sentence: '先自己翻译，再展开对照。',
+}
+const REVEAL_NAMES: Record<Kind, string> = {
+  knowledge: '显示答案',
+  exercise: '显示答案',
+  word: '显示释义',
+  sentence: '显示翻译',
 }
 function ReviewFace({
   card,
@@ -101,9 +108,9 @@ function ReviewFace({
           </p>
         )}
         {revealed && (
-          <section className="answer-block" aria-label="答案与解析">
+          <section className="answer-block" aria-label={FACE_NAMES[card.kind].answer}>
             <h2 ref={answerHeading} tabIndex={-1}>
-              答案与解析
+              {FACE_NAMES[card.kind].answer}
             </h2>
             <ContentView content={card.answer} label="答案图片" />
           </section>
@@ -112,7 +119,7 @@ function ReviewFace({
       {!revealed ? (
         <div className="reveal-area">
           <button className="primary reveal-button" onClick={reveal} disabled={busy}>
-            显示答案
+            {REVEAL_NAMES[card.kind]}
           </button>
           <p>
             想过以后，再展开。<span className="keyboard-hint">也可以按空格</span>
