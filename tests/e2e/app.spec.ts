@@ -1,5 +1,16 @@
 import { test, expect, type Page } from '@playwright/test'
 
+// Explicit synthetic fixtures for the compatibility module; the product seeds nothing.
+test.beforeEach(async ({ page }) => {
+  await page.goto('#home')
+  for (const name of ['高数', '英语', '408']) {
+    await page.getByRole('button', { name: '新建领域', exact: true }).click()
+    await page.getByLabel('领域名称').fill(name)
+    await page.getByRole('button', { name: '创建领域', exact: true }).click()
+    await expect(page.getByRole('dialog')).toHaveCount(0)
+  }
+})
+
 async function snapshot(page: Page) {
   return page.evaluate(async () => {
     const databases = await indexedDB.databases()
@@ -41,7 +52,7 @@ async function addText(
 ) {
   await page.goto('#add')
   if (category) {
-    const tree = page.getByRole('region', { name: '选择所属知识节点' })
+    const tree = page.getByRole('region', { name: '选择卡片分类' })
     const segments = category.split('/')
     for (let i = 0; i < segments.length; i++) {
       const existing = tree.locator('.tree-name').filter({ hasText: segments[i] }).first()
@@ -57,7 +68,7 @@ async function addText(
   await page.getByLabel('问题', { exact: true }).fill(question)
   if (answer) await page.getByLabel('答案与解析', { exact: true }).fill(answer)
   await page.getByRole('button', { name: draft ? '暂存为待整理' : '保存并加入新学', exact: true }).click()
-  await expect(page.getByRole('heading', { name: '我的内容', exact: true })).toBeVisible()
+  await expect(page.getByRole('heading', { name: '记忆卡片', exact: true })).toBeVisible()
 }
 async function noOverflow(page: Page) {
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true)
@@ -91,7 +102,7 @@ test('完整流程：文字图片、刷新、复习、撤销、导出与覆盖�
     if (/^https?:/.test(request.url()) && new URL(request.url()).origin !== origin)
       externalRequests.push(request.url())
   })
-  await page.goto('')
+  await page.goto('#today')
   await expect(page.getByRole('heading', { name: '今天复习', exact: true })).toBeVisible()
   await expect(page.getByRole('link', { name: '添加第一条' })).toBeVisible()
   await noOverflow(page)
@@ -117,7 +128,7 @@ test('完整流程：文字图片、刷新、复习、撤销、导出与覆盖�
   await noOverflow(page)
   await page.screenshot({ path: testInfo.outputPath('02-editor.png'), fullPage: true })
   await page.getByRole('button', { name: '保存并加入新学', exact: true }).click()
-  await expect(page.getByRole('heading', { name: '我的内容', exact: true })).toBeVisible()
+  await expect(page.getByRole('heading', { name: '记忆卡片', exact: true })).toBeVisible()
   await page.reload()
   await expect(page.getByRole('heading', { name: /测试题/ })).toBeVisible()
   const before = await snapshot(page)
@@ -181,7 +192,7 @@ test('完整流程：文字图片、刷新、复习、撤销、导出与覆盖�
   expect(restored.reviews).toEqual(rated.reviews)
   expect(restored.images).toEqual(rated.images)
   await page.reload()
-  await page.getByRole('link', { name: '我的内容', exact: true }).click()
+  await page.getByRole('link', { name: '记忆卡片', exact: true }).click()
   await page.getByRole('button', { name: /测试题/ }).click()
   await expect(page.getByText('测试解析：极限等于 1。', { exact: false })).toHaveCount(0)
   await page.getByRole('link', { name: '编辑内容', exact: true }).click()
@@ -195,6 +206,7 @@ test('完整流程：文字图片、刷新、复习、撤销、导出与覆盖�
 
 test('粘贴、拖放、待整理排除、沿用科目与非法备份', async ({ page }) => {
   await page.goto('#add/英语')
+  await page.getByLabel('单词', { exact: true }).check()
   const file = await fixtureImage(page)
   const base64 = file.buffer.toString('base64')
   await page.getByLabel('单词或短语', { exact: true }).evaluate((element, b64) => {
@@ -219,7 +231,7 @@ test('粘贴、拖放、待整理排除、沿用科目与非法备份', async ({
     }, base64)
   await expect(page.getByRole('button', { name: '放大释义与用法图片 1' })).toBeVisible()
   await page.getByRole('button', { name: '暂存为待整理' }).click()
-  await expect(page.getByRole('heading', { name: '我的内容' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: '记忆卡片' })).toBeVisible()
   await page.goto('#today')
   await expect(page.getByRole('link', { name: '开始全部复习' })).toHaveCount(0)
   await expect(page.getByRole('link', { name: '整理 1 条暂存内容' })).toBeVisible()
@@ -261,8 +273,9 @@ test('保存失败保留表单并清楚报错，键盘可完成复习', async ({
   expect((await snapshot(page)).cards).toHaveLength(0)
   await page.evaluate(() => (window as any).__restorePut())
   await page.getByRole('button', { name: '保存并加入新学' }).click()
-  await expect(page.getByRole('heading', { name: '我的内容' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: '记忆卡片' })).toBeVisible()
   await page.goto('#review/all')
+  await expect(page.getByRole('button', { name: '显示答案', exact: true })).toBeVisible()
   await page.keyboard.press('Space')
   await expect(page.getByRole('heading', { name: '答案与解析' })).toBeFocused()
   await page.keyboard.press('3')
@@ -335,7 +348,7 @@ test('批量录入：继续下一条沿用来源、图片复用、重复提醒�
   await page.getByLabel('问题', { exact: true }).fill('第二题：栈的典型应用？')
   await page.getByLabel('答案与解析', { exact: true }).fill('括号匹配、表达式求值')
   await page.keyboard.press('Control+Enter')
-  await expect(page.getByRole('heading', { name: '我的内容', exact: true })).toBeVisible()
+  await expect(page.getByRole('heading', { name: '记忆卡片', exact: true })).toBeVisible()
   expect((await snapshot(page)).cards).toHaveLength(2)
   await page.goto('#add')
   await page.getByLabel('问题', { exact: true }).fill('第二题：栈的典型应用？')
@@ -360,9 +373,10 @@ test('批量录入：继续下一条沿用来源、图片复用、重复提醒�
 
 test('英语科目：单词速录回车连录，录入框随类型变化', async ({ page }) => {
   await page.goto('#add/英语')
+  await page.getByLabel('单词', { exact: true }).check()
   await expect(page.getByLabel('单词', { exact: true })).toBeChecked()
   await expect(page.getByLabel('句子', { exact: true })).toBeVisible()
-  await expect(page.getByLabel('知识点', { exact: true })).toHaveCount(0)
+  await expect(page.getByLabel('知识点', { exact: true })).toBeVisible()
   await expect(page.locator('.editor-hint')).toContainText('一词一卡')
   await expect(page.getByLabel('单词或短语', { exact: true })).toBeVisible()
   await expect(page.getByLabel('释义与用法', { exact: true })).toBeVisible()
@@ -382,7 +396,7 @@ test('英语科目：单词速录回车连录，录入框随类型变化', async
   await page.getByLabel('英文句子', { exact: true }).fill('The show must go on.')
   await page.getByLabel('翻译与解析', { exact: true }).fill('演出必须继续。go on 表示继续。')
   await page.getByRole('button', { name: '保存并加入新学', exact: true }).click()
-  await expect(page.getByRole('heading', { name: '我的内容', exact: true })).toBeVisible()
+  await expect(page.getByRole('heading', { name: '记忆卡片', exact: true })).toBeVisible()
   await page.goto('#review/all')
   await expect(page.locator('.review-meta')).toContainText('单词')
   await page.getByRole('button', { name: '显示释义' }).click()
@@ -399,6 +413,7 @@ test('英语科目：单词速录回车连录，录入框随类型变化', async
   await expect(page.getByLabel('知识点', { exact: true })).toBeChecked()
   await expect(page.getByLabel('问题', { exact: true })).toBeVisible()
   await page.getByLabel('科目', { exact: true }).selectOption('英语')
+  await page.getByLabel('单词', { exact: true }).check()
   await expect(page.getByLabel('单词', { exact: true })).toBeChecked()
   await expect(page.getByLabel('单词或短语', { exact: true })).toBeVisible()
   await expect(page.locator('.editor-hint')).toContainText('一词一卡')
@@ -450,14 +465,14 @@ test('知识族谱点选录入、跨分支关联、移动节点与英语简化',
   await page.getByLabel('搜索可关联的知识').fill('几何意义')
   await page.locator('.relation-results').getByRole('button').click()
   await page.getByRole('button', { name: '保存并加入新学', exact: true }).click()
-  await expect(page.getByRole('heading', { name: '我的内容', exact: true })).toBeVisible()
+  await expect(page.getByRole('heading', { name: '记忆卡片', exact: true })).toBeVisible()
   const data = await snapshot(page)
   expect(data.cards.find((c: any) => c.question.text.startsWith('函数在')).relatedIds).toHaveLength(2)
   expect(data.cards.find((c: any) => c.question.text.startsWith('连续')).relatedIds).toHaveLength(1)
   await noOverflow(page)
   await page.screenshot({ path: `test-results/visual/cards-${testInfo.project.name}.png`, fullPage: false })
-  await page.getByRole('button', { name: '数学知识图谱', exact: true }).click()
-  await expect(page.getByRole('region', { name: '知识族谱树' })).toBeVisible()
+  await page.getByRole('button', { name: '卡片关联图', exact: true }).click()
+  await expect(page.getByRole('region', { name: '卡片分类树' })).toBeVisible()
   await expect(page.locator('.graph-relation')).toHaveCount(2)
   await page.locator('.graph-card').filter({ hasText: '函数在一点' }).click()
   await expect(page.locator('.graph-inspector')).toContainText('函数在一点可导')
@@ -471,7 +486,7 @@ test('知识族谱点选录入、跨分支关联、移动节点与英语简化',
   await page.getByRole('button', { name: '总览', exact: true }).click()
   await noOverflow(page)
   await page.screenshot({ path: `test-results/visual/graph-${testInfo.project.name}.png`, fullPage: false })
-  const tree = page.getByRole('region', { name: '知识族谱树' })
+  const tree = page.getByRole('region', { name: '卡片分类树' })
   await tree.locator('.tree-name').filter({ hasText: '导数与微分' }).click()
   await tree.getByRole('button', { name: '重命名', exact: true }).click()
   await tree.getByLabel('节点名称').fill('导数 & 微分')
@@ -488,14 +503,15 @@ test('知识族谱点选录入、跨分支关联、移动节点与英语简化',
   await expect(page.locator('.tree-name.selected')).toContainText('导数 & 微分')
   await page.screenshot({ path: `test-results/visual/editor-${testInfo.project.name}.png`, fullPage: false })
   await page.goto('#add/英语')
-  await expect(page.getByRole('region', { name: '选择所属知识节点' })).toHaveCount(0)
-  await expect(page.getByLabel('知识点', { exact: true })).toHaveCount(0)
+  await page.getByLabel('单词', { exact: true }).check()
+  await expect(page.getByRole('region', { name: '选择卡片分类' })).toBeVisible()
+  await expect(page.getByLabel('知识点', { exact: true })).toBeVisible()
   await page.getByLabel('单词或短语', { exact: true }).fill('derive')
   await page.getByLabel('释义与用法', { exact: true }).fill('v. 获得；推导')
   await page.getByRole('button', { name: '保存并加入新学', exact: true }).click()
-  await expect(page.getByRole('heading', { name: '我的内容', exact: true })).toBeVisible()
+  await expect(page.getByRole('heading', { name: '记忆卡片', exact: true })).toBeVisible()
   await page.getByLabel('筛选科目').selectOption('英语')
-  await expect(page.getByRole('region', { name: '知识族谱树' })).toHaveCount(0)
+  await expect(page.getByRole('region', { name: '卡片分类树' })).toBeVisible()
   await page.getByRole('button', { name: '单词', exact: true }).click()
   await expect(page.getByText('1 条结果', { exact: false })).toBeVisible()
   await page.getByRole('button', { name: '句子', exact: true }).click()

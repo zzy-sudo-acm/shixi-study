@@ -12,5 +12,7 @@ backups/
 uploads/
 private/
 shixi-backup-*.json
+shixi-recovery-*.json
+.impeccable/review/
 *.backup.json
 *.log

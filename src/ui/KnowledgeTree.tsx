@@ -1,299 +1,119 @@
 import { useMemo, useState } from 'react'
-import { addCategory, deleteCategory, renameCategory } from '../core/db'
-import { allCategoryPaths, buildCategoryTree, type CategoryNode } from '../core/graph'
-import {
-  CATEGORY_MAX_DEPTH,
-  categoryParent,
-  categoryUnder,
-  friendlyError,
-  type Snapshot,
-  type Subject,
-} from '../core/model'
-import { Icon, Notice } from './shared'
+import type { Snapshot } from '../core/model'
+import { buildKnowledgeTree, flattenKnowledgeTree } from '../core/graph'
+import { Icon } from './shared'
 
 export function KnowledgeTree({
   data,
-  subject,
-  value,
+  spaceId,
+  selected,
   onSelect,
-  onChanged,
-  picker = false,
-  onBusy,
+  onAdd,
 }: {
   data: Snapshot
-  subject: Subject
-  value: string
-  onSelect: (path: string) => void
-  onChanged: () => Promise<void>
-  picker?: boolean
-  onBusy?: (busy: boolean) => void
+  spaceId: string
+  selected: string
+  onSelect: (id: string) => void
+  onAdd: () => void
 }) {
-  const paths = useMemo(() => allCategoryPaths(data, subject), [data.cards, data.categories, subject])
-  const roots = useMemo(() => buildCategoryTree(paths), [paths])
+  const [collapsed, setCollapsed] = useState(new Set<string>()),
+    [limit, setLimit] = useState(100),
+    [search, setSearch] = useState('')
+  const nodes = useMemo(
+    () => data.knowledgeNodes.filter((n) => n.spaceId === spaceId),
+    [data.knowledgeNodes, spaceId],
+  )
+  const roots = useMemo(() => buildKnowledgeTree(nodes), [nodes])
+  const rows = useMemo(
+    () => flattenKnowledgeTree(roots, search ? new Set() : collapsed),
+    [roots, collapsed, search],
+  )
+  const filtered = rows.filter(
+    (row) => !search || row.node.title.toLocaleLowerCase().includes(search.toLocaleLowerCase().trim()),
+  )
   const counts = useMemo(() => {
-    const counts = new Map<string, number>()
-    for (const card of data.cards)
-      if (card.subject === subject)
-        for (let path = card.category; path; path = categoryParent(path))
-          counts.set(path, (counts.get(path) ?? 0) + 1)
-    return counts
-  }, [data.cards, subject])
-  const [collapsed, setCollapsed] = useState(new Set<string>())
-  const [edit, setEdit] = useState<'root' | 'child' | 'rename' | 'move' | null>(null)
-  const [name, setName] = useState(''),
-    [parent, setParent] = useState('')
-  const [busy, setBusy] = useState(false),
-    [error, setError] = useState('')
-  const [visible, setVisible] = useState(!picker || !value)
-  const selected = paths.includes(value) ? value : ''
-  function start(mode: NonNullable<typeof edit>) {
-    setEdit(mode)
-    setError('')
-    setName(mode === 'rename' ? selected.split('/').at(-1)! : '')
-    setParent(
-      mode === 'child' ? selected : mode === 'move' || mode === 'rename' ? categoryParent(selected) : '',
-    )
-  }
-  async function submit() {
-    if (busy || !edit) return
-    if (edit !== 'move' && (!name.trim() || /[/\\／]/.test(name))) {
-      setError('请填写一个节点名称；层级通过选择父节点来设置。')
-      return
+    const result = new Map<string, number>()
+    const byId = new Map(nodes.map((n) => [n.id, n]))
+    for (const node of nodes) {
+      let parent = node.parentId
+      while (parent) {
+        result.set(parent, (result.get(parent) ?? 0) + 1)
+        parent = byId.get(parent)?.parentId ?? null
+      }
     }
-    const segment = edit === 'move' ? selected.split('/').at(-1)! : name.trim()
-    const next = parent ? `${parent}/${segment}` : segment
-    if (paths.includes(next) && next !== selected) {
-      setError('这个位置已有同名节点，请换一个名称。')
-      return
-    }
-    setBusy(true)
-    onBusy?.(true)
-    setError('')
-    try {
-      if (edit === 'rename' || edit === 'move') await renameCategory(subject, selected, next, data.revision)
-      else await addCategory(subject, next, data.revision)
-      await onChanged()
-      setCollapsed((previous) => {
-        const nextSet = new Set(previous)
-        nextSet.delete(parent)
-        return nextSet
-      })
-      onSelect(next)
-      setEdit(null)
-    } catch (error) {
-      setError(friendlyError(error))
-    } finally {
-      setBusy(false)
-      onBusy?.(false)
-    }
-  }
-  async function remove() {
-    if (!selected || busy || !window.confirm('删除此节点及子节点？其中的卡片会保留，并变为未分类。')) return
-    setBusy(true)
-    onBusy?.(true)
-    setError('')
-    try {
-      await deleteCategory(subject, selected, data.revision)
-      await onChanged()
-      onSelect(picker ? '' : 'all')
-      setEdit(null)
-    } catch (error) {
-      setError(friendlyError(error))
-    } finally {
-      setBusy(false)
-      onBusy?.(false)
-    }
-  }
-  function node(item: CategoryNode) {
-    const open = !collapsed.has(item.path)
-    return (
-      <li key={item.path}>
-        <div className="tree-row">
-          {item.children.length > 0 ? (
-            <button
-              type="button"
-              className="tree-toggle"
-              aria-label={`${open ? '收起' : '展开'} ${item.path}`}
-              aria-expanded={open}
-              onClick={() =>
-                setCollapsed((previous) => {
-                  const next = new Set(previous)
-                  if (open) next.add(item.path)
-                  else next.delete(item.path)
-                  return next
-                })
-              }
-            >
-              <Icon name="chevron" size={16} />
-            </button>
-          ) : (
-            <span className="tree-leaf" aria-hidden="true" />
-          )}
-          <button
-            type="button"
-            className={`tree-name ${value === item.path ? 'selected' : ''}`}
-            aria-pressed={value === item.path}
-            onClick={() => {
-              onSelect(item.path)
-              setEdit(null)
-              setError('')
-            }}
-          >
-            <span>{item.name}</span>
-            <small>{counts.get(item.path) ?? 0}</small>
-          </button>
-        </div>
-        {open && item.children.length > 0 && <ul>{item.children.map(node)}</ul>}
-      </li>
-    )
-  }
+    return result
+  }, [nodes])
   return (
-    <section
-      className={`knowledge-tree ${picker ? 'tree-picker' : ''}`}
-      aria-label={picker ? '选择所属知识节点' : '知识族谱树'}
-    >
+    <section className="knowledge-tree stable-tree" aria-label="知识树节点">
       <div className="tree-heading">
         <Icon name="tree" />
-        <h2>{picker ? '放进知识树' : '知识族谱'}</h2>
-        {picker && (
-          <button
-            type="button"
-            className="text-button"
-            aria-expanded={visible}
-            onClick={() => setVisible((v) => !v)}
-          >
-            {visible ? '收起' : '选择节点'}
-          </button>
-        )}
+        <h2>知识树</h2>
+        <span className="muted">{nodes.length} 个节点</span>
       </div>
-      <p className="tree-description">
-        {picker
-          ? selected
-            ? `所属：${selected.split('/').join(' › ')}`
-            : '点选一个节点，让这张卡片找到自己的位置。'
-          : '从概念到方法，搭建自己的知识脉络。'}
-      </p>
-      <div hidden={!visible}>
-        <fieldset disabled={busy}>
-          <div className="tree-scope">
-            {!picker && (
-              <button
-                type="button"
-                aria-pressed={value === 'all'}
-                onClick={() => {
-                  onSelect('all')
-                  setEdit(null)
-                }}
-              >
-                全部
-              </button>
-            )}
-            <button
-              type="button"
-              aria-pressed={value === '' || value === '__none__'}
-              onClick={() => {
-                onSelect(picker ? '' : '__none__')
-                setEdit(null)
-              }}
-            >
-              未分类
+      <p className="tree-description">从一个概念开始，慢慢长出自己的结构。</p>
+      {nodes.length ? (
+        <>
+          <input
+            type="search"
+            aria-label="搜索知识树"
+            placeholder="查找节点"
+            value={search}
+            onChange={(e) => {
+              setSearch(e.target.value)
+              setLimit(100)
+            }}
+          />
+          <ul className="stable-tree-list">
+            {filtered.slice(0, limit).map((row) => (
+              <li key={row.node.id} style={{ paddingLeft: (row.depth - 1) * 16 }}>
+                <div className="tree-row">
+                  {row.children ? (
+                    <button
+                      className="tree-toggle"
+                      aria-expanded={!collapsed.has(row.node.id)}
+                      aria-label={`${collapsed.has(row.node.id) ? '展开' : '收起'} ${row.node.title}`}
+                      onClick={() =>
+                        setCollapsed((prev) => {
+                          const next = new Set(prev)
+                          if (next.has(row.node.id)) next.delete(row.node.id)
+                          else next.add(row.node.id)
+                          return next
+                        })
+                      }
+                    >
+                      <Icon name="chevron" size={16} />
+                    </button>
+                  ) : (
+                    <span className="tree-leaf" aria-hidden="true" />
+                  )}
+                  <button
+                    className={`tree-name ${selected === row.node.id ? 'selected' : ''}`}
+                    aria-pressed={selected === row.node.id}
+                    onClick={() => onSelect(row.node.id)}
+                  >
+                    <span>{row.node.title}</span>
+                    <small aria-label={`${counts.get(row.node.id) ?? 0} 个后代节点`}>
+                      {counts.get(row.node.id) ?? 0}
+                    </small>
+                  </button>
+                </div>
+              </li>
+            ))}
+          </ul>
+          {!filtered.length ? <p className="muted">没有找到节点，试试其他名称。</p> : null}
+          {filtered.length > limit ? (
+            <button className="text-button" onClick={() => setLimit((n) => n + 100)}>
+              再显示 100 个节点
             </button>
-          </div>
-          {roots.length ? (
-            <ul className="tree-branches">{roots.map(node)}</ul>
-          ) : (
-            <p className="tree-empty">还没有节点，从一个章节或概念开始。</p>
-          )}
-          <div className="tree-tools">
-            <button type="button" className="text-button" onClick={() => start('root')}>
-              <Icon name="add" size={16} />
-              新建根节点
-            </button>
-            {selected && (
-              <button
-                type="button"
-                className="text-button"
-                disabled={selected.split('/').length >= CATEGORY_MAX_DEPTH}
-                onClick={() => start('child')}
-              >
-                <Icon name="branch" size={16} />
-                添加子节点
-              </button>
-            )}
-          </div>
-          {selected && (
-            <div className="tree-selection">
-              <span title={selected}>{selected.split('/').join(' › ')}</span>
-              <div className="tree-tools">
-                <button type="button" className="text-button" onClick={() => start('rename')}>
-                  重命名
-                </button>
-                <button type="button" className="text-button" onClick={() => start('move')}>
-                  移动节点
-                </button>
-                <button type="button" className="text-button" onClick={() => void remove()}>
-                  删除节点
-                </button>
-              </div>
-            </div>
-          )}
-          {edit && (
-            <div
-              className="tree-edit"
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && !e.nativeEvent.isComposing) {
-                  e.preventDefault()
-                  e.stopPropagation()
-                  void submit()
-                }
-                if (e.key === 'Escape') setEdit(null)
-              }}
-            >
-              {edit !== 'move' && (
-                <label>
-                  节点名称
-                  <input
-                    autoFocus
-                    value={name}
-                    maxLength={100}
-                    placeholder="例如：极限与连续"
-                    onChange={(e) => setName(e.target.value)}
-                  />
-                </label>
-              )}
-              {edit === 'move' && (
-                <label>
-                  移动到
-                  <select value={parent} onChange={(e) => setParent(e.target.value)}>
-                    <option value="">根层级</option>
-                    {paths
-                      .filter((p) => !categoryUnder(p, selected))
-                      .map((p) => (
-                        <option key={p} value={p}>
-                          {p.split('/').join(' › ')}
-                        </option>
-                      ))}
-                  </select>
-                </label>
-              )}
-              <div className="actions">
-                <button type="button" className="primary small" onClick={() => void submit()}>
-                  确认{edit === 'move' ? '移动' : '保存'}
-                </button>
-                <button type="button" className="subtle small" onClick={() => setEdit(null)}>
-                  取消
-                </button>
-              </div>
-            </div>
-          )}
-        </fieldset>
-        {busy && (
-          <p role="status" className="muted">
-            正在保存节点…
-          </p>
-        )}
-        {error && <Notice error>{error}</Notice>}
-      </div>
+          ) : null}
+        </>
+      ) : (
+        <p className="tree-empty">还没有知识节点。建立一个你想整理的概念。</p>
+      )}
+      <button className="text-button" onClick={onAdd}>
+        <Icon name="add" size={16} />
+        新建根节点
+      </button>
     </section>
   )
 }

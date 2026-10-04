@@ -6,15 +6,16 @@ import {
   FAMILIARITY_NAMES,
   friendlyError,
   KIND_NAMES,
-  SUBJECTS,
+  KINDS,
+  subjectsFor,
   type Snapshot,
   type StudyCard,
   type Subject,
 } from '../core/model'
 import { formatTime } from '../core/scheduler'
 import { ContentView, Empty, Icon, Notice, PageHead } from './shared'
-import { KnowledgeTree } from './KnowledgeTree'
-import { KnowledgeGraph } from './KnowledgeGraph'
+import { LegacyCategoryTree } from './LegacyCategoryTree'
+import { LegacyCardGraph } from './LegacyCardGraph'
 
 const stateNames = ['未开始', '学习中', '复习中', '重新学习']
 function Item({
@@ -71,7 +72,7 @@ function Item({
         <div className="item-meta">
           <span>{card.subject}</span>
           <span>{KIND_NAMES[card.kind]}</span>
-          {card.subject !== '英语' && !!card.category && <span>{card.category}</span>}
+          {!!card.category && <span>{card.category}</span>}
           <span className={card.status === 'draft' ? 'draft-label' : ''}>{status}</span>
           {familiarity > 0 && (
             <span className={`fam-badge fam-${familiarity}`}>{FAMILIARITY_NAMES[familiarity]}</span>
@@ -214,7 +215,7 @@ export function Library({
         .filter(
           (c) =>
             (subject === '全部' || c.subject === subject) &&
-            (subject !== '英语' || kind === 'all' || c.kind === kind) &&
+            (kind === 'all' || c.kind === kind) &&
             (category === 'all' ||
               (category === '__none__' ? !(c.category ?? '') : categoryUnder(c.category ?? '', category))) &&
             (status === 'all' ||
@@ -236,7 +237,7 @@ export function Library({
   return (
     <>
       <PageHead
-        title="我的内容"
+        title="记忆卡片"
         description={`${data.cards.length} 条内容，慢慢积累，只留下对你有用的。`}
         action={
           <a className="button primary" href="#add">
@@ -245,6 +246,14 @@ export function Library({
           </a>
         }
       />
+      <div className="memory-navigation">
+        <a className="button secondary" href="#today">
+          今天复习
+        </a>
+        <a className="button subtle" href="#home">
+          返回学习空间
+        </a>
+      </div>
       <div className="library-filters">
         <label className="search-field">
           <span className="sr-only">搜索内容</span>
@@ -270,7 +279,7 @@ export function Library({
             }}
           >
             <option>全部</option>
-            {SUBJECTS.map((s) => (
+            {subjectsFor(data).map((s) => (
               <option key={s}>{s}</option>
             ))}
           </select>
@@ -292,63 +301,55 @@ export function Library({
         </label>
       </div>
       <div className="library-view-tools">
-        {subject === '英语' ? (
-          <div className="segmented" aria-label="英语内容类型">
-            {[
-              ['all', '全部'],
-              ['word', '单词'],
-              ['sentence', '句子'],
-            ].map(([value, label]) => (
-              <button
-                type="button"
-                key={value}
-                aria-pressed={kind === value}
-                onClick={() => {
-                  setKind(value)
-                  setLimit(30)
-                }}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
-        ) : (
-          <div className="segmented" aria-label="内容视图">
+        <div className="segmented" aria-label="卡片内容类型">
+          {[['all', '全部'], ...KINDS.map((kind) => [kind, KIND_NAMES[kind]])].map(([value, label]) => (
             <button
               type="button"
-              aria-pressed={view === 'cards' || subject !== '高数'}
-              onClick={() => setView('cards')}
-            >
-              <Icon name="cards" size={17} />
-              卡片
-            </button>
-            <button
-              type="button"
-              aria-pressed={view === 'graph' && subject === '高数'}
+              key={value}
+              aria-pressed={kind === value}
               onClick={() => {
-                if (subject !== '高数') {
-                  setSubject('高数')
-                  setCategory('all')
-                  setKind('all')
-                }
-                setView('graph')
+                setKind(value)
+                setLimit(30)
               }}
             >
-              <Icon name="tree" size={17} />
-              数学知识图谱
+              {label}
             </button>
-          </div>
-        )}
-        {subject === '高数' && category !== 'all' && category !== '__none__' && (
-          <a className="button small subtle" href={`#add/高数?category=${encodeURIComponent(category)}`}>
+          ))}
+        </div>
+        <div className="segmented" aria-label="内容视图">
+          <button type="button" aria-pressed={view === 'cards'} onClick={() => setView('cards')}>
+            <Icon name="cards" size={17} />
+            卡片
+          </button>
+          <button
+            type="button"
+            aria-pressed={view === 'graph'}
+            onClick={() => {
+              if (subject === '全部' && subjectsFor(data).length) {
+                setSubject(subjectsFor(data)[0])
+                setCategory('all')
+                setKind('all')
+              }
+              setView('graph')
+            }}
+          >
+            <Icon name="tree" size={17} />
+            卡片关联图
+          </button>
+        </div>
+        {subject !== '全部' && category !== 'all' && category !== '__none__' && (
+          <a
+            className="button small subtle"
+            href={`#add?subject=${encodeURIComponent(subject)}&category=${encodeURIComponent(category)}`}
+          >
             <Icon name="add" size={16} />
             在此节点添加
           </a>
         )}
       </div>
-      <div className={subject !== '全部' && subject !== '英语' ? 'library-workspace' : undefined}>
-        {subject !== '全部' && subject !== '英语' && (
-          <KnowledgeTree
+      <div className={subject !== '全部' ? 'library-workspace' : undefined}>
+        {subject !== '全部' && (
+          <LegacyCategoryTree
             key={subject}
             data={data}
             subject={subject as Subject}
@@ -361,8 +362,14 @@ export function Library({
           />
         )}
         <div className="library-results">
-          {subject === '高数' && view === 'graph' ? (
-            <KnowledgeGraph data={data} cards={cards} category={category} onCategory={setCategory} />
+          {subject !== '全部' && view === 'graph' ? (
+            <LegacyCardGraph
+              data={data}
+              cards={cards}
+              category={category}
+              onCategory={setCategory}
+              subject={subject}
+            />
           ) : (
             <>
               <p className="result-count">

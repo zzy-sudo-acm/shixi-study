@@ -7,7 +7,7 @@
   line-height: 1.65;
   font-size: 15px;
   --ink: #263e58;
-  --muted: #5e7184;
+  --muted: #596d80;
   --line: #dde4ec;
   --accent: #365d86;
   --paper: #fff;
@@ -440,7 +440,7 @@ dialog::backdrop {
 }
 .page-footer {
   font-size: 11px;
-  color: #6e7f8d;
+  color: var(--muted);
   text-align: center;
   margin-top: 64px;
   padding-top: 22px;

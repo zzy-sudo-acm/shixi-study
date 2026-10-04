@@ -15,26 +15,39 @@ import {
   type Snapshot,
   type Subject,
   DEFAULT_SETTINGS,
+  DATA_VERSION,
+  type Workspace,
 } from './model'
 import { z } from 'zod'
 import { DEFAULT_ALGORITHM, nextReview, queueFor } from './scheduler'
 import type { Grade } from 'ts-fsrs'
+import { applyCommand, workspaceSchema, workspaceStores, type WorkspaceCommand } from './workspace'
+import { migrateLegacy } from './migration'
 
 interface StudyDB extends DBSchema {
+  spaces: { key: string; value: Workspace['spaces'][number] }
+  goals: { key: string; value: Workspace['goals'][number] }
+  steps: { key: string; value: Workspace['steps'][number] }
+  knowledgeNodes: { key: string; value: Workspace['knowledgeNodes'][number] }
+  knowledgeRelations: { key: string; value: Workspace['knowledgeRelations'][number] }
+  stepKnowledgeLinks: { key: string; value: Workspace['stepKnowledgeLinks'][number] }
   cards: { key: string; value: StudyCard }
   images: { key: string; value: StoredImage }
   reviews: { key: string; value: Review; indexes: { 'by-card': string } }
   meta: { key: string; value: unknown }
 }
-const stores = ['cards', 'images', 'reviews', 'meta'] as const
+const stores = ['cards', 'images', 'reviews', 'meta', ...workspaceStores] as const
 type WriteTx = IDBPTransaction<StudyDB, typeof stores, 'readwrite'>
 // A path-specific database avoids mixing different projects on the same Pages origin.
 export const DB_NAME = `shixi:${typeof location === 'undefined' ? 'test' : location.pathname.replace(/\/[^/]*\.html$/, '/').replace(/\/$/, '') || '/'}`
 let connection: Promise<IDBPDatabase<StudyDB>> | undefined
 export function database() {
+  let migrationFailure: unknown
   if (!connection)
-    connection = openDB<StudyDB>(DB_NAME, 2, {
+    connection = openDB<StudyDB>(DB_NAME, DATA_VERSION, {
       upgrade(db, oldVersion, _newVersion, tx) {
+        // idb also rejects tx.done on upgrade abort; the openDB promise reports it.
+        void tx.done.catch(() => undefined)
         if (oldVersion < 1) {
           db.createObjectStore('cards', { keyPath: 'id' })
           db.createObjectStore('images', { keyPath: 'id' })
@@ -51,7 +64,27 @@ export function database() {
                 .objectStore('meta')
                 .put({ ...DEFAULT_SETTINGS, ...((value as Partial<Settings>) ?? {}) }, 'settings'),
             )
-            .catch(() => undefined)
+            .catch((error) => {
+              migrationFailure = error
+              tx.abort()
+            })
+        }
+        if (oldVersion < 3) {
+          for (const name of workspaceStores) db.createObjectStore(name, { keyPath: 'id' })
+          // All reads and writes are in the versionchange transaction. Failure aborts the
+          // upgrade, preserving the old stores and database version for recovery.
+          void Promise.all([tx.objectStore('cards').getAll(), tx.objectStore('meta').get('categories')])
+            .then(async ([cards, categories]) => {
+              const migrated = migrateLegacy(cards, categories)
+              for (const name of workspaceStores)
+                for (const entity of migrated[name]) await tx.objectStore(name).put(entity)
+              await tx.objectStore('meta').put(migrated.migrationWarnings, 'migrationWarnings')
+              await tx.objectStore('meta').put(DATA_VERSION, 'dataVersion')
+            })
+            .catch((error) => {
+              migrationFailure = error
+              tx.abort()
+            })
         }
       },
       blocked() {
@@ -66,6 +99,10 @@ export function database() {
       },
     }).catch((error) => {
       connection = undefined
+      if (migrationFailure)
+        throw new Error('旧数据未能安全升级，原数据库未修改。请导出原始数据副本后修复格式。', {
+          cause: migrationFailure,
+        })
       throw error
     })
   return connection
@@ -76,7 +113,8 @@ export async function closeDatabase() {
 }
 export async function readSnapshot(): Promise<Snapshot> {
   const db = await database()
-  const tx = db.transaction(['cards', 'reviews', 'meta'], 'readonly')
+  const tx = db.transaction(stores, 'readonly')
+  const workspace = await readWorkspace(tx)
   const [cards, reviews, settings, algorithm, revision, undoId, categories] = await Promise.all([
     tx.objectStore('cards').getAll(),
     tx.objectStore('reviews').getAll(),
@@ -86,8 +124,12 @@ export async function readSnapshot(): Promise<Snapshot> {
     tx.objectStore('meta').get('undoId'),
     tx.objectStore('meta').get('categories'),
   ])
+  const migrationWarnings = await tx.objectStore('meta').get('migrationWarnings')
   await tx.done
   return {
+    ...workspace,
+    version: DATA_VERSION,
+    migrationWarnings: z.array(z.string()).parse(migrationWarnings ?? []),
     cards,
     reviews,
     settings: settingsSchema.parse(settings ?? DEFAULT_SETTINGS),
@@ -99,8 +141,38 @@ export async function readSnapshot(): Promise<Snapshot> {
 }
 const categoryListSchema = z.array(categoryEntrySchema).max(2000)
 function parseCategories(value: unknown): CategoryEntry[] {
-  const result = categoryListSchema.safeParse(value ?? [])
-  return result.success ? result.data : []
+  return categoryListSchema.parse(value ?? [])
+}
+async function readWorkspace(
+  tx: IDBPTransaction<StudyDB, typeof stores, 'readonly' | 'readwrite'>,
+): Promise<Workspace> {
+  const entries = await Promise.all(
+    workspaceStores.map(
+      async (name) =>
+        [
+          name,
+          (await tx.objectStore(name).getAll()).sort(
+            (a, b) => a.createdAt - b.createdAt || a.id.localeCompare(b.id),
+          ),
+        ] as const,
+    ),
+  )
+  return workspaceSchema.parse(Object.fromEntries(entries))
+}
+export async function changeWorkspace(command: WorkspaceCommand, revision: number) {
+  return mutate(revision, async (tx) => {
+    const previous = await readWorkspace(tx),
+      next = applyCommand(previous, command)
+    for (const name of workspaceStores) {
+      if (next[name] === previous[name]) continue
+      const before = new Map(previous[name].map((e) => [e.id, e]))
+      for (const value of next[name]) {
+        if (before.get(value.id) !== value) await tx.objectStore(name).put(value)
+        before.delete(value.id)
+      }
+      for (const id of before.keys()) await tx.objectStore(name).delete(id)
+    }
+  })
 }
 async function guard(tx: WriteTx, revision: number) {
   const current = (await tx.objectStore('meta').get('revision')) ?? 0
@@ -139,11 +211,11 @@ export async function saveCard(card: StudyCard, images: StoredImage[], revision:
   if (valid.category) valid.category = validCategoryPath(valid.category)
   return mutate(revision, async (tx) => {
     const all = await tx.objectStore('cards').getAll()
-    const related = new Set(valid.subject === '高数' ? (valid.relatedIds ?? []) : [])
+    const related = new Set(valid.relatedIds ?? [])
     if (related.has(valid.id)) throw new Error('知识点不能与自己关联。')
     for (const id of related)
-      if (!all.some((c) => c.id === id && c.subject === '高数'))
-        throw new Error('关联的数学内容已不存在，请重新选择。')
+      if (!all.some((c) => c.id === id && c.subject === valid.subject))
+        throw new Error('关联的内容必须存在且属于同一领域，请重新选择。')
     // A relation is undirected. Update both ends atomically, also when changing subject.
     if (valid.relatedIds || related.size) valid.relatedIds = [...related]
     for (const other of all) {
@@ -319,6 +391,7 @@ export async function readImage(id: string) {
 export async function readAllData() {
   const db = await database()
   const tx = db.transaction(stores, 'readonly')
+  const workspace = await readWorkspace(tx)
   const [cards, images, reviews, settings, algorithm, undoId, categories] = await Promise.all([
     tx.objectStore('cards').getAll(),
     tx.objectStore('images').getAll(),
@@ -328,8 +401,11 @@ export async function readAllData() {
     tx.objectStore('meta').get('undoId'),
     tx.objectStore('meta').get('categories'),
   ])
+  const migrationWarnings = await tx.objectStore('meta').get('migrationWarnings')
   await tx.done
   return {
+    ...workspace,
+    migrationWarnings: z.array(z.string()).parse(migrationWarnings ?? []),
     cards,
     images,
     reviews,
@@ -340,14 +416,19 @@ export async function readAllData() {
   }
 }
 export async function replaceAll(data: Awaited<ReturnType<typeof readAllData>>, revision: number) {
+  workspaceSchema.parse(Object.fromEntries(workspaceStores.map((name) => [name, data[name]])))
   return mutate(revision, async (tx) => {
     for (const store of stores) await tx.objectStore(store).clear()
     for (const card of data.cards) await tx.objectStore('cards').put(card)
     for (const image of data.images) await tx.objectStore('images').put(image)
     for (const review of data.reviews) await tx.objectStore('reviews').put(review)
+    for (const name of workspaceStores)
+      for (const entity of data[name]) await tx.objectStore(name).put(entity)
     await tx.objectStore('meta').put(data.settings, 'settings')
     await tx.objectStore('meta').put(data.algorithm, 'algorithm')
     await tx.objectStore('meta').put(data.undoId, 'undoId')
     await tx.objectStore('meta').put(data.categories, 'categories')
+    await tx.objectStore('meta').put(data.migrationWarnings, 'migrationWarnings')
+    await tx.objectStore('meta').put(DATA_VERSION, 'dataVersion')
   })
 }

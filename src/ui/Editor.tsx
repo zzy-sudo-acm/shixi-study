@@ -7,7 +7,7 @@ import {
   KIND_NAMES,
   kindsForSubject,
   normalizeCategoryPath,
-  SUBJECTS,
+  subjectsFor,
   type Content,
   type Kind,
   type Snapshot,
@@ -20,8 +20,8 @@ import { saveCard } from '../core/db'
 import { clearDraft, loadDraft, saveDraft, type EditorDraft } from '../core/draft'
 import { prepareImage } from '../core/images'
 import { FormulaText, Icon, ImageView, Notice, PageHead } from './shared'
-import { KnowledgeTree } from './KnowledgeTree'
-import { RelationPicker } from './KnowledgeGraph'
+import { LegacyCategoryTree } from './LegacyCategoryTree'
+import { RelationPicker } from './LegacyCardGraph'
 
 function ContentEditor({
   label,
@@ -297,7 +297,7 @@ export function Editor({
     () =>
       existing ?? {
         id: crypto.randomUUID(),
-        subject: subject ?? data.settings.lastSubject,
+        subject: subject ?? (data.settings.lastSubject || subjectsFor(data)[0] || ''),
         kind: kindsForSubject(subject ?? data.settings.lastSubject)[0],
         status: 'ready',
         question: { text: '', images: [] },
@@ -400,7 +400,7 @@ export function Editor({
     try {
       const candidate = cardSchema.parse({
         ...card,
-        category: card.subject === '英语' ? '' : normalizeCategoryPath(card.category),
+        category: normalizeCategoryPath(card.category),
         tags: [...new Set(tagsText.split(/[,，\s]+/).filter(Boolean))],
         status,
         updatedAt: Date.now(),
@@ -505,7 +505,8 @@ export function Editor({
                   })
                 }}
               >
-                {SUBJECTS.map((s) => (
+                <option value="">选择领域</option>
+                {subjectsFor(data).map((s) => (
                   <option key={s}>{s}</option>
                 ))}
               </select>
@@ -530,8 +531,8 @@ export function Editor({
             </fieldset>
           </div>
           <p className="editor-hint">{EDITOR_KIND_HINTS[card.kind]}</p>
-          {card.subject !== '英语' && (
-            <KnowledgeTree
+          {card.subject && (
+            <LegacyCategoryTree
               key={card.subject}
               data={data}
               subject={card.subject}
@@ -590,7 +591,7 @@ export function Editor({
               reuseLabel="用到正面"
             />
           </div>
-          {card.subject === '高数' && (
+          {card.subject && (
             <RelationPicker data={data} card={card} onChange={(relatedIds) => change({ relatedIds })} />
           )}
           <div className="editor-options">

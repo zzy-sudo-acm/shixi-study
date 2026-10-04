@@ -93,7 +93,7 @@ function ReviewFace({
         <div className="review-meta">
           <span>{card.subject}</span>
           <span>{KIND_NAMES[card.kind]}</span>
-          {card.subject !== '英语' && !!card.category && <span>{card.category}</span>}
+          {!!card.category && <span>{card.category}</span>}
           <span>{card.schedule.state === 0 ? '新内容' : '到期复习'}</span>
         </div>
         <p className="review-instruction">{REVIEW_INSTRUCTIONS[card.kind]}</p>

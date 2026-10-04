@@ -1,7 +1,10 @@
 import { z } from 'zod'
 
-export const SUBJECTS = ['高数', '英语', '408', '政治'] as const
-export type Subject = (typeof SUBJECTS)[number]
+// Compatibility cards retain their old subject labels; the workspace has no fixed subjects.
+export type Subject = string
+export function subjectsFor(data: Pick<Snapshot, 'cards' | 'spaces'>): string[] {
+  return [...new Set([...data.spaces.map((s) => s.name), ...data.cards.map((c) => c.subject)])]
+}
 export const KINDS = ['knowledge', 'exercise', 'word', 'sentence'] as const
 export type Kind = (typeof KINDS)[number]
 export const KIND_NAMES: Record<Kind, string> = {
@@ -10,8 +13,8 @@ export const KIND_NAMES: Record<Kind, string> = {
   word: '单词',
   sentence: '句子',
 }
-export function kindsForSubject(subject: Subject): readonly Kind[] {
-  return subject === '英语' ? ['word', 'sentence'] : ['knowledge', 'exercise']
+export function kindsForSubject(_subject: Subject): readonly Kind[] {
+  return KINDS
 }
 export const FACE_NAMES: Record<Kind, { question: string; answer: string }> = {
   knowledge: { question: '问题', answer: '答案与解析' },
@@ -43,11 +46,11 @@ export function categoryPaths(data: Pick<Snapshot, 'cards' | 'categories'>, subj
   return [...paths].sort((a, b) => a.split('/').length - b.split('/').length || a.localeCompare(b, 'zh'))
 }
 export const categoryEntrySchema = z
-  .object({ subject: z.enum(SUBJECTS), path: z.string().min(1).max(100) })
+  .object({ subject: z.string().min(1).max(200), path: z.string().min(1).max(100) })
   .strict()
 export type CategoryEntry = z.infer<typeof categoryEntrySchema>
 export const FAMILIARITY_NAMES = ['未标记', '陌生', '眼熟', '熟练'] as const
-export const DATA_VERSION = 2
+export const DATA_VERSION = 3
 const time = z.number().finite().min(0).max(8640000000000000)
 const count = z.number().int().nonnegative().max(10000000)
 const text = z.string().max(100000)
@@ -77,7 +80,7 @@ export type Content = z.infer<typeof contentSchema>
 export const cardSchema = z
   .object({
     id,
-    subject: z.enum(SUBJECTS),
+    subject: z.string().min(1).max(200),
     kind: z.enum(KINDS),
     status: z.enum(['draft', 'ready']),
     question: contentSchema,
@@ -126,7 +129,7 @@ export type Algorithm = z.infer<typeof algorithmSchema>
 export const settingsSchema = z
   .object({
     dailyNewLimit: z.number().int().min(0).max(200),
-    lastSubject: z.enum(SUBJECTS),
+    lastSubject: z.string().max(200),
     reminderTime: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/),
     reminderEnabled: z.boolean(),
   })
@@ -134,7 +137,7 @@ export const settingsSchema = z
 export type Settings = z.infer<typeof settingsSchema>
 export const DEFAULT_SETTINGS: Settings = {
   dailyNewLimit: 20,
-  lastSubject: '高数',
+  lastSubject: '',
   reminderTime: '20:00',
   reminderEnabled: true,
 }
@@ -184,7 +187,96 @@ export interface StoredImage {
   height: number
   name: string
 }
-export interface Snapshot {
+const title = z.string().trim().min(1).max(200)
+export const spaceSchema = z
+  .object({
+    id,
+    name: title,
+    icon: z.string().max(16).optional(),
+    color: z
+      .string()
+      .regex(/^#[0-9a-fA-F]{6}$/)
+      .optional(),
+    createdAt: time,
+    updatedAt: time,
+  })
+  .strict()
+export const goalSchema = z
+  .object({
+    id,
+    spaceId: id,
+    title,
+    parentGoalId: id.nullable(),
+    description: text.optional(),
+    createdAt: time,
+    updatedAt: time,
+  })
+  .strict()
+export const stepSchema = z
+  .object({
+    id,
+    goalId: id,
+    title,
+    completed: z.boolean(),
+    createdAt: time,
+    completedAt: time.optional(),
+    updatedAt: time,
+  })
+  .strict()
+  .refine((s) => s.completed === (s.completedAt !== undefined), '步骤完成状态与完成时间不一致')
+export const knowledgeNodeSchema = z
+  .object({
+    id,
+    spaceId: id,
+    title,
+    parentId: id.nullable(),
+    note: text.optional(),
+    createdAt: time,
+    updatedAt: time,
+  })
+  .strict()
+export const knowledgeRelationSchema = z
+  .object({
+    id,
+    spaceId: id,
+    sourceNodeId: id,
+    targetNodeId: id,
+    createdAt: time,
+  })
+  .strict()
+export const stepKnowledgeLinkSchema = z
+  .object({
+    id,
+    stepId: id,
+    knowledgeNodeId: id,
+    createdAt: time,
+  })
+  .strict()
+export type Space = z.infer<typeof spaceSchema>
+export type Goal = z.infer<typeof goalSchema>
+export type Step = z.infer<typeof stepSchema>
+export type KnowledgeNode = z.infer<typeof knowledgeNodeSchema>
+export type KnowledgeRelation = z.infer<typeof knowledgeRelationSchema>
+export type StepKnowledgeLink = z.infer<typeof stepKnowledgeLinkSchema>
+export interface Workspace {
+  spaces: Space[]
+  goals: Goal[]
+  steps: Step[]
+  knowledgeNodes: KnowledgeNode[]
+  knowledgeRelations: KnowledgeRelation[]
+  stepKnowledgeLinks: StepKnowledgeLink[]
+}
+export const EMPTY_WORKSPACE: Workspace = {
+  spaces: [],
+  goals: [],
+  steps: [],
+  knowledgeNodes: [],
+  knowledgeRelations: [],
+  stepKnowledgeLinks: [],
+}
+export interface Snapshot extends Workspace {
+  version: typeof DATA_VERSION
+  migrationWarnings: string[]
   cards: StudyCard[]
   reviews: Review[]
   settings: Settings

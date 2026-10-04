@@ -10,6 +10,8 @@ import {
   type StoredImage,
 } from './model'
 import { readAllData, replaceAll } from './db'
+import { workspaceSchema, workspaceStores } from './workspace'
+import { migrateLegacy } from './migration'
 
 export const MAX_BACKUP_BYTES = 200 * 1024 * 1024
 const imageSchema = z
@@ -34,6 +36,8 @@ const payloadSchema = z
     algorithm: algorithmSchema,
     undoId: z.string().max(100).nullable(),
     categories: z.array(categoryEntrySchema).max(2000).default([]),
+    ...workspaceSchema.shape,
+    migrationWarnings: z.array(z.string().max(1000)).max(100000),
   })
   .strict()
 const envelopeSchema = z
@@ -82,6 +86,7 @@ function uniqueIds(items: { id: string }[], label: string) {
   return ids
 }
 function validateReferences(data: ValidBackup) {
+  workspaceSchema.parse(Object.fromEntries(workspaceStores.map((name) => [name, data[name]])))
   const cards = uniqueIds(data.cards, '内容')
   const images = uniqueIds(data.images, '图片')
   const reviews = uniqueIds(data.reviews, '复习记录')
@@ -92,8 +97,7 @@ function validateReferences(data: ValidBackup) {
     for (const id of related)
       if (
         id === card.id ||
-        card.subject !== '高数' ||
-        byId.get(id)?.subject !== '高数' ||
+        byId.get(id)?.subject !== card.subject ||
         !byId.get(id)?.relatedIds?.includes(card.id)
       )
         throw new Error('备份中的知识关联不完整，未导入。')
@@ -135,12 +139,18 @@ function validateReferences(data: ValidBackup) {
   }
 }
 export function migratePayload(version: number, payload: unknown): unknown {
-  if (version === 2) return payload
-  if (version === 1 && typeof payload === 'object' && payload !== null && 'settings' in payload) {
+  if (version === DATA_VERSION) return payload
+  if (
+    (version === 1 || version === 2) &&
+    typeof payload === 'object' &&
+    payload !== null &&
+    'settings' in payload
+  ) {
     const old = payload as Record<string, unknown>
     if (typeof old.settings !== 'object' || old.settings === null) throw new Error('旧版备份设置无效。')
     return {
       ...old,
+      ...migrateLegacy(old.cards, old.categories),
       settings: {
         reminderTime: DEFAULT_SETTINGS.reminderTime,
         reminderEnabled: DEFAULT_SETTINGS.reminderEnabled,

@@ -1,161 +1,286 @@
-import { SUBJECTS, type Snapshot } from '../core/model'
-import { formatTime, localDayBounds, newStudiedToday, queueFor } from '../core/scheduler'
+import { useState, type CSSProperties } from 'react'
+import type { Snapshot, Space } from '../core/model'
+import { spaceProgress } from '../core/workspace'
 import { Icon, PageHead } from './shared'
+import { FormActions, Modal, ProgressView, useWorkspaceActions, type Dirty } from './workspaceShared'
 
-const subjectDescriptions = [
-  '从一个容易忘记的条件、一种解题方法开始。',
-  '补充难记词义或阅读中的具体问题，继续用墨墨背词。',
-  '开始学习后，再留下需要回忆的问题。',
-  '跟随学习进度，逐步积累需要回忆的内容。',
-]
-const subjectSymbols = ['∫', 'Aa', '01', '政']
-export function Home({ data, now }: { data: Snapshot; now: number }) {
-  const q = queueFor(data, now)
-  const drafts = data.cards.filter((c) => c.status === 'draft').length
-  const { start, end } = localDayBounds(now)
-  const reviewed = data.reviews.filter((r) => r.reviewedAt >= start && r.reviewedAt < end).length
-  const learned = newStudiedToday(data.reviews, now)
-  const date = new Date(now)
-  const reminder =
-    data.settings.reminderEnabled &&
-    date.getHours() * 60 + date.getMinutes() >=
-      Number(data.settings.reminderTime.slice(0, 2)) * 60 + Number(data.settings.reminderTime.slice(3))
+const colors = ['#456785', '#527668', '#826541', '#75668c', '#8b606a']
+export function SpaceForm({
+  existing,
+  data,
+  refresh,
+  onClose,
+  setDirty,
+}: {
+  existing?: Space
+  data: Snapshot
+  refresh: () => Promise<void>
+  onClose: () => void
+  setDirty: Dirty
+}) {
+  const [name, setName] = useState(existing?.name ?? ''),
+    [icon, setIcon] = useState(existing?.icon ?? ''),
+    [color, setColor] = useState(existing?.color ?? colors[0])
+  const { act, busy, error } = useWorkspaceActions(data, refresh)
+  return (
+    <Modal
+      title={existing ? '编辑领域' : '新建领域'}
+      onClose={onClose}
+      busy={busy}
+      error={error}
+      setDirty={setDirty}
+    >
+      <form
+        onSubmit={(e) => {
+          e.preventDefault()
+          const now = Date.now()
+          void act({
+            type: 'saveSpace',
+            value: {
+              id: existing?.id ?? crypto.randomUUID(),
+              name,
+              icon: icon || undefined,
+              color,
+              createdAt: existing?.createdAt ?? now,
+              updatedAt: now,
+            },
+          }).then((saved) => {
+            if (saved) {
+              setDirty(false)
+              onClose()
+            }
+          })
+        }}
+      >
+        <fieldset disabled={busy}>
+          <label>
+            领域名称
+            <input
+              autoFocus
+              required
+              maxLength={200}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="你正在学习什么？"
+            />
+          </label>
+          <label>
+            图标（可选）
+            <input
+              maxLength={16}
+              value={icon}
+              onChange={(e) => setIcon(e.target.value)}
+              placeholder="一个你喜欢的符号"
+            />
+          </label>
+          <fieldset className="color-picker">
+            <legend>标记颜色</legend>
+            {colors.map((c) => (
+              <button
+                type="button"
+                key={c}
+                aria-label={`选择颜色 ${c}`}
+                aria-pressed={c === color}
+                style={{ background: c }}
+                onClick={() => setColor(c)}
+              />
+            ))}
+            <label className="custom-color">
+              自选
+              <input
+                type="color"
+                aria-label="自选颜色"
+                value={color}
+                onChange={(e) => setColor(e.target.value)}
+              />
+            </label>
+          </fieldset>
+          <FormActions
+            busy={busy}
+            onClose={() => {
+              setDirty(false)
+              onClose()
+            }}
+            save={existing ? '保存修改' : '创建领域'}
+          />
+        </fieldset>
+      </form>
+    </Modal>
+  )
+}
+export function DeleteSpace({
+  space,
+  data,
+  refresh,
+  onClose,
+  setDirty,
+}: {
+  space: Space
+  data: Snapshot
+  refresh: () => Promise<void>
+  onClose: () => void
+  setDirty: Dirty
+}) {
+  const [confirmed, setConfirmed] = useState(false),
+    [name, setName] = useState('')
+  const { act, busy, error } = useWorkspaceActions(data, refresh)
+  const goals = data.goals.filter((g) => g.spaceId === space.id),
+    goalIds = new Set(goals.map((g) => g.id))
+  return (
+    <Modal title={`删除“${space.name}”？`} onClose={onClose} busy={busy} error={error} setDirty={setDirty}>
+      <p>
+        将删除该领域的 {goals.length} 个目标、{data.steps.filter((s) => goalIds.has(s.goalId)).length}{' '}
+        个步骤、{data.knowledgeNodes.filter((n) => n.spaceId === space.id).length}{' '}
+        个知识节点，以及它们的关联。无法撤销。
+      </p>
+      <p className="muted">记忆卡片与复习历史独立保留。可先到设置中导出完整备份。</p>
+      <label className="check-label">
+        <input type="checkbox" checked={confirmed} onChange={(e) => setConfirmed(e.target.checked)} />
+        我确认删除该领域及其内容
+      </label>
+      <label>
+        再次输入领域名称
+        <input value={name} onChange={(e) => setName(e.target.value)} autoComplete="off" />
+      </label>
+      <div className="actions form-actions">
+        <button
+          className="danger"
+          disabled={busy || !confirmed || name !== space.name}
+          onClick={() =>
+            void act({ type: 'deleteSpace', id: space.id }).then((saved) => {
+              if (saved) {
+                setDirty(false)
+                onClose()
+              }
+            })
+          }
+        >
+          {busy ? '正在删除…' : '确认删除领域'}
+        </button>
+        <button
+          disabled={busy}
+          onClick={() => {
+            setDirty(false)
+            onClose()
+          }}
+        >
+          取消
+        </button>
+      </div>
+    </Modal>
+  )
+}
+export function Home({
+  data,
+  refresh,
+  setDirty,
+}: {
+  data: Snapshot
+  refresh: () => Promise<void>
+  setDirty: Dirty
+}) {
+  const [form, setForm] = useState<Space | 'new' | null>(null),
+    [deleting, setDeleting] = useState<Space | null>(null)
   return (
     <>
       <PageHead
-        title="今天复习"
-        description={date.toLocaleDateString('zh-CN', { month: 'long', day: 'numeric', weekday: 'long' })}
+        title="我的学习空间"
+        description={data.spaces.length ? '把正在学习的东西，放在这里。' : undefined}
         action={
-          <a className="button secondary desktop-add" href="#add">
-            <Icon name="add" />
-            添加内容
-          </a>
+          data.spaces.length ? (
+            <button className="primary" onClick={() => setForm('new')}>
+              <Icon name="add" />
+              新建领域
+            </button>
+          ) : undefined
         }
       />
-      <section className="today-panel" aria-labelledby="today-title">
-        <div className="today-copy">
-          <h2 id="today-title">
-            {q.due.length ? (
-              <>
-                有 <em>{q.due.length}</em> 条内容，到复习的时候了。
-              </>
-            ) : q.availableNew.length ? (
-              <>
-                从今天的 <em>{q.availableNew.length}</em> 条新内容开始。
-              </>
-            ) : data.cards.length ? (
-              '此刻没有到期的内容。'
-            ) : (
-              '从一个想记住的问题开始。'
-            )}
-          </h2>
-          <p>
-            {q.due.length
-              ? '到期内容优先，完成后再学习新内容。随时可以停下。'
-              : data.cards.length
-                ? '已学内容会按实际评分安排下次复习。'
-                : '把书上容易忘的条件、公式或一道错题，留给未来的自己。'}
-          </p>
-          <div className="actions">
-            <a
-              className="button primary"
-              href={q.due.length + q.availableNew.length ? '#review/all' : '#add'}
-            >
-              {q.due.length + q.availableNew.length
-                ? '开始全部复习'
-                : data.cards.length
-                  ? '添加内容'
-                  : '添加第一条'}
-              <Icon name="arrow" />
-            </a>
-            {!!q.availableNew.length && (
-              <span className="secondary-copy">今日还可新学 {q.availableNew.length} 条</span>
-            )}
-          </div>
-        </div>
-        <div className="today-note">
-          <Icon name="book" size={25} />
-          <p>
-            知识点，先回忆。
-            <br />
-            练习题，先动笔。
-          </p>
-          <span>答案由你主动展开</span>
-        </div>
-      </section>
-      <a className="graph-entry" href="#library/高数?view=graph">
-        <span className="graph-entry-icon">
-          <Icon name="tree" size={24} />
-        </span>
-        <span>
-          <strong>我的数学知识图谱</strong>
-          <small>把零散的知识，连成自己的理解。</small>
-        </span>
-        <Icon name="arrow" size={19} />
-      </a>
-      {reminder && q.due.length > 0 && (
-        <p className="reminder" role="status">
-          已到你设定的 {data.settings.reminderTime}，现在有 {q.due.length} 条内容待复习。
-        </p>
-      )}
-      <section className="subjects" aria-labelledby="subjects-title">
-        <div className="section-head">
-          <h2 id="subjects-title">按科目复习</h2>
-          <span>到期 / 待新学</span>
-        </div>
-        {SUBJECTS.map((subject, index) => {
-          const queue = queueFor(data, now, subject),
-            all = data.cards.filter((c) => c.subject === subject)
-          return (
-            <div className="subject-row" key={subject}>
-              <span className={`subject-symbol subject-${index}`} aria-hidden="true">
-                {subjectSymbols[index]}
-              </span>
-              <div className="subject-info">
-                <h3>{subject}</h3>
-                <p>
-                  {all.length === 0
-                    ? subjectDescriptions[index]
-                    : `${all.length} 条内容${all.some((c) => c.status === 'draft') ? `，其中 ${all.filter((c) => c.status === 'draft').length} 条待整理` : ''}${queue.later.length ? ` · 下次 ${formatTime(queue.later[0].schedule.due)}` : ''}`}
-                </p>
-              </div>
-              <div className="subject-count">
-                <strong>{queue.due.length}</strong>
-                <span>/ {queue.fresh.length}</span>
-              </div>
-              {queue.due.length + queue.availableNew.length > 0 ? (
-                <a
-                  className="button small secondary"
-                  href={`#review/${subject}`}
-                  aria-label={`复习${subject}`}
-                >
-                  复习
-                  <Icon name="arrow" size={17} />
+      {data.migrationWarnings.length ? (
+        <details className="migration-note">
+          <summary>旧数据已安全升级 · 查看说明</summary>
+          {data.migrationWarnings.map((message, i) => (
+            <p key={i}>{message}</p>
+          ))}
+          <a href="#library">查看保留的记忆卡片</a>
+        </details>
+      ) : null}
+      {!data.spaces.length ? (
+        <section className="blank-workbench">
+          <Icon name="book" size={36} />
+          <h2>还没有任何领域。</h2>
+          <p>建立一个你正在学习的东西。</p>
+          <button className="primary" onClick={() => setForm('new')}>
+            <Icon name="add" />
+            新建领域
+          </button>
+        </section>
+      ) : (
+        <div className="space-grid">
+          {data.spaces.map((space) => {
+            const goals = data.goals.filter((g) => g.spaceId === space.id && !g.parentGoalId).length
+            const count = data.knowledgeNodes.filter((n) => n.spaceId === space.id).length
+            return (
+              <article
+                className="space-card"
+                key={space.id}
+                style={{ '--space-color': space.color ?? colors[0] } as CSSProperties}
+              >
+                <a className="space-open" href={`#space/${space.id}/goals`} aria-label={`进入 ${space.name}`}>
+                  <div className="space-title">
+                    <span className="space-symbol" aria-hidden="true">
+                      {space.icon || <Icon name="book" size={22} />}
+                    </span>
+                    <h2>{space.name}</h2>
+                  </div>
+                  <ProgressView progress={spaceProgress(data, space.id)} />
+                  <p className="space-meta">
+                    {goals} 个目标 · {count} 个知识节点
+                  </p>
                 </a>
-              ) : (
-                <a className="button small subtle" href={`#add/${subject}`} aria-label={`添加${subject}内容`}>
-                  添加
-                  <Icon name="add" size={17} />
-                </a>
-              )}
-            </div>
-          )
-        })}
-      </section>
-      <div className="home-foot">
-        <p>
-          {reviewed
-            ? `今天已完成 ${reviewed} 次回忆，其中新学 ${learned} 条。`
-            : '每天一点回忆，让学过的内容留得久一些。'}
-          <span>每日新学上限 {data.settings.dailyNewLimit} 条。</span>
-        </p>
-        {drafts > 0 && <a href="#library/draft">整理 {drafts} 条暂存内容</a>}
-      </div>
-      {q.later.length > 0 && (
-        <p className="subtle-info">
-          下次到期：{formatTime(q.later[0].schedule.due)}。短间隔内容会在到期后重新出现。
-        </p>
+                <div className="space-actions">
+                  <button
+                    className="text-button"
+                    aria-label={`编辑 ${space.name}`}
+                    onClick={() => setForm(space)}
+                  >
+                    编辑
+                  </button>
+                  <button
+                    className="text-button"
+                    aria-label={`删除 ${space.name}`}
+                    onClick={() => setDeleting(space)}
+                  >
+                    删除
+                  </button>
+                </div>
+              </article>
+            )
+          })}
+          <button className="new-space-tile" onClick={() => setForm('new')}>
+            <Icon name="add" size={25} />
+            新建学习领域
+          </button>
+        </div>
       )}
+      {form ? (
+        <SpaceForm
+          key={typeof form === 'string' ? form : form.id}
+          existing={typeof form === 'string' ? undefined : form}
+          data={data}
+          refresh={refresh}
+          onClose={() => setForm(null)}
+          setDirty={setDirty}
+        />
+      ) : null}
+      {deleting ? (
+        <DeleteSpace
+          space={deleting}
+          data={data}
+          refresh={refresh}
+          onClose={() => setDeleting(null)}
+          setDirty={setDirty}
+        />
+      ) : null}
     </>
   )
 }

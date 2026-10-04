@@ -89,7 +89,7 @@ export function SettingsPage({ data, refresh }: { data: Snapshot; refresh: () =>
           <div className="setting-row">
             <div>
               <label htmlFor="new-limit">每日新学上限</label>
-              <p>四科共用，到期内容优先。设为 0 时只复习已学内容。</p>
+              <p>所有记忆卡片共用，到期内容优先。设为 0 时只复习已学内容。</p>
             </div>
             <input
               id="new-limit"
@@ -138,7 +138,9 @@ export function SettingsPage({ data, refresh }: { data: Snapshot; refresh: () =>
       </section>
       <section className="settings-section">
         <h2>备份与恢复</h2>
-        <p>完整备份包含所有图片、卡片、设置、复习历史与调度状态。建议每周备份一次，换设备前再备份一次。</p>
+        <p>
+          完整备份包含领域、目标、步骤、知识节点和关联，以及图片、卡片、设置、复习历史与调度状态。换设备前记得备份。
+        </p>
         <div className="backup-actions">
           <button className="primary" disabled={busy} onClick={() => void run(download)}>
             <Icon name="download" />
@@ -161,7 +163,7 @@ export function SettingsPage({ data, refresh }: { data: Snapshot; refresh: () =>
             e.target.value = ''
           }}
         />
-        <p className="fine-print muted">数据格式 v{DATA_VERSION} · 支持 v1 迁移 · 备份文件上限 200 MB</p>
+        <p className="fine-print muted">数据格式 v{DATA_VERSION} · 支持 v1 / v2 迁移 · 备份文件上限 200 MB</p>
         <div className="privacy-note">
           <strong>数据只在这个浏览器里</strong>
           <ul>
@@ -200,13 +202,16 @@ export function SettingsPage({ data, refresh }: { data: Snapshot; refresh: () =>
         {backup && (
           <>
             <p>
-              备份校验通过：{backup.cards.length} 条内容、{backup.images.length} 张图片、
-              {backup.reviews.length} 次复习。
+              备份校验通过：{backup.spaces.length} 个领域、{backup.goals.length} 个目标、{backup.steps.length}{' '}
+              个步骤、{backup.knowledgeNodes.length} 个知识节点，{backup.knowledgeRelations.length}{' '}
+              条知识关系、{backup.stepKnowledgeLinks.length} 条步骤关联，以及 {backup.cards.length} 条内容、
+              {backup.images.length} 张图片、{backup.reviews.length} 次复习。
             </p>
             <p>
               恢复后，当前浏览器的{' '}
               <strong>
-                {data.cards.length} 条内容和 {data.reviews.length} 次复习
+                {data.spaces.length} 个领域及其全部目标、步骤、知识节点和关联，以及 {data.cards.length}{' '}
+                条内容和 {data.reviews.length} 次复习
               </strong>
               将被替换。此操作不会合并两份数据。
             </p>

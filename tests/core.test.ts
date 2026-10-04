@@ -354,7 +354,7 @@ describe('备份恢复与迁移', () => {
     expect(await readAllData()).toEqual(before)
   })
   it('数据库能正确初始化到版本 2', async () => {
-    expect((await database()).version).toBe(2)
+    expect((await database()).version).toBe(3)
   })
   it('实际 IndexedDB v1 数据升级到 v2，保留内容与原设置', async () => {
     const old = await openDB(DB_NAME, 1, {

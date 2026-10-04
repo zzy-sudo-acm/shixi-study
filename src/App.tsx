@@ -1,5 +1,7 @@
 import {
   Component,
+  lazy,
+  Suspense,
   memo,
   useCallback,
   useEffect,
@@ -9,18 +11,16 @@ import {
   type ReactNode,
 } from 'react'
 import { DB_NAME, readSnapshot } from './core/db'
-import { friendlyError, SUBJECTS, type Snapshot, type Subject } from './core/model'
+import { friendlyError, subjectsFor, type Snapshot, type Subject } from './core/model'
 import { Home } from './ui/Home'
-import { Editor } from './ui/Editor'
-import { Library } from './ui/Library'
-import { ReviewPage } from './ui/Review'
-import { SettingsPage } from './ui/Settings'
+import { SpacePage } from './ui/SpacePage'
 import { Icon, Notice, type IconName } from './ui/shared'
-const MemoEditor = memo(Editor)
-const MemoSettings = memo(SettingsPage)
+const MemoEditor = lazy(() => import('./ui/Editor').then((m) => ({ default: m.Editor })))
+const MemoSettings = lazy(() => import('./ui/Settings').then((m) => ({ default: m.SettingsPage })))
 const MemoHome = memo(Home)
-const MemoLibrary = memo(Library)
-const MemoReview = memo(ReviewPage)
+const MemoLibrary = lazy(() => import('./ui/Library').then((m) => ({ default: m.Library })))
+const MemoReview = lazy(() => import('./ui/Review').then((m) => ({ default: m.ReviewPage })))
+const CardsHome = lazy(() => import('./ui/CardsHome').then((m) => ({ default: m.CardsHome })))
 
 export class ErrorBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
   state = { failed: false }
@@ -42,9 +42,9 @@ export class ErrorBoundary extends Component<{ children: ReactNode }, { failed: 
 function routeValue() {
   try {
     const [path, ...query] = location.hash.slice(1).split('?')
-    return (decodeURIComponent(path) || 'today') + (query.length ? `?${query.join('?')}` : '')
+    return (path || 'home') + (query.length ? `?${query.join('?')}` : '')
   } catch {
-    return 'today'
+    return 'home'
   }
 }
 export default function App() {
@@ -54,6 +54,8 @@ export default function App() {
     [now, setNow] = useState(Date.now()),
     [external, setExternal] = useState(false)
   const [navRoute, setNavRoute] = useState(route)
+  const [recoveryError, setRecoveryError] = useState(''),
+    [recovering, setRecovering] = useState(false)
   const [pending, startTransition] = useTransition()
   const dirty = useRef(false),
     previousRoute = useRef(route)
@@ -119,7 +121,7 @@ export default function App() {
   }, [navigate])
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' })
-    document.title = `${route.startsWith('review') ? '专注复习' : route.startsWith('library') ? '我的内容' : route.startsWith('settings') ? '设置与备份' : route.startsWith('add') || route.startsWith('edit') ? '添加与编辑' : '今天复习'} · 时习`
+    document.title = `${route.startsWith('space') ? '学习领域' : route.startsWith('review') ? '专注复习' : route.startsWith('library') ? '记忆卡片' : route.startsWith('settings') ? '设置与备份' : route.startsWith('add') || route.startsWith('edit') ? '添加与编辑' : route.startsWith('today') ? '今天复习' : '我的学习空间'} · 时习`
     if (!route.startsWith('review')) document.querySelector<HTMLElement>('h1')?.focus()
   }, [route, !!data])
   if (fatal)
@@ -129,24 +131,61 @@ export default function App() {
         <Notice error>{fatal}</Notice>
         <p>请不要清除浏览器数据。可先关闭其他时习页面或检查存储权限。</p>
         <button onClick={load}>重试读取</button>
+        <button
+          className="secondary"
+          disabled={recovering}
+          onClick={() => {
+            setRecovering(true)
+            setRecoveryError('')
+            void import('./core/recovery')
+              .then((m) => m.exportRecoveryData())
+              .then((contents) => {
+                const url = URL.createObjectURL(new Blob([contents], { type: 'application/json' })),
+                  link = document.createElement('a')
+                link.href = url
+                link.download = `shixi-recovery-${Date.now()}.json`
+                link.click()
+                setTimeout(() => URL.revokeObjectURL(url), 60000)
+              })
+              .catch((err) => setRecoveryError(friendlyError(err)))
+              .finally(() => setRecovering(false))
+          }}
+        >
+          {recovering ? '正在导出…' : '导出原始数据副本'}
+        </button>
+        <p>原始副本用于修复数据格式后恢复，不能直接通过常规备份入口导入。</p>
+        {recoveryError ? <Notice error>{recoveryError}</Notice> : null}
       </main>
     )
   if (!data)
     return (
       <main className="fatal" role="status">
-        正在打开你的复习本…
+        正在打开你的学习空间…
       </main>
     )
   const [routePath, routeQuery = ''] = route.split('?')
-  const [page, argument] = routePath.split('/')
-  const activePage = navRoute.split('/')[0].split('?')[0]
+  const [page, rawArgument = '', view = 'goals'] = routePath.split('/')
+  let argument = rawArgument
+  try {
+    argument = decodeURIComponent(rawArgument)
+  } catch {
+    /* invalid route is shown as missing */
+  }
+  const activeRoute = navRoute.split('/')[0].split('?')[0]
+  const activePage = ['space', 'home'].includes(activeRoute)
+    ? 'home'
+    : ['today', 'review', 'add', 'edit', 'library'].includes(activeRoute)
+      ? 'library'
+      : activeRoute
   const params = new URLSearchParams(routeQuery)
-  const subject = SUBJECTS.includes(argument as Subject) ? (argument as Subject) : undefined
+  const requestedSubject = params.get('subject') ?? argument
+  const subject = subjectsFor(data).includes(requestedSubject as Subject)
+    ? (requestedSubject as Subject)
+    : undefined
   const reviewing = page === 'review'
   const nav: { key: string; name: string; icon: IconName }[] = [
-    { key: 'today', name: '今天复习', icon: 'today' },
-    { key: 'library', name: '我的内容', icon: 'library' },
-    { key: 'add', name: '添加内容', icon: 'add' },
+    { key: 'home', name: '学习空间', icon: 'book' },
+    { key: 'library', name: '记忆卡片', icon: 'cards' },
     { key: 'settings', name: '设置与备份', icon: 'settings' },
   ]
   const editing = data.cards.find((c) => c.id === argument)
@@ -165,12 +204,12 @@ export default function App() {
       {!reviewing && (
         <>
           <aside className="sidebar">
-            <a href="#today" className="brand" aria-label="时习首页">
+            <a href="#home" className="brand" aria-label="时习首页">
               <span className="brand-mark">
                 <Icon name="book" size={24} />
               </span>
               <span>
-                时习<small>个人考研复习本</small>
+                时习<small>个人学习空间</small>
               </span>
             </a>
             <nav aria-label="主导航">
@@ -203,11 +242,11 @@ export default function App() {
             </div>
           </aside>
           <header className="mobile-brand">
-            <a href="#today">
+            <a href="#home">
               <Icon name="book" />
               时习
             </a>
-            <span>个人考研复习本</span>
+            <span>个人学习空间</span>
           </header>
         </>
       )}
@@ -228,37 +267,52 @@ export default function App() {
           </Notice>
         )}
         <div className="page-surface" key={page} aria-busy={pending}>
-          {page === 'add' || page === 'edit' ? (
-            page === 'edit' && !editing ? (
-              <Notice error>没有找到这条内容，请返回“我的内容”。</Notice>
-            ) : (
-              <MemoEditor
+          <Suspense fallback={<p role="status">正在打开页面…</p>}>
+            {page === 'space' ? (
+              <SpacePage
+                key={argument}
+                data={data}
+                spaceId={argument}
+                view={view}
+                initialNode={params.get('node') ?? undefined}
+                focusStep={params.get('step') ?? undefined}
+                refresh={refresh}
+                setDirty={setDirty}
+              />
+            ) : page === 'add' || page === 'edit' ? (
+              page === 'edit' && !editing ? (
+                <Notice error>没有找到这条内容，请返回“我的内容”。</Notice>
+              ) : (
+                <MemoEditor
+                  key={route}
+                  data={data}
+                  existing={page === 'edit' ? editing : undefined}
+                  subject={subject}
+                  initialCategory={params.get('category') ?? undefined}
+                  setDirty={setDirty}
+                  onSaved={refresh}
+                />
+              )
+            ) : page === 'library' ? (
+              <MemoLibrary
                 key={route}
                 data={data}
-                existing={page === 'edit' ? editing : undefined}
-                subject={subject}
-                initialCategory={params.get('category') ?? undefined}
-                setDirty={setDirty}
-                onSaved={refresh}
+                now={now}
+                refresh={refresh}
+                draftOnly={argument === 'draft'}
+                initialSubject={subject}
+                initialGraph={params.get('view') === 'graph'}
               />
-            )
-          ) : page === 'library' ? (
-            <MemoLibrary
-              key={route}
-              data={data}
-              now={now}
-              refresh={refresh}
-              draftOnly={argument === 'draft'}
-              initialSubject={subject}
-              initialGraph={params.get('view') === 'graph'}
-            />
-          ) : page === 'settings' ? (
-            <MemoSettings data={data} refresh={refresh} />
-          ) : reviewing ? (
-            <MemoReview key={route} data={data} now={now} subject={subject} refresh={refresh} />
-          ) : (
-            <MemoHome data={data} now={now} />
-          )}
+            ) : page === 'settings' ? (
+              <MemoSettings data={data} refresh={refresh} />
+            ) : reviewing ? (
+              <MemoReview key={route} data={data} now={now} subject={subject} refresh={refresh} />
+            ) : page === 'today' ? (
+              <CardsHome data={data} now={now} />
+            ) : (
+              <MemoHome data={data} refresh={refresh} setDirty={setDirty} />
+            )}
+          </Suspense>
         </div>
         {!reviewing && (
           <footer className="page-footer">无需登录 · 内容仅保存在当前浏览器 · 设备之间不自动同步</footer>

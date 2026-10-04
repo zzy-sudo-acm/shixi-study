@@ -1,158 +1,134 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { allCategoryPaths } from '../core/graph'
-import { categoryParent, FAMILIARITY_NAMES, type Snapshot, type StudyCard } from '../core/model'
-import { ContentView, Icon } from './shared'
+import type { Snapshot } from '../core/model'
+import { layoutKnowledgeGraph } from '../core/graph'
+import { Empty } from './shared'
 
-type Node = {
-  id: string
-  label: string
-  parent: string
-  x: number
-  y: number
-  card?: StudyCard
-  path?: string
-}
 export function KnowledgeGraph({
   data,
-  cards,
-  category,
-  onCategory,
+  spaceId,
+  selected,
+  onSelect,
+  onAdd,
 }: {
   data: Snapshot
-  cards: StudyCard[]
-  category: string
-  onCategory: (path: string) => void
+  spaceId: string
+  selected: string
+  onSelect: (id: string) => void
+  onAdd: () => void
 }) {
-  const [selected, setSelected] = useState(''),
-    [answer, setAnswer] = useState(false),
-    [scale, setScale] = useState(1)
-  const [limit, setLimit] = useState(80)
   const viewport = useRef<HTMLDivElement>(null)
-  const [compact, setCompact] = useState(() => window.matchMedia('(max-width: 640px)').matches)
+  const [scale, setScale] = useState(1),
+    [limit, setLimit] = useState(100),
+    [compact, setCompact] = useState(() => window.matchMedia('(max-width: 640px)').matches)
+  const [branch, setBranch] = useState('')
   useEffect(() => {
     const media = window.matchMedia('(max-width: 640px)')
     const update = () => setCompact(media.matches)
     media.addEventListener('change', update)
     return () => media.removeEventListener('change', update)
   }, [])
-  const graph = useMemo(() => {
-    const nodes: Node[] = [{ id: 'root', label: '我的数学', parent: '', x: 24, y: 0 }]
-    const paths = allCategoryPaths(data, '高数')
-    for (const path of paths)
-      nodes.push({
-        id: `cat:${path}`,
-        label: path.split('/').at(-1)!,
-        path,
-        parent: categoryParent(path) ? `cat:${categoryParent(path)}` : 'root',
-        x: 24 + path.split('/').length * 230,
-        y: 0,
-      })
-    if (cards.some((c) => !c.category))
-      nodes.push({ id: 'none', label: '未分类', path: '__none__', parent: 'root', x: 254, y: 0 })
-    for (const card of cards.slice(0, limit))
-      nodes.push({
-        id: card.id,
-        label: card.question.text || '图片知识卡片',
-        card,
-        parent: card.category ? `cat:${card.category}` : 'none',
-        x: 24 + ((card.category?.split('/').length || 1) + 1) * 230,
-        y: 0,
-      })
-    const children = new Map<string, Node[]>()
-    for (const node of nodes) {
-      const list = children.get(node.parent) ?? []
-      list.push(node)
-      children.set(node.parent, list)
-    }
-    let cursor = 24
-    function position(node: Node) {
-      const branch = children.get(node.id) ?? []
-      if (compact) {
-        node.x = 16 + Math.round((node.x - 24) / 230) * 14
-        node.y = cursor
-        cursor += 100
-        branch.forEach(position)
-        return
+  const nodes = useMemo(
+    () => data.knowledgeNodes.filter((n) => n.spaceId === spaceId),
+    [data.knowledgeNodes, spaceId],
+  )
+  const roots = nodes.filter((n) => !n.parentId)
+  const filtered = useMemo(() => {
+    if (!branch) return nodes
+    const byId = new Map(nodes.map((n) => [n.id, n]))
+    return nodes.filter((n) => {
+      let current: typeof n | undefined = n
+      while (current) {
+        if (current.id === branch) return true
+        current = current.parentId ? byId.get(current.parentId) : undefined
       }
-      if (!branch.length) {
-        node.y = cursor
-        cursor += 100
-        return
-      }
-      branch.forEach(position)
-      node.y = (branch[0].y + branch[branch.length - 1].y) / 2
-    }
-    position(nodes[0])
-    const byId = new Map(nodes.map((node) => [node.id, node]))
-    const relations: [Node, Node][] = []
-    for (const node of nodes)
-      for (const id of node.card?.relatedIds ?? []) {
-        const other = byId.get(id)
-        if (other && node.id < other.id) relations.push([node, other])
-      }
-    return {
-      nodes,
-      byId,
-      relations,
-      width: Math.max(compact ? 270 : 700, ...nodes.map((n) => n.x + (compact ? 208 : 250))),
-      height: Math.max(320, cursor + 20),
-    }
-  }, [data.cards, data.categories, cards, limit, compact])
-  useEffect(() => {
-    if (viewport.current) setScale(Math.min(1, Math.max(0.6, viewport.current.clientWidth / graph.width)))
-  }, [graph.width, compact])
-  const active = data.cards.find((card) => card.id === selected && card.subject === '高数')
-  const connected = useMemo(() => new Set(active?.relatedIds ?? []), [active])
-  function focusCard(card: StudyCard) {
-    setSelected(card.id)
-    setAnswer(false)
+      return false
+    })
+  }, [nodes, branch])
+  const graph = useMemo(() => layoutKnowledgeGraph(filtered, compact, limit), [filtered, compact, limit])
+  const relations = data.knowledgeRelations.filter(
+    (r) => r.spaceId === spaceId && graph.byId.has(r.sourceNodeId) && graph.byId.has(r.targetNodeId),
+  )
+  const connected = new Set<string>()
+  for (const relation of data.knowledgeRelations) {
+    if (relation.sourceNodeId === selected) connected.add(relation.targetNodeId)
+    if (relation.targetNodeId === selected) connected.add(relation.sourceNodeId)
   }
+  const active = nodes.find((n) => n.id === selected)
+  if (active?.parentId) connected.add(active.parentId)
+  for (const node of nodes) if (node.parentId === selected) connected.add(node.id)
+  function overview() {
+    if (!viewport.current) return
+    setScale(
+      Math.max(
+        0.08,
+        Math.min(1, viewport.current.clientWidth / graph.width, viewport.current.clientHeight / graph.height),
+      ),
+    )
+    viewport.current.scrollTo({ top: 0, left: 0, behavior: 'instant' })
+  }
+  if (!nodes.length)
+    return (
+      <Empty title="知识图谱从一个节点开始">
+        <p>建立知识树，再把相关的概念连起来。</p>
+        <button className="primary" onClick={onAdd}>
+          新建根节点
+        </button>
+      </Empty>
+    )
   return (
-    <section className="knowledge-graph" aria-label="数学知识图谱">
+    <section className="knowledge-graph stable-graph" aria-label="知识图谱">
       <div className="graph-toolbar">
         <div>
-          <h2>让知识连成图</h2>
-          <p>实线是归属，虚线是关联。点击卡片展开内容。</p>
+          <h2>知识之间的关系</h2>
+          <p>实线是父子关系，虚线是你建立的关联。</p>
         </div>
         <div className="graph-zoom" aria-label="图谱缩放">
+          <button onClick={overview}>总览</button>
           <button
-            type="button"
-            onClick={() => {
-              if (viewport.current) {
-                setScale(Math.min(1, viewport.current.clientWidth / graph.width))
-                viewport.current.scrollTo({ top: 0, left: 0, behavior: 'instant' })
-              }
-            }}
-          >
-            总览
-          </button>
-          <button
-            type="button"
             aria-label="缩小图谱"
-            disabled={scale <= 0.6}
-            onClick={() => setScale((s) => Math.max(0.6, s - 0.2))}
+            disabled={scale <= 0.08}
+            onClick={() => setScale((s) => Math.max(0.08, s - 0.15))}
           >
             −
           </button>
-          <button type="button" aria-label="重置图谱缩放" onClick={() => setScale(1)}>
+          <button aria-label="重置图谱缩放" onClick={() => setScale(1)}>
             {Math.round(scale * 100)}%
           </button>
           <button
-            type="button"
             aria-label="放大图谱"
-            disabled={scale >= 1.4}
-            onClick={() => setScale((s) => Math.min(1.4, s + 0.2))}
+            disabled={scale >= 1.6}
+            onClick={() => setScale((s) => Math.min(1.6, s + 0.15))}
           >
             +
           </button>
         </div>
       </div>
+      {roots.length > 1 ? (
+        <label className="graph-branch-filter">
+          查看分支
+          <select
+            value={branch}
+            onChange={(e) => {
+              setBranch(e.target.value)
+              setLimit(100)
+              setScale(1)
+            }}
+          >
+            <option value="">全部分支</option>
+            {roots.map((n) => (
+              <option key={n.id} value={n.id}>
+                {n.title}
+              </option>
+            ))}
+          </select>
+        </label>
+      ) : null}
       <div
         ref={viewport}
         className="graph-scroll"
-        tabIndex={0}
         role="region"
         aria-label="知识图谱画布，可横向和纵向滚动"
+        tabIndex={0}
       >
         <div style={{ width: graph.width * scale, height: graph.height * scale }}>
           <div
@@ -160,201 +136,59 @@ export function KnowledgeGraph({
             style={{ width: graph.width, height: graph.height, transform: `scale(${scale})` }}
           >
             <svg width={graph.width} height={graph.height} className="graph-lines" aria-hidden="true">
-              {graph.nodes
-                .filter((n) => n.parent)
-                .map((node) => {
-                  const parent = graph.byId.get(node.parent)!
-                  return (
-                    <path
-                      key={node.id}
-                      d={
-                        compact
-                          ? `M${parent.x + 7},${parent.y + 80} V${node.y + 40} H${node.x}`
-                          : `M${parent.x + 184},${parent.y + 40} C${parent.x + 210},${parent.y + 40} ${node.x - 28},${node.y + 40} ${node.x},${node.y + 40}`
-                      }
-                    />
-                  )
-                })}
-              {graph.relations.map(([a, b]) => (
-                <path
-                  className={`graph-relation ${selected === a.id || selected === b.id ? 'highlighted' : ''}`}
-                  key={`${a.id}:${b.id}`}
-                  d={`M${a.x + 184},${a.y + 40} C${Math.max(a.x, b.x) + (compact ? 208 : 250)},${a.y + 40} ${Math.max(a.x, b.x) + (compact ? 208 : 250)},${b.y + 40} ${b.x + 184},${b.y + 40}`}
-                />
-              ))}
+              {graph.nodes.map((row) => {
+                const parent = row.node.parentId ? graph.byId.get(row.node.parentId) : undefined
+                return parent ? (
+                  <path
+                    key={row.node.id}
+                    className={selected === row.node.id || selected === parent.node.id ? 'highlighted' : ''}
+                    d={
+                      compact
+                        ? `M${parent.x + 8},${parent.y + 64} V${row.y + 32} H${row.x}`
+                        : `M${parent.x + 208},${parent.y + 32} C${parent.x + 224},${parent.y + 32} ${row.x - 16},${row.y + 32} ${row.x},${row.y + 32}`
+                    }
+                  />
+                ) : null
+              })}
+              {relations.map((r) => {
+                const a = graph.byId.get(r.sourceNodeId)!,
+                  b = graph.byId.get(r.targetNodeId)!
+                const control = Math.max(a.x, b.x) + 250
+                return (
+                  <path
+                    key={r.id}
+                    className={`graph-relation ${selected === a.node.id || selected === b.node.id ? 'highlighted' : ''}`}
+                    d={`M${a.x + 208},${a.y + 32} C${control},${a.y + 32} ${control},${b.y + 32} ${b.x + 208},${b.y + 32}`}
+                  />
+                )
+              })}
             </svg>
-            {graph.nodes.map((node) => (
+            {graph.nodes.map((row) => (
               <button
-                type="button"
-                key={node.id}
-                className={`graph-node ${node.card ? 'graph-card' : 'graph-category'} ${node.id === 'root' ? 'graph-root' : ''} ${node.id === selected || node.path === category ? 'selected' : ''} ${connected.has(node.id) ? 'connected' : ''}`}
-                style={{ left: node.x, top: node.y }}
-                title={node.label}
-                aria-pressed={node.card ? selected === node.id : category === (node.path ?? 'all')}
-                onClick={() => (node.card ? focusCard(node.card) : onCategory(node.path ?? 'all'))}
+                key={row.node.id}
+                className={`graph-node stable-graph-node ${selected === row.node.id ? 'selected' : ''} ${connected.has(row.node.id) ? 'connected' : ''}`}
+                style={{ left: row.x, top: row.y }}
+                aria-pressed={selected === row.node.id}
+                title={row.node.title}
+                onClick={() => onSelect(row.node.id)}
               >
-                <span>{node.label}</span>
-                <small>
-                  {node.card
-                    ? FAMILIARITY_NAMES[node.card.familiarity ?? 0]
-                    : node.id === 'root'
-                      ? '知识族谱'
-                      : '知识分支'}
-                </small>
+                <span>{row.node.title}</span>
               </button>
             ))}
           </div>
         </div>
       </div>
       <div className="graph-caption">
-        <span>拖动滚动条或滑动画布，查看不同分支。</span>
-        <span>{graph.relations.length} 条可见关联</span>
+        <span>滑动画布浏览，点击节点查看详情。</span>
+        <span>
+          {graph.nodes.length} / {graph.total} 个节点 · {relations.length} 条可见关联
+        </span>
       </div>
-      {cards.length > limit && (
-        <button type="button" className="text-button" onClick={() => setLimit((n) => n + 80)}>
-          再展开 80 张卡片（共 {cards.length} 张，可先筛选分支）
+      {graph.total > limit ? (
+        <button className="text-button" onClick={() => setLimit((n) => n + 100)}>
+          再展开 100 个节点
         </button>
-      )}
-      {active && (
-        <div className="graph-inspector" key={active.id}>
-          <div className="section-head">
-            <h3>知识卡片</h3>
-            <button
-              type="button"
-              className="subtle small"
-              aria-label="关闭卡片详情"
-              onClick={() => setSelected('')}
-            >
-              <Icon name="close" />
-            </button>
-          </div>
-          <ContentView content={active.question} label="问题图片" />
-          <div className="actions">
-            <button type="button" className="secondary" onClick={() => setAnswer((v) => !v)}>
-              {answer ? '隐藏答案' : '显示答案'}
-            </button>
-            <a className="button subtle" href={`#edit/${active.id}`}>
-              编辑内容与关联
-            </a>
-          </div>
-          {answer && (
-            <div className="answer-block">
-              <ContentView content={active.answer} label="答案图片" />
-            </div>
-          )}
-          <div className="related-links">
-            {data.cards
-              .filter((c) => connected.has(c.id))
-              .map((card) => (
-                <button
-                  type="button"
-                  className="text-button"
-                  key={card.id}
-                  onClick={() => {
-                    if (cards.some((c) => c.id === card.id)) focusCard(card)
-                    else {
-                      onCategory('all')
-                      focusCard(card)
-                    }
-                  }}
-                >
-                  <Icon name="link" size={16} />
-                  {card.question.text || '图片知识卡片'}
-                </button>
-              ))}
-          </div>
-        </div>
-      )}
-      {data.cards.every((card) => card.subject !== '高数') && (
-        <p className="graph-empty">先在知识树上创建分支，再添加第一张卡片。关联会随你的积累逐渐生长。</p>
-      )}
-    </section>
-  )
-}
-
-export function RelationPicker({
-  data,
-  card,
-  onChange,
-}: {
-  data: Snapshot
-  card: StudyCard
-  onChange: (ids: string[]) => void
-}) {
-  const [search, setSearch] = useState('')
-  const ids = card.relatedIds ?? []
-  const choices = useMemo(
-    () => data.cards.filter((c) => c.subject === '高数' && c.id !== card.id),
-    [data.cards, card.id],
-  )
-  const results = choices.filter(
-    (c) =>
-      !ids.includes(c.id) &&
-      (!search ||
-        `${c.question.text} ${c.category}`.toLocaleLowerCase().includes(search.toLocaleLowerCase())),
-  )
-  return (
-    <section className="relation-picker" aria-label="关联数学知识">
-      <div className="field-head">
-        <h3>
-          <Icon name="link" size={18} />
-          关联已有知识
-        </h3>
-        <span className="muted">{ids.length} / 100</span>
-      </div>
-      <p>把前置概念、相关公式或练习连起来，图谱中会出现连接线。</p>
-      {ids.length > 0 && (
-        <div className="relation-selected">
-          {ids.map((id) => (
-            <button
-              key={id}
-              type="button"
-              onClick={() => onChange(ids.filter((value) => value !== id))}
-              aria-label={`取消关联 ${choices.find((c) => c.id === id)?.question.text || '已失效内容'}`}
-            >
-              <span>{choices.find((c) => c.id === id)?.question.text || '已失效内容'}</span>
-              <Icon name="close" size={15} />
-            </button>
-          ))}
-        </div>
-      )}
-      <input
-        type="search"
-        aria-label="搜索可关联的知识"
-        placeholder="搜索知识点、公式或所属节点"
-        value={search}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter') e.preventDefault()
-        }}
-        onChange={(e) => setSearch(e.target.value)}
-      />
-      <div className="relation-results">
-        {results.slice(0, 8).map((other) => (
-          <button
-            key={other.id}
-            type="button"
-            disabled={ids.length >= 100}
-            onClick={() => {
-              onChange([...ids, other.id])
-              setSearch('')
-            }}
-          >
-            <Icon name="add" size={16} />
-            <span>
-              {other.question.text || '图片知识卡片'}
-              <small>{other.category?.split('/').join(' › ') || '未分类'}</small>
-            </span>
-          </button>
-        ))}
-      </div>
-      {!results.length && (
-        <p className="muted">
-          {choices.length
-            ? '没有更多匹配的知识，可以换个关键词。'
-            : '保存更多数学内容后，就可以在这里建立关联。'}
-        </p>
-      )}
-      {results.length > 8 && <p className="muted">还有 {results.length - 8} 条，输入关键词缩小范围。</p>}
+      ) : null}
     </section>
   )
 }

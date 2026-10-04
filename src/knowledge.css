@@ -123,18 +123,6 @@
   border-radius: 5px;
   padding: 3px 9px;
 }
-.library-item[data-subject='英语'] .item-meta span:first-child {
-  color: #3f6757;
-  background: #eaf2ed;
-}
-.library-item[data-subject='408'] .item-meta span:first-child {
-  color: #6c5e88;
-  background: #f0edf5;
-}
-.library-item[data-subject='政治'] .item-meta span:first-child {
-  color: #805f38;
-  background: #f5efe5;
-}
 .item-meta span {
   overflow-wrap: anywhere;
 }
