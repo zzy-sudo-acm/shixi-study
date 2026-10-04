@@ -135,6 +135,7 @@ export function NodeDetails({
   onEdit,
   onChild,
   onMove,
+  showTools = true,
 }: {
   node: KnowledgeNode
   data: Snapshot
@@ -145,6 +146,7 @@ export function NodeDetails({
   onEdit: () => void
   onChild: () => void
   onMove: () => void
+  showTools?: boolean
 }) {
   const [relating, setRelating] = useState(false),
     [search, setSearch] = useState('')
@@ -181,38 +183,40 @@ export function NodeDetails({
         {data.spaces.find((s) => s.id === node.spaceId)?.name} ›{' '}
         {nodePath(node.id, nodes).slice(0, -1).join(' › ') || '根层级'}
       </p>
-      <div className="node-tools">
-        <button className="text-button" disabled={busy || depth >= 5} onClick={onChild}>
-          <Icon name="branch" size={16} />
-          添加子节点
-        </button>
-        <button className="text-button" disabled={busy} onClick={onEdit}>
-          编辑节点
-        </button>
-        <button className="text-button" disabled={busy} onClick={onEdit}>
-          重命名
-        </button>
-        <button className="text-button" disabled={busy} onClick={onMove}>
-          移动节点
-        </button>
-        <button
-          className="text-button"
-          disabled={busy}
-          onClick={() => {
-            const branch = descendants(node.id, nodes, (n) => n.parentId)
-            const text =
-              branch.size > 1
-                ? `“${node.title}”包含 ${branch.size - 1} 个子节点。删除整个分支及关联？如需保留子节点，请取消后先移动。`
-                : `删除“${node.title}”及其知识、步骤关联？`
-            if (window.confirm(text))
-              void act({ type: 'deleteNode', id: node.id, branch: true }).then((ok) => {
-                if (ok) onClose()
-              })
-          }}
-        >
-          删除节点
-        </button>
-      </div>
+      {showTools ? (
+        <div className="node-tools">
+          <button className="text-button" disabled={busy || depth >= 5} onClick={onChild}>
+            <Icon name="branch" size={16} />
+            添加子节点
+          </button>
+          <button className="text-button" disabled={busy} onClick={onEdit}>
+            编辑节点
+          </button>
+          <button className="text-button" disabled={busy} onClick={onEdit}>
+            重命名
+          </button>
+          <button className="text-button" disabled={busy} onClick={onMove}>
+            移动节点
+          </button>
+          <button
+            className="text-button"
+            disabled={busy}
+            onClick={() => {
+              const branch = descendants(node.id, nodes, (n) => n.parentId)
+              const text =
+                branch.size > 1
+                  ? `“${node.title}”包含 ${branch.size - 1} 个子节点。删除整个分支及关联？如需保留子节点，请取消后先移动。`
+                  : `删除“${node.title}”及其知识、步骤关联？`
+              if (window.confirm(text))
+                void act({ type: 'deleteNode', id: node.id, branch: true }).then((ok) => {
+                  if (ok) onClose()
+                })
+            }}
+          >
+            删除节点
+          </button>
+        </div>
+      ) : null}
       <div className="node-detail-section">
         <h3>笔记</h3>
         {node.note ? (

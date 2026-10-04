@@ -199,7 +199,7 @@ export default function App() {
   ]
   const editing = data.cards.find((c) => c.id === argument)
   return (
-    <div className={reviewing ? 'app review-app' : 'app'}>
+    <div className={reviewing ? 'app studio-app review-app' : 'app studio-app'}>
       <a
         className="skip-link"
         href="#main"

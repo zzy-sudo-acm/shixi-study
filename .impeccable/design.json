@@ -1,67 +1,67 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-04T09:38:07.572Z",
+  "generatedAt": "2026-10-04T11:57:15.000Z",
   "title": "Design System: 时习",
   "extensions": {
     "colorMeta": {
       "ink": {
         "role": "primary",
-        "displayName": "墨绿",
-        "canonical": "#263e35",
+        "displayName": "墨黑",
+        "canonical": "#171717",
         "tonalRamp": [
-          "oklch(15% 0.0340 168.74)",
-          "oklch(26% 0.0340 168.74)",
-          "oklch(38% 0.0340 168.74)",
-          "oklch(50% 0.0340 168.74)",
-          "oklch(62% 0.0340 168.74)",
-          "oklch(74% 0.0340 168.74)",
-          "oklch(86% 0.0340 168.74)",
-          "oklch(95% 0.0340 168.74)"
+          "oklch(15% 0.0000 0.00)",
+          "oklch(26% 0.0000 0.00)",
+          "oklch(38% 0.0000 0.00)",
+          "oklch(50% 0.0000 0.00)",
+          "oklch(62% 0.0000 0.00)",
+          "oklch(74% 0.0000 0.00)",
+          "oklch(86% 0.0000 0.00)",
+          "oklch(95% 0.0000 0.00)"
         ]
       },
       "accent": {
         "role": "primary",
-        "displayName": "操作绿",
-        "canonical": "#416b53",
+        "displayName": "主动作黑",
+        "canonical": "#171717",
         "tonalRamp": [
-          "oklch(15% 0.0612 158.08)",
-          "oklch(26% 0.0612 158.08)",
-          "oklch(38% 0.0612 158.08)",
-          "oklch(50% 0.0612 158.08)",
-          "oklch(62% 0.0612 158.08)",
-          "oklch(74% 0.0612 158.08)",
-          "oklch(86% 0.0612 158.08)",
-          "oklch(95% 0.0612 158.08)"
+          "oklch(15% 0.0000 0.00)",
+          "oklch(26% 0.0000 0.00)",
+          "oklch(38% 0.0000 0.00)",
+          "oklch(50% 0.0000 0.00)",
+          "oklch(62% 0.0000 0.00)",
+          "oklch(74% 0.0000 0.00)",
+          "oklch(86% 0.0000 0.00)",
+          "oklch(95% 0.0000 0.00)"
         ]
       },
       "muted": {
         "role": "neutral",
-        "displayName": "灰绿文字",
-        "canonical": "#607267",
+        "displayName": "辅助灰",
+        "canonical": "#686868",
         "tonalRamp": [
-          "oklch(15% 0.0274 158.51)",
-          "oklch(26% 0.0274 158.51)",
-          "oklch(38% 0.0274 158.51)",
-          "oklch(50% 0.0274 158.51)",
-          "oklch(62% 0.0274 158.51)",
-          "oklch(74% 0.0274 158.51)",
-          "oklch(86% 0.0274 158.51)",
-          "oklch(95% 0.0274 158.51)"
+          "oklch(15% 0.0000 0.00)",
+          "oklch(26% 0.0000 0.00)",
+          "oklch(38% 0.0000 0.00)",
+          "oklch(50% 0.0000 0.00)",
+          "oklch(62% 0.0000 0.00)",
+          "oklch(74% 0.0000 0.00)",
+          "oklch(86% 0.0000 0.00)",
+          "oklch(95% 0.0000 0.00)"
         ]
       },
       "page": {
         "role": "neutral",
-        "displayName": "雾白纸底",
-        "canonical": "#f8faf8",
+        "displayName": "纯白页面",
+        "canonical": "#fff",
         "tonalRamp": [
-          "oklch(15% 0.0034 145.55)",
-          "oklch(26% 0.0034 145.55)",
-          "oklch(38% 0.0034 145.55)",
-          "oklch(50% 0.0034 145.55)",
-          "oklch(62% 0.0034 145.55)",
-          "oklch(74% 0.0034 145.55)",
-          "oklch(86% 0.0034 145.55)",
-          "oklch(95% 0.0034 145.55)"
+          "oklch(15% 0.0000 0.00)",
+          "oklch(26% 0.0000 0.00)",
+          "oklch(38% 0.0000 0.00)",
+          "oklch(50% 0.0000 0.00)",
+          "oklch(62% 0.0000 0.00)",
+          "oklch(74% 0.0000 0.00)",
+          "oklch(86% 0.0000 0.00)",
+          "oklch(95% 0.0000 0.00)"
         ]
       },
       "paper": {
@@ -81,38 +81,23 @@
       },
       "soft": {
         "role": "neutral",
-        "displayName": "浅绿",
-        "canonical": "#e9f0ea",
+        "displayName": "浅灰",
+        "canonical": "#f1f1ef",
         "tonalRamp": [
-          "oklch(15% 0.0109 149.86)",
-          "oklch(26% 0.0109 149.86)",
-          "oklch(38% 0.0109 149.86)",
-          "oklch(50% 0.0109 149.86)",
-          "oklch(62% 0.0109 149.86)",
-          "oklch(74% 0.0109 149.86)",
-          "oklch(86% 0.0109 149.86)",
-          "oklch(95% 0.0109 149.86)"
+          "oklch(15% 0.0027 0.00)",
+          "oklch(26% 0.0027 0.00)",
+          "oklch(38% 0.0027 0.00)",
+          "oklch(50% 0.0027 0.00)",
+          "oklch(62% 0.0027 0.00)",
+          "oklch(74% 0.0027 0.00)",
+          "oklch(86% 0.0027 0.00)",
+          "oklch(95% 0.0027 0.00)"
         ]
       },
       "line": {
         "role": "neutral",
         "displayName": "细分隔",
-        "canonical": "#dfe7e1",
-        "tonalRamp": [
-          "oklch(15% 0.0117 153.66)",
-          "oklch(26% 0.0117 153.66)",
-          "oklch(38% 0.0117 153.66)",
-          "oklch(50% 0.0117 153.66)",
-          "oklch(62% 0.0117 153.66)",
-          "oklch(74% 0.0117 153.66)",
-          "oklch(86% 0.0117 153.66)",
-          "oklch(95% 0.0117 153.66)"
-        ]
-      },
-      "sidebar": {
-        "role": "neutral",
-        "displayName": "白色侧栏",
-        "canonical": "#fff",
+        "canonical": "#e7e7e7",
         "tonalRamp": [
           "oklch(15% 0.0000 0.00)",
           "oklch(26% 0.0000 0.00)",
@@ -124,109 +109,124 @@
           "oklch(95% 0.0000 0.00)"
         ]
       },
-      "navigation-text": {
+      "card-surface": {
         "role": "neutral",
-        "displayName": "导航文字",
-        "canonical": "#607267",
+        "displayName": "展台灰",
+        "canonical": "#f6f6f4",
         "tonalRamp": [
-          "oklch(15% 0.0274 158.51)",
-          "oklch(26% 0.0274 158.51)",
-          "oklch(38% 0.0274 158.51)",
-          "oklch(50% 0.0274 158.51)",
-          "oklch(62% 0.0274 158.51)",
-          "oklch(74% 0.0274 158.51)",
-          "oklch(86% 0.0274 158.51)",
-          "oklch(95% 0.0274 158.51)"
+          "oklch(15% 0.0026 0.00)",
+          "oklch(26% 0.0026 0.00)",
+          "oklch(38% 0.0026 0.00)",
+          "oklch(50% 0.0026 0.00)",
+          "oklch(62% 0.0026 0.00)",
+          "oklch(74% 0.0026 0.00)",
+          "oklch(86% 0.0026 0.00)",
+          "oklch(95% 0.0026 0.00)"
         ]
       },
-      "tree-surface": {
+      "control-surface": {
         "role": "neutral",
-        "displayName": "结构纸面",
-        "canonical": "#f0f5f1",
+        "displayName": "控件灰",
+        "canonical": "#eaeae7",
         "tonalRamp": [
-          "oklch(15% 0.0075 151.89)",
-          "oklch(26% 0.0075 151.89)",
-          "oklch(38% 0.0075 151.89)",
-          "oklch(50% 0.0075 151.89)",
-          "oklch(62% 0.0075 151.89)",
-          "oklch(74% 0.0075 151.89)",
-          "oklch(86% 0.0075 151.89)",
-          "oklch(95% 0.0075 151.89)"
+          "oklch(15% 0.0040 106.48)",
+          "oklch(26% 0.0040 106.48)",
+          "oklch(38% 0.0040 106.48)",
+          "oklch(50% 0.0040 106.48)",
+          "oklch(62% 0.0040 106.48)",
+          "oklch(74% 0.0040 106.48)",
+          "oklch(86% 0.0040 106.48)",
+          "oklch(95% 0.0040 106.48)"
         ]
       },
-      "button-hover": {
+      "selection": {
         "role": "neutral",
-        "displayName": "按钮悬停纸面",
-        "canonical": "#edf3ee",
+        "displayName": "选区蓝灰",
+        "canonical": "#d8e0e8",
         "tonalRamp": [
-          "oklch(15% 0.0092 150.69)",
-          "oklch(26% 0.0092 150.69)",
-          "oklch(38% 0.0092 150.69)",
-          "oklch(50% 0.0092 150.69)",
-          "oklch(62% 0.0092 150.69)",
-          "oklch(74% 0.0092 150.69)",
-          "oklch(86% 0.0092 150.69)",
-          "oklch(95% 0.0092 150.69)"
+          "oklch(15% 0.0139 247.98)",
+          "oklch(26% 0.0139 247.98)",
+          "oklch(38% 0.0139 247.98)",
+          "oklch(50% 0.0139 247.98)",
+          "oklch(62% 0.0139 247.98)",
+          "oklch(74% 0.0139 247.98)",
+          "oklch(86% 0.0139 247.98)",
+          "oklch(95% 0.0139 247.98)"
         ]
       },
       "focus": {
         "role": "primary",
-        "displayName": "焦点绿",
-        "canonical": "#688d76",
+        "displayName": "焦点灰",
+        "canonical": "#767676",
         "tonalRamp": [
-          "oklch(15% 0.0540 157.10)",
-          "oklch(26% 0.0540 157.10)",
-          "oklch(38% 0.0540 157.10)",
-          "oklch(50% 0.0540 157.10)",
-          "oklch(62% 0.0540 157.10)",
-          "oklch(74% 0.0540 157.10)",
-          "oklch(86% 0.0540 157.10)",
-          "oklch(95% 0.0540 157.10)"
+          "oklch(15% 0.0000 0.00)",
+          "oklch(26% 0.0000 0.00)",
+          "oklch(38% 0.0000 0.00)",
+          "oklch(50% 0.0000 0.00)",
+          "oklch(62% 0.0000 0.00)",
+          "oklch(74% 0.0000 0.00)",
+          "oklch(86% 0.0000 0.00)",
+          "oklch(95% 0.0000 0.00)"
         ]
       },
       "input-line": {
         "role": "neutral",
         "displayName": "字段描边",
-        "canonical": "#bbcbbf",
+        "canonical": "#dcdcdc",
         "tonalRamp": [
-          "oklch(15% 0.0240 153.37)",
-          "oklch(26% 0.0240 153.37)",
-          "oklch(38% 0.0240 153.37)",
-          "oklch(50% 0.0240 153.37)",
-          "oklch(62% 0.0240 153.37)",
-          "oklch(74% 0.0240 153.37)",
-          "oklch(86% 0.0240 153.37)",
-          "oklch(95% 0.0240 153.37)"
+          "oklch(15% 0.0000 0.00)",
+          "oklch(26% 0.0000 0.00)",
+          "oklch(38% 0.0000 0.00)",
+          "oklch(50% 0.0000 0.00)",
+          "oklch(62% 0.0000 0.00)",
+          "oklch(74% 0.0000 0.00)",
+          "oklch(86% 0.0000 0.00)",
+          "oklch(95% 0.0000 0.00)"
         ]
       },
       "placeholder": {
         "role": "neutral",
-        "displayName": "占位灰绿",
-        "canonical": "#607267",
+        "displayName": "占位灰",
+        "canonical": "#737373",
         "tonalRamp": [
-          "oklch(15% 0.0274 158.51)",
-          "oklch(26% 0.0274 158.51)",
-          "oklch(38% 0.0274 158.51)",
-          "oklch(50% 0.0274 158.51)",
-          "oklch(62% 0.0274 158.51)",
-          "oklch(74% 0.0274 158.51)",
-          "oklch(86% 0.0274 158.51)",
-          "oklch(95% 0.0274 158.51)"
+          "oklch(15% 0.0000 0.00)",
+          "oklch(26% 0.0000 0.00)",
+          "oklch(38% 0.0000 0.00)",
+          "oklch(50% 0.0000 0.00)",
+          "oklch(62% 0.0000 0.00)",
+          "oklch(74% 0.0000 0.00)",
+          "oklch(86% 0.0000 0.00)",
+          "oklch(95% 0.0000 0.00)"
         ]
       },
-      "relation": {
+      "unsaved": {
         "role": "secondary",
-        "displayName": "关联绿",
-        "canonical": "#367861",
+        "displayName": "未保存琥珀",
+        "canonical": "#806218",
         "tonalRamp": [
-          "oklch(15% 0.0774 167.94)",
-          "oklch(26% 0.0774 167.94)",
-          "oklch(38% 0.0774 167.94)",
-          "oklch(50% 0.0774 167.94)",
-          "oklch(62% 0.0774 167.94)",
-          "oklch(74% 0.0774 167.94)",
-          "oklch(86% 0.0774 167.94)",
-          "oklch(95% 0.0774 167.94)"
+          "oklch(15% 0.0954 85.06)",
+          "oklch(26% 0.0954 85.06)",
+          "oklch(38% 0.0954 85.06)",
+          "oklch(50% 0.0954 85.06)",
+          "oklch(62% 0.0954 85.06)",
+          "oklch(74% 0.0954 85.06)",
+          "oklch(86% 0.0954 85.06)",
+          "oklch(95% 0.0954 85.06)"
+        ]
+      },
+      "phone-frame": {
+        "role": "neutral",
+        "displayName": "手机边框",
+        "canonical": "#303030",
+        "tonalRamp": [
+          "oklch(15% 0.0000 0.00)",
+          "oklch(26% 0.0000 0.00)",
+          "oklch(38% 0.0000 0.00)",
+          "oklch(50% 0.0000 0.00)",
+          "oklch(62% 0.0000 0.00)",
+          "oklch(74% 0.0000 0.00)",
+          "oklch(86% 0.0000 0.00)",
+          "oklch(95% 0.0000 0.00)"
         ]
       },
       "danger": {
@@ -273,39 +273,28 @@
           "oklch(86% 0.0157 32.01)",
           "oklch(95% 0.0157 32.01)"
         ]
-      },
-      "map-surface": {
-        "role": "neutral",
-        "displayName": "坐标纸面",
-        "canonical": "#eef3ef",
-        "tonalRamp": [
-          "oklch(15% 0.0075 151.89)",
-          "oklch(26% 0.0075 151.89)",
-          "oklch(38% 0.0075 151.89)",
-          "oklch(50% 0.0075 151.89)",
-          "oklch(62% 0.0075 151.89)",
-          "oklch(74% 0.0075 151.89)",
-          "oklch(86% 0.0075 151.89)",
-          "oklch(95% 0.0075 151.89)"
-        ]
       }
     },
     "typographyMeta": {
       "brand": {
         "displayName": "品牌",
-        "purpose": "时习桌面品牌字；原有复习主句沿用同一宋体家族。"
+        "purpose": "时习顶栏品牌字，保留宋体家族；手机为25px。"
+      },
+      "hero": {
+        "displayName": "首页主标题",
+        "purpose": "我的学习空间；500、clamp(36px, 4vw, 54px)、字距-0.035em，手机36px。"
       },
       "headline": {
         "displayName": "页面标题",
-        "purpose": "功能页面与领域名称；首页局部标题为500、clamp(28px, 2.6vw, 38px)，手机28px。"
+        "purpose": "领域名称38px、500、字距-0.025em，手机30px；既有功能页面保留各自层级。"
       },
       "title": {
         "displayName": "区域标题",
-        "purpose": "领域卡与区域标题。"
+        "purpose": "知识树、实时呈现与学习领域列表共用22px、500。"
       },
       "subheading": {
         "displayName": "子标题",
-        "purpose": "目标等层级标题。"
+        "purpose": "工作台编辑内容16px，节点详情分节14px。"
       },
       "body": {
         "displayName": "正文",
@@ -321,23 +310,33 @@
       },
       "label": {
         "displayName": "标签与计数",
-        "purpose": "计划标签、树与图谱计数。"
+        "purpose": "计划标签、树与图谱计数；状态与页脚11px。"
       },
       "control": {
         "displayName": "控件文字",
-        "purpose": "常规按钮文字。"
+        "purpose": "常规按钮文字；工作台行内操作11–14px。"
       }
     },
     "shadows": [
       {
-        "name": "card-shadow",
-        "value": "0 4px 18px #263e350a, 0 1px 3px #263e3505",
-        "purpose": "既有记忆卡片与复习纸面。新工作区领域卡和节点详情使用边框。"
+        "name": "orb-shadow",
+        "value": "drop-shadow(10px 18px 22px #00000015)",
+        "purpose": "首页黑色球体的轻微投影。"
       },
       {
-        "name": "navigation-selected",
-        "value": "0 2px 3px #1e375505",
-        "purpose": "桌面主导航选中纸面的轻微分层，手机取消。"
+        "name": "phone-shadow",
+        "value": "8px 16px 34px #00000010",
+        "purpose": "工作台手机预览框架。"
+      },
+      {
+        "name": "graph-node",
+        "value": "0 3px 8px #00000004",
+        "purpose": "预览图谱中的节点按钮。"
+      },
+      {
+        "name": "card-shadow",
+        "value": "0 4px 18px #263e350a, 0 1px 3px #263e3505",
+        "purpose": "既有记忆卡片与复习纸面。新工作台卡片使用灰面不使用阴影。"
       },
       {
         "name": "dialog",
@@ -349,45 +348,49 @@
       {
         "name": "ease-out",
         "value": "cubic-bezier(0.16, 1, 0.3, 1)",
-        "purpose": "树分支指示与导航图标反馈；系统减少动态效果时关闭。"
+        "purpose": "球体跟随、网格旋转与标准反馈；系统减少动态效果时关闭。"
       },
       {
-        "name": "button-colors",
-        "value": "150ms",
-        "purpose": "按钮背景与边框颜色过渡。"
+        "name": "ease-spring",
+        "value": "cubic-bezier(0.34, 1.56, 0.64, 1)",
+        "purpose": "按钮按压与悬停位移的弹簧缓动。"
       },
       {
-        "name": "navigation-colors",
-        "value": "160ms ease",
-        "purpose": "主导航背景与文字颜色过渡。"
+        "name": "pop-in",
+        "value": "240ms cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "列表与卡片交错弹入，逐项30ms、封顶8项。"
       },
       {
-        "name": "content-reveal",
+        "name": "orb-form-in",
+        "value": "700ms cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "球体符号入场圆形裁切展开；no-preference 门控。"
+      },
+      {
+        "name": "studio-note-in",
         "value": "220ms cubic-bezier(0.16, 1, 0.3, 1)",
-        "purpose": "既有卡片与答案展开；工作区页面入场最终被覆盖为无动画。"
+        "purpose": "工作台笔记呈现纵向裁切进入；no-preference 门控。"
       },
       {
-        "name": "map-feedback",
-        "value": "180ms cubic-bezier(0.16, 1, 0.3, 1)",
-        "purpose": "首页领域聚焦和悬停时的圆点、圆环及线透明度反馈；减少动态效果时关闭。"
-      },
-      {
-        "name": "origin-feedback",
-        "value": "220ms cubic-bezier(0.16, 1, 0.3, 1)",
-        "purpose": "空态创建起点圆环的局部响应；减少动态效果时关闭。"
+        "name": "graph-canvas",
+        "value": "240ms cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "预览图谱缩放过渡。"
       }
     ],
     "breakpoints": [
       {
-        "name": "wide-content",
-        "value": "1600px"
+        "name": "studio-compact",
+        "value": "1050px"
       },
       {
-        "name": "compact-sidebar",
-        "value": "1100px"
+        "name": "studio-stack",
+        "value": "850px"
       },
       {
-        "name": "knowledge-stack",
+        "name": "mobile",
+        "value": "640px"
+      },
+      {
+        "name": "legacy-knowledge-stack",
         "value": "1000px"
       },
       {
@@ -397,10 +400,6 @@
       {
         "name": "legacy-review-compact",
         "value": "820px"
-      },
-      {
-        "name": "mobile",
-        "value": "640px"
       }
     ]
   },
@@ -409,130 +408,143 @@
       "name": "主按钮",
       "kind": "button",
       "refersTo": "button-primary",
-      "description": "创建和保存动作；墨绿纸面，悬停转为操作绿。",
+      "description": "创建和保存动作；黑色药丸，悬停提亮为 #363636。",
       "html": "<button type=\"button\" class=\"ds-primary\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M12 5v14M5 12h14\"/></svg>新建领域</button>",
-      "css": ".ds-primary{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:44px;padding:10px 19px;border-radius:8px;font:500 15px/1.4 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;cursor:pointer;text-decoration:none;white-space:nowrap;transition:background-color .15s,border-color .15s;border:1px solid var(--ink,#263e35);background:var(--ink,#263e35);color:var(--paper,#fff);}.ds-primary:hover{background:var(--accent,#416b53);}.ds-primary:disabled{opacity:.48;cursor:not-allowed;}.ds-primary:focus-visible{outline:3px solid #688d76;outline-offset:4px;}@media(prefers-reduced-motion:reduce){.ds-primary{transition:none;}}"
+      "css": ".ds-primary{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:44px;padding:10px 20px;border-radius:999px;font:500 15px/1.4 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;cursor:pointer;text-decoration:none;white-space:nowrap;transition:background-color .15s,border-color .15s;border:1px solid var(--ink,#171717);background:var(--ink,#171717);color:var(--paper,#fff);}.ds-primary:hover{background:#363636;border-color:#363636;}.ds-primary:disabled{opacity:.45;cursor:not-allowed;}.ds-primary:focus-visible{outline:3px solid #767676;outline-offset:4px;}@media(prefers-reduced-motion:reduce){.ds-primary{transition:none;}}"
     },
     {
       "name": "次按钮",
       "kind": "button",
       "refersTo": "button-secondary",
-      "description": "新建目标等补充动作；白纸和清晰细边框。",
-      "html": "<button type=\"button\" class=\"ds-secondary\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M12 5v14M5 12h14\"/></svg>新建目标</button>",
-      "css": ".ds-secondary{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:44px;padding:10px 19px;border-radius:8px;font:500 15px/1.4 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;cursor:pointer;text-decoration:none;white-space:nowrap;transition:background-color .15s,border-color .15s;border:1px solid #c5d3c9;background:var(--paper,#fff);color:var(--ink,#263e35);}.ds-secondary:hover{background:#edf3ee;border-color:#abbacb;}.ds-secondary:focus-visible{outline:3px solid #688d76;outline-offset:4px;}.ds-secondary:disabled{opacity:.48;cursor:not-allowed;}@media(prefers-reduced-motion:reduce){.ds-secondary{transition:none;}}"
+      "description": "放弃修改等补充动作；白纸和清晰细边框。",
+      "html": "<button type=\"button\" class=\"ds-secondary\">放弃修改</button>",
+      "css": ".ds-secondary{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:44px;padding:10px 19px;border-radius:999px;font:500 15px/1.4 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;cursor:pointer;text-decoration:none;white-space:nowrap;transition:background-color .15s,border-color .15s;border:1px solid #dcdcdc;background:var(--paper,#fff);color:var(--ink,#171717);}.ds-secondary:hover{background:#f1f1ef;}.ds-secondary:focus-visible{outline:3px solid #767676;outline-offset:4px;}.ds-secondary:disabled{opacity:.45;cursor:not-allowed;}@media(prefers-reduced-motion:reduce){.ds-secondary{transition:none;}}"
     },
     {
       "name": "文字操作",
       "kind": "button",
       "refersTo": "button-text",
-      "description": "节点编辑、移动及任务关联等行内操作；手机扩大操作高度。",
+      "description": "节点编辑、移动及任务关联等行内操作；深灰文字，悬停转黑。",
       "html": "<button type=\"button\" class=\"ds-text\">编辑节点</button>",
-      "css": ".ds-text{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:44px;padding:10px 19px;border-radius:8px;font:500 15px/1.4 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;cursor:pointer;text-decoration:none;white-space:nowrap;transition:background-color .15s,border-color .15s;min-height:36px;padding:4px 2px;border:0;background:transparent;color:var(--accent,#416b53);font-size:12px;}.ds-text:hover{background:#edf3ee;}.ds-text:focus-visible{outline:3px solid #688d76;outline-offset:4px;}.ds-text:disabled{opacity:.48;cursor:not-allowed;}@media(max-width:640px){.ds-text{min-height:44px;}}@media(prefers-reduced-motion:reduce){.ds-text{transition:none;}}"
+      "css": ".ds-text{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:36px;padding:4px 2px;border:0;background:transparent;color:#505050;font:500 12px/1.4 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;cursor:pointer;transition:color .15s;}.ds-text:hover{color:#111;}.ds-text:focus-visible{outline:3px solid #767676;outline-offset:4px;}.ds-text:disabled{opacity:.48;cursor:not-allowed;}@media(max-width:640px){.ds-text{min-height:44px;}}@media(prefers-reduced-motion:reduce){.ds-text{transition:none;}}"
     },
     {
       "name": "搜索字段",
       "kind": "input",
       "refersTo": "field",
-      "description": "树及关联选择器使用带可访问名称的白纸搜索输入。",
+      "description": "树及关联选择器使用带可访问名称的白纸搜索输入；工作台内编辑字段圆角为12px。",
       "html": "<input class=\"ds-field\" type=\"search\" aria-label=\"搜索知识节点\" placeholder=\"查找节点\"/>",
-      "css": ".ds-field{width:100%;max-width:100%;min-height:44px;padding:11px 12px;border:1px solid #bbcbbf;border-radius:7px;background:var(--paper,#fff);color:var(--ink,#263e35);font:400 15px/1.65 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;caret-color:var(--accent,#416b53);}.ds-field::placeholder{color:#607267;}.ds-field:focus-visible{outline:3px solid #688d76;outline-offset:4px;}@media(max-width:640px){.ds-field{font-size:16px;}}"
-    },
-    {
-      "name": "建议标签",
-      "kind": "chip",
-      "refersTo": "tag",
-      "description": "既有标签建议按钮的浅绿药丸形；静态卡片标签另用4px圆角。",
-      "html": "<button type=\"button\" class=\"ds-tag\">标签</button>",
-      "css": ".ds-tag{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:44px;padding:10px 19px;border-radius:8px;font:500 15px/1.4 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;cursor:pointer;text-decoration:none;white-space:nowrap;transition:background-color .15s,border-color .15s;min-height:30px;padding:3px 12px;border:1px solid transparent;border-radius:999px;background:var(--soft,#e9f0ea);color:var(--ink,#263e35);font-size:12px;font-weight:400;}.ds-tag:hover{background:#dce7f2;}.ds-tag:focus-visible{outline:3px solid #688d76;outline-offset:4px;}@media(prefers-reduced-motion:reduce){.ds-tag{transition:none;}}"
+      "css": ".ds-field{width:100%;max-width:100%;min-height:44px;padding:11px 12px;border:1px solid #dcdcdc;border-radius:7px;background:var(--paper,#fff);color:var(--ink,#171717);font:400 15px/1.65 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;caret-color:#171717;}.ds-field::placeholder{color:#737373;}.ds-field:focus-visible{outline:3px solid #767676;outline-offset:4px;}@media(max-width:640px){.ds-field{font-size:16px;}}"
     },
     {
       "name": "主导航",
       "kind": "nav",
       "refersTo": "navigation-item",
-      "description": "桌面三项书签导航，手机排列为三栏并保持当前页面语义。",
-      "html": "<nav class=\"ds-nav\" aria-label=\"主导航\"><a class=\"ds-nav-active\" aria-current=\"page\" href=\"#home\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M4 4h12a4 4 0 0 1 4 4v13H8a4 4 0 0 1-4-4V4zM8 9h8M8 13h6\"/></svg><span>学习空间</span></a><a href=\"#library\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><rect x=\"7\" y=\"5\" width=\"13\" height=\"16\" rx=\"2\"/><path d=\"M4 17V3a1 1 0 0 1 1-1h11M11 10h5m-5 4h3\"/></svg><span>记忆卡片</span></a><a href=\"#settings\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M4 7h16M4 17h16\"/><circle cx=\"8\" cy=\"7\" r=\"3\"/><circle cx=\"16\" cy=\"17\" r=\"3\"/></svg><span>设置与备份</span></a></nav>",
-      "css": ".ds-nav{display:grid;gap:9px;padding:20px;background:#fff;font:400 15px/1.65 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;}.ds-nav a{position:relative;display:flex;align-items:center;gap:12px;min-height:49px;padding:12px 16px;text-decoration:none;color:#607267;border-radius:7px;transition:background-color 160ms ease,color 160ms ease;}.ds-nav a:hover{background:#eef3ef;}.ds-nav a.ds-nav-active{color:var(--ink,#263e35);background:var(--paper,#fff);font-weight:600;box-shadow:0 2px 3px #1e375505;}.ds-nav-active:before{position:absolute;content:'';width:3px;background:var(--ink,#263e35);height:22px;left:-20px;border-radius:0 2px 2px 0;}.ds-nav a:focus-visible{outline:3px solid #688d76;outline-offset:4px;}.ds-nav svg{flex-shrink:0;transition:transform 180ms cubic-bezier(.16,1,.3,1);}.ds-nav a:active svg{transform:scale(.88);}@media(max-width:640px){.ds-nav{grid-template-columns:repeat(3,1fr);gap:3px;padding:6px 12px;background:var(--paper,#fff);}.ds-nav a{flex-direction:column;justify-content:center;gap:4px;min-height:56px;padding:7px 2px;font-size:11px;color:#607267;}.ds-nav a.ds-nav-active{background:#e9f0ea;color:#263e35;box-shadow:none;}.ds-nav-active:before{display:none;}.ds-nav a:not(.ds-nav-active):hover{background:transparent;}}@media(prefers-reduced-motion:reduce){.ds-nav a,.ds-nav svg{transition:none;}}"
+      "description": "顶栏居中三项药丸导航，选中为黑底白字；手机品牌在上、入口等分在下。",
+      "html": "<nav class=\"ds-nav\" aria-label=\"主导航\"><a class=\"ds-nav-active\" aria-current=\"page\" href=\"#home\"><svg width=\"17\" height=\"17\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M4 4h12a4 4 0 0 1 4 4v13H8a4 4 0 0 1-4-4V4zM8 9h8M8 13h6\"/></svg><span>学习空间</span></a><a href=\"#library\"><svg width=\"17\" height=\"17\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><rect x=\"7\" y=\"5\" width=\"13\" height=\"16\" rx=\"2\"/><path d=\"M4 17V3a1 1 0 0 1 1-1h11M11 10h5m-5 4h3\"/></svg><span>记忆卡片</span></a><a href=\"#settings\"><svg width=\"17\" height=\"17\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M4 7h16M4 17h16\"/><circle cx=\"8\" cy=\"7\" r=\"3\"/><circle cx=\"16\" cy=\"17\" r=\"3\"/></svg><span>设置与备份</span></a></nav>",
+      "css": ".ds-nav{display:flex;justify-content:center;gap:4px;font:400 14px/1.65 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;}.ds-nav a{display:flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:10px 18px;text-decoration:none;color:#686868;border-radius:999px;transition:background-color 160ms ease,color 160ms ease;}.ds-nav a:hover{background:#f3f3f1;color:#171717;}.ds-nav a.ds-nav-active{color:#fff;background:#171717;}.ds-nav a:focus-visible{outline:3px solid #767676;outline-offset:4px;}@media(max-width:640px){.ds-nav{width:100%;gap:3px;}.ds-nav a{flex:1;padding:8px 10px;font-size:12px;gap:6px;}}@media(prefers-reduced-motion:reduce){.ds-nav a{transition:none;}}"
     },
     {
-      "name": "首页领域条目",
+      "name": "知识球体",
+      "kind": "custom",
+      "refersTo": "knowledge-orb",
+      "description": "首页黑色球体与创建入口：SVG 径向渐变球面、白色经纬网格与点线符号；指针跟随、悬停网格旋转、按压缩放，点击新建领域。",
+      "html": "<button type=\"button\" class=\"ds-orb\" aria-label=\"在学习空间新建领域\"><svg viewBox=\"0 0 440 440\" aria-hidden=\"true\"><circle cx=\"220\" cy=\"220\" r=\"194\" fill=\"#151515\"/><g stroke=\"#fff\" fill=\"none\" opacity=\".5\"><ellipse cx=\"220\" cy=\"220\" rx=\"214\" ry=\"72\" transform=\"rotate(-24 220 220)\"/></g><path d=\"M139 273 208 133 299 250\" stroke=\"#fff\" stroke-width=\"3\" fill=\"none\"/><circle cx=\"139\" cy=\"273\" r=\"19\" fill=\"#fff\"/><circle cx=\"208\" cy=\"133\" r=\"24\" fill=\"#fff\"/><circle cx=\"299\" cy=\"250\" r=\"19\" fill=\"#fff\"/></svg><span class=\"ds-orb-mark\" aria-hidden=\"true\">+</span><span class=\"ds-orb-caption\">从一个想法开始</span></button>",
+      "css": ".ds-orb{position:relative;display:block;padding:0;width:min(100%,440px);aspect-ratio:1;border:0;border-radius:50%;background:transparent;color:#171717;cursor:pointer;}.ds-orb>svg{display:block;width:100%;height:100%;filter:drop-shadow(10px 18px 22px #00000015);transition:transform .3s cubic-bezier(.16,1,.3,1);}.ds-orb:active>svg{transform:scale(.97);}.ds-orb-mark{position:absolute;right:7%;bottom:16%;display:grid;place-items:center;width:52px;height:52px;font:300 30px/1 system-ui;background:#fff;border:1px solid #dedede;border-radius:50%;transition:transform .18s,background-color .18s,color .18s;}.ds-orb:hover .ds-orb-mark,.ds-orb:focus-visible .ds-orb-mark{transform:scale(1.1);background:#171717;color:#fff;}.ds-orb-caption{position:absolute;bottom:-6px;left:0;right:0;color:#686868;font-size:12px;}.ds-orb:focus-visible{outline:3px solid #767676;outline-offset:4px;}@media(max-width:640px){.ds-orb{width:min(100%,310px);}.ds-orb-mark{width:44px;height:44px;font-size:26px;}}@media(prefers-reduced-motion:reduce){.ds-orb>svg,.ds-orb-mark{transition:none;transform:none;}}"
+    },
+    {
+      "name": "首页领域卡片",
       "kind": "card",
       "refersTo": "space-card",
-      "description": "透明背景、下沿细分隔的领域入口，显示真实计划状态与知识计数。",
-      "html": "<article class=\"ds-space-card\"><a class=\"ds-space-open\" href=\"#home\" aria-label=\"进入我的领域\"><div class=\"ds-space-title\"><span class=\"ds-space-symbol\"><svg width=\"22\" height=\"22\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M4 4h12a4 4 0 0 1 4 4v13H8a4 4 0 0 1-4-4V4zM8 9h8M8 13h6\"/></svg></span><h2>我的领域</h2></div><p class=\"ds-space-progress\">尚未建立计划</p><p class=\"ds-space-meta\">0 个目标 · 0 个知识节点</p></a><div class=\"ds-space-actions\"><button type=\"button\">编辑</button><button type=\"button\">删除</button></div></article>",
-      "css": ".ds-space-card{min-width:0;background:transparent;border:0;border-bottom:1px solid var(--line,#dfe7e1);border-radius:0;overflow:hidden;color:var(--ink,#263e35);font:400 15px/1.65 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;}.ds-space-card:has(.ds-space-open:hover){border-color:#9aafbf;}.ds-space-open{display:block;padding:22px 0 10px;color:var(--ink,#263e35);text-decoration:none;}.ds-space-title{display:flex;gap:11px;align-items:center;margin-bottom:14px;}.ds-space-symbol{display:grid;place-items:center;color:var(--space-color,#456785);flex-shrink:0;width:28px;height:28px;}.ds-space-title h2{margin:0;font-size:18px;font-weight:500;overflow-wrap:anywhere;}.ds-space-progress{margin:0;color:var(--muted,#607267);font-size:14px;}.ds-space-meta{margin:12px 0 0;font-size:12px;color:var(--muted,#607267);}.ds-space-actions{display:flex;gap:18px;padding:0 0 12px;}.ds-space-actions button{min-height:36px;padding:4px 2px;border:0;background:transparent;color:var(--accent,#416b53);font:500 12px/1.4 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;cursor:pointer;}.ds-space-actions button:hover{background:#edf3ee;}.ds-space-open:focus-visible,.ds-space-actions button:focus-visible{outline:3px solid #688d76;outline-offset:4px;}.ds-space-open:hover h2{text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:5px;}"
+      "description": "浅灰圆角卡片：名称、真实计划完成度、目标与知识计数、根节点预览，右侧真实知识结构缩略图；悬停时缩略结构舒展。",
+      "html": "<article class=\"ds-space-card\" style=\"--space-color:#456785\"><a class=\"ds-space-open\" href=\"#home\" aria-label=\"进入我的领域\"><div class=\"ds-space-card-body\"><div class=\"ds-space-card-copy\"><div class=\"ds-space-title\"><span class=\"ds-space-symbol\"><svg width=\"22\" height=\"22\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M4 4h12a4 4 0 0 1 4 4v13H8a4 4 0 0 1-4-4V4zM8 9h8M8 13h6\"/></svg></span><h2>我的领域</h2></div><p class=\"ds-space-progress\">尚未建立计划</p><p class=\"ds-space-meta\">0 个目标 · 0 个知识节点</p><p class=\"ds-space-root-preview\">从一个概念，长出自己的结构。</p></div><div class=\"ds-space-card-visual\"><svg viewBox=\"0 0 300 274\" class=\"ds-space-drawing\" aria-hidden=\"true\"><circle cx=\"150\" cy=\"137\" r=\"21\" fill=\"none\" stroke=\"#456785\" stroke-width=\".8\" opacity=\".35\"/><circle cx=\"150\" cy=\"137\" r=\"11\" fill=\"#456785\"/></svg></div></div></a><div class=\"ds-space-actions\"><button type=\"button\">编辑</button><button type=\"button\">删除</button></div></article>",
+      "css": ".ds-space-card{min-width:0;background:#f6f6f4;border:0;border-radius:24px;overflow:hidden;color:var(--ink,#171717);font:400 15px/1.65 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;}.ds-space-open{display:block;padding:28px 28px 8px;color:inherit;text-decoration:none;}.ds-space-card-body{display:grid;grid-template-columns:1.2fr 1fr;align-items:center;gap:8px;}.ds-space-card-copy{min-width:0;}.ds-space-title{display:flex;gap:11px;align-items:flex-start;margin-bottom:22px;}.ds-space-symbol{display:grid;place-items:center;color:var(--space-color,#456785);flex-shrink:0;width:25px;height:30px;}.ds-space-title h2{margin:0;font-size:21px;font-weight:500;overflow-wrap:anywhere;}.ds-space-progress{margin:0;color:#171717;font-size:14px;}.ds-space-meta{margin:12px 0 0;font-size:12px;color:#686868;}.ds-space-root-preview{margin:16px 0 0;font-size:12px;line-height:1.7;color:#686868;overflow-wrap:anywhere;}.ds-space-card-visual{min-width:0;}.ds-space-drawing{width:100%;transition:transform .3s cubic-bezier(.16,1,.3,1);}.ds-space-card:has(.ds-space-open:hover) .ds-space-drawing{transform:scale(1.07);}.ds-space-actions{display:flex;gap:18px;padding:0 28px 18px;}.ds-space-actions button{min-height:36px;padding:4px 2px;border:0;background:transparent;color:#505050;font:500 12px/1.4 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;cursor:pointer;}.ds-space-actions button:hover{color:#111;}.ds-space-open:focus-visible,.ds-space-actions button:focus-visible{outline:3px solid #767676;outline-offset:4px;}@media(max-width:640px){.ds-space-card{border-radius:20px;}.ds-space-open{padding:24px 22px 10px;}.ds-space-actions{padding-inline:22px;}.ds-space-title h2{font-size:19px;}}@media(prefers-reduced-motion:reduce){.ds-space-drawing{transition:none;transform:none;}}"
+    },
+    {
+      "name": "呈现方式分段控件",
+      "kind": "custom",
+      "refersTo": "preview-mode-control",
+      "description": "工作台右卡片切换笔记、图谱、手机三种实时呈现；选中为白纸黑字，aria-pressed 表达。",
+      "html": "<div class=\"ds-mode\" aria-label=\"呈现方式\"><button type=\"button\" aria-pressed=\"true\">笔记预览</button><button type=\"button\" aria-pressed=\"false\">图谱预览</button><button type=\"button\" aria-pressed=\"false\">手机预览</button></div>",
+      "css": ".ds-mode{display:flex;gap:4px;padding:4px;background:#eaeae7;border-radius:13px;font:400 12px/1.65 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;}.ds-mode button{flex:1;min-height:40px;padding:8px 10px;border:0;background:transparent;border-radius:10px;color:#686868;font:inherit;cursor:pointer;transition:background-color .15s,color .15s;}.ds-mode button[aria-pressed='true']{color:#171717;background:#fff;box-shadow:0 2px 4px #00000005;}.ds-mode button:focus-visible{outline:3px solid #767676;outline-offset:4px;}@media(prefers-reduced-motion:reduce){.ds-mode button{transition:none;}}"
+    },
+    {
+      "name": "手机预览",
+      "kind": "custom",
+      "refersTo": "phone-preview",
+      "description": "带状态栏、胶囊感应区与主页指示条的手机框架，实时呈现当前节点名称与笔记；内容随左侧编辑同步。",
+      "html": "<div class=\"ds-phone\"><div class=\"ds-phone-status\"><span>时习</span></div><div class=\"ds-phone-island\" aria-hidden=\"true\"></div><div class=\"ds-phone-screen\"><p class=\"ds-phone-space\">我的领域</p><article class=\"ds-phone-note\"><h3>知识节点</h3><p>先理解概念，再把它与已有的知识连接。</p><button type=\"button\">收起笔记</button></article><div class=\"ds-phone-bottom\">内容随左侧编辑同步</div></div><span class=\"ds-phone-home\" aria-hidden=\"true\"></span></div>",
+      "css": ".ds-phone{position:relative;width:min(100%,310px);height:548px;margin:28px auto 0;border:6px solid #303030;border-radius:46px;background:#fff;box-shadow:8px 16px 34px #00000010;overflow:hidden;font:400 14px/1.65 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;color:#171717;}.ds-phone-status{display:flex;justify-content:space-between;align-items:center;padding:17px 24px 0;font-size:11px;font-weight:500;}.ds-phone-island{position:absolute;top:12px;left:50%;transform:translateX(-50%);width:94px;height:25px;background:#111;border-radius:999px;}.ds-phone-screen{display:flex;flex-direction:column;height:calc(100% - 39px);padding:32px 21px 38px;overflow-y:auto;}.ds-phone-space{padding-bottom:20px;color:#686868;font-size:12px;text-align:center;}.ds-phone-note h3{font-size:27px;font-weight:500;line-height:1.45;overflow-wrap:anywhere;margin:0;}.ds-phone-note p{margin-top:24px;font-size:14px;line-height:1.9;white-space:pre-wrap;overflow-wrap:anywhere;}.ds-phone-note button{display:flex;justify-content:space-between;width:100%;margin-top:26px;font-size:12px;border:0;padding:12px 0;border-radius:0;border-bottom:1px solid #ededed;background:transparent;color:#171717;cursor:pointer;}.ds-phone-bottom{display:flex;justify-content:center;gap:7px;font-size:11px;color:#686868;margin-top:auto;padding-top:30px;}.ds-phone-home{position:absolute;bottom:10px;left:calc(50% - 43px);width:86px;height:4px;background:#111;border-radius:99px;}@media(max-width:640px){.ds-phone{height:530px;}}"
     },
     {
       "name": "SpaceIconPicker",
       "kind": "custom",
       "refersTo": "space-icon-picker",
-      "description": "新建和编辑领域的图标点选器：默认书本、12 个内联 SVG 与 10 个常用 emoji；SVG 继承领域颜色，旧符号保留原值。点选收起并返回焦点，Escape 先收起面板；表单记录按钮选择的未保存状态，面板随原生对话框内部滚动。尺寸与网格只属于本组件。预览展示展开及自定义区域状态。",
-      "html": "<fieldset class=\"ds-icon-picker\" style=\"--ds-icon-color:#456785\"><legend>图标（可选）</legend><div class=\"ds-icon-picker-control\"><span class=\"ds-icon-preview\" aria-hidden=\"true\"><svg width=\"28\" height=\"28\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M4 4h12a4 4 0 0 1 4 4v13H8a4 4 0 0 1-4-4V4zM8 9h8M8 13h6\"/></svg></span><span class=\"ds-icon-current\" aria-live=\"polite\">书本</span><button type=\"button\" class=\"ds-icon-trigger\" aria-expanded=\"true\" aria-controls=\"ds-icon-panel\">收起图标</button></div><div class=\"ds-icon-panel\" id=\"ds-icon-panel\"><div class=\"ds-icon-grid\" role=\"group\" aria-label=\"线条图标\"><button type=\"button\" class=\"ds-icon-choice\" aria-label=\"选择图标 书本\" aria-pressed=\"true\"><svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M4 4h12a4 4 0 0 1 4 4v13H8a4 4 0 0 1-4-4V4zM8 9h8M8 13h6\"/></svg><span>书本</span></button><button type=\"button\" class=\"ds-icon-choice\" aria-label=\"选择图标 代码\" aria-pressed=\"false\"><svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"m8 6-6 6 6 6m8-12 6 6-6 6m-3-15-2 18\"/></svg><span>代码</span></button><button type=\"button\" class=\"ds-icon-choice\" aria-label=\"选择图标 计算器\" aria-pressed=\"false\"><svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><rect x=\"5\" y=\"2\" width=\"14\" height=\"20\" rx=\"2\"/><path d=\"M8 6h8M8 11h1m6 0h1m-8 4h1m6 0h1m-8 4h1m6 0h1\"/></svg><span>计算器</span></button><button type=\"button\" class=\"ds-icon-choice\" aria-label=\"选择图标 地球\" aria-pressed=\"false\"><svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><circle cx=\"12\" cy=\"12\" r=\"10\"/><ellipse cx=\"12\" cy=\"12\" rx=\"4\" ry=\"10\"/><path d=\"M2 12h20\"/></svg><span>地球</span></button><button type=\"button\" class=\"ds-icon-choice\" aria-label=\"选择图标 植物\" aria-pressed=\"false\"><svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M20 3C10 2 3 6 3 13a7 7 0 0 0 7 7c7 0 11-7 10-17ZM4 20 15 9\"/></svg><span>植物</span></button><button type=\"button\" class=\"ds-icon-choice\" aria-label=\"选择图标 语言\" aria-pressed=\"false\"><svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M3 5h11M8 2v3m3 0c0 5-3 8-7 10m1-7c1 3 4 6 7 7m1 6 4-10 4 10m-7-3h6\"/></svg><span>语言</span></button><button type=\"button\" class=\"ds-icon-choice\" aria-label=\"选择图标 灵感\" aria-pressed=\"false\"><svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M8 16a7 7 0 1 1 8 0l-1 2H9l-1-2Zm1 5h6\"/></svg><span>灵感</span></button><button type=\"button\" class=\"ds-icon-choice\" aria-label=\"选择图标 实验\" aria-pressed=\"false\"><svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M9 2h6m-5 0v7L4 19a2 2 0 0 0 2 3h12a2 2 0 0 0 2-3L14 9V2M7 15h10\"/></svg><span>实验</span></button><button type=\"button\" class=\"ds-icon-choice\" aria-label=\"选择图标 音乐\" aria-pressed=\"false\"><svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M9 18V5l11-2v13M9 8l11-2\"/><ellipse cx=\"6\" cy=\"18\" rx=\"3\" ry=\"2\"/><ellipse cx=\"17\" cy=\"16\" rx=\"3\" ry=\"2\"/></svg><span>音乐</span></button><button type=\"button\" class=\"ds-icon-choice\" aria-label=\"选择图标 绘画\" aria-pressed=\"false\"><svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M12 2a10 10 0 1 0 0 20h2a2 2 0 0 0 0-4h-1a2 2 0 0 1 0-4h5a4 4 0 0 0 4-4c0-4-5-8-10-8Z\"/><circle cx=\"7\" cy=\"10\" r=\".6\"/><circle cx=\"10\" cy=\"6\" r=\".6\"/><circle cx=\"15\" cy=\"6\" r=\".6\"/><circle cx=\"18\" cy=\"10\" r=\".6\"/></svg><span>绘画</span></button><button type=\"button\" class=\"ds-icon-choice\" aria-label=\"选择图标 目标\" aria-pressed=\"false\"><svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><circle cx=\"12\" cy=\"12\" r=\"10\"/><circle cx=\"12\" cy=\"12\" r=\"6\"/><circle cx=\"12\" cy=\"12\" r=\"2\"/></svg><span>目标</span></button><button type=\"button\" class=\"ds-icon-choice\" aria-label=\"选择图标 文件夹\" aria-pressed=\"false\"><svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M3 7V4h6l2 3h10v13H3V7Z\"/></svg><span>文件夹</span></button></div><button type=\"button\" class=\"ds-icon-custom-trigger\" aria-expanded=\"true\" aria-controls=\"ds-icon-custom\">收起自定义 emoji</button><div class=\"ds-icon-custom\" id=\"ds-icon-custom\"><div class=\"ds-emoji-grid\" role=\"group\" aria-label=\"常用 emoji\"><button type=\"button\" class=\"ds-emoji-choice\" aria-label=\"选择 emoji 📐\" aria-pressed=\"false\">📐</button><button type=\"button\" class=\"ds-emoji-choice\" aria-label=\"选择 emoji 🌱\" aria-pressed=\"false\">🌱</button><button type=\"button\" class=\"ds-emoji-choice\" aria-label=\"选择 emoji 🐱\" aria-pressed=\"false\">🐱</button><button type=\"button\" class=\"ds-emoji-choice\" aria-label=\"选择 emoji 📚\" aria-pressed=\"false\">📚</button><button type=\"button\" class=\"ds-emoji-choice\" aria-label=\"选择 emoji 💻\" aria-pressed=\"false\">💻</button><button type=\"button\" class=\"ds-emoji-choice\" aria-label=\"选择 emoji 🌍\" aria-pressed=\"false\">🌍</button><button type=\"button\" class=\"ds-emoji-choice\" aria-label=\"选择 emoji 🎨\" aria-pressed=\"false\">🎨</button><button type=\"button\" class=\"ds-emoji-choice\" aria-label=\"选择 emoji 🎵\" aria-pressed=\"false\">🎵</button><button type=\"button\" class=\"ds-emoji-choice\" aria-label=\"选择 emoji 🔬\" aria-pressed=\"false\">🔬</button><button type=\"button\" class=\"ds-emoji-choice\" aria-label=\"选择 emoji ✨\" aria-pressed=\"false\">✨</button></div><label class=\"ds-icon-label\">其他 emoji 或符号<input class=\"ds-icon-input\" maxlength=\"16\" placeholder=\"粘贴或输入你喜欢的符号\"></label></div></div></fieldset>",
-      "css": ".ds-icon-picker{min-width:0;margin:0 0 24px;padding:0;border:0;background:var(--paper,#fff);color:var(--ink,#263e35);font:400 15px/1.65 'PingFang SC','Microsoft YaHei',system-ui,sans-serif;}.ds-icon-picker>legend{padding:0;margin-bottom:9px;font-size:14px;}.ds-icon-picker-control{display:flex;align-items:center;gap:12px;}.ds-icon-preview{display:grid;place-items:center;width:52px;height:52px;flex-shrink:0;border:1px solid var(--line,#dfe7e1);border-radius:12px;color:var(--ds-icon-color,#456785);font-size:28px;}.ds-icon-current{flex:1;min-width:0;font-size:14px;}.ds-icon-trigger,.ds-icon-choice,.ds-emoji-choice,.ds-icon-custom-trigger{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:44px;border:1px solid var(--line,#dfe7e1);border-radius:8px;background:var(--paper,#fff);color:var(--ink,#263e35);font-family:inherit;font-weight:500;line-height:1.4;cursor:pointer;transition:background-color .15s,border-color .15s;}.ds-icon-trigger{padding:9px 12px;font-size:13px;white-space:nowrap;border-color:#c5d3c9;}.ds-icon-trigger:hover{background:#edf3ee;border-color:#abbacb;}.ds-icon-panel{margin-top:14px;}.ds-icon-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;}.ds-icon-choice{flex-direction:column;gap:7px;min-height:72px;padding:9px 3px;color:var(--muted,#607267);font-size:12px;}.ds-icon-choice svg{color:var(--ds-icon-color,#456785);flex-shrink:0;}.ds-icon-choice:hover,.ds-emoji-choice:hover{background:#f8faf8;border-color:#abbacb;}.ds-icon-choice[aria-pressed='true'],.ds-emoji-choice[aria-pressed='true']{border-color:var(--accent,#416b53);background:var(--soft,#e9f0ea);color:var(--ink,#263e35);}.ds-icon-custom-trigger{margin-top:10px;padding:4px 2px;min-height:44px;border:0;background:transparent;color:var(--accent,#416b53);font-size:15px;}.ds-icon-custom-trigger:hover{background:#edf3ee;}.ds-emoji-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;}.ds-emoji-choice{min-height:46px;padding:7px;font-size:24px;}.ds-icon-label{display:grid;gap:7px;margin-top:16px;font-size:14px;}.ds-icon-input{width:100%;min-height:44px;padding:11px 12px;border:1px solid #bbcbbf;border-radius:7px;background:var(--paper,#fff);color:var(--ink,#263e35);font:inherit;}.ds-icon-input::placeholder{color:#607267;}.ds-icon-picker button:focus-visible,.ds-icon-input:focus-visible{outline:3px solid #688d76;outline-offset:4px;}.ds-icon-picker button:disabled{opacity:.48;cursor:not-allowed;}@media(max-width:640px){.ds-icon-grid{grid-template-columns:repeat(4,minmax(0,1fr));}.ds-icon-picker-control{gap:8px;}.ds-icon-preview{width:48px;height:48px;}.ds-icon-input{font-size:16px;}}@media(prefers-reduced-motion:reduce){.ds-icon-picker button{transition:none;}}"
+      "description": "新建和编辑领域的图标点选器：默认书本、12 个内联 SVG 与 10 个常用 emoji；SVG 继承领域颜色，旧符号保留原值。点选收起并返回焦点，Escape 先收起面板；表单记录按钮选择的未保存状态，面板随原生对话框内部滚动。尺寸与网格只属于本组件。",
+      "html": "<fieldset class=\"ds-icon-picker\" style=\"--ds-icon-color:#456785\"><legend>图标（可选）</legend><div class=\"ds-icon-picker-control\"><span class=\"ds-icon-preview\" aria-hidden=\"true\"><svg width=\"28\" height=\"28\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M4 4h12a4 4 0 0 1 4 4v13H8a4 4 0 0 1-4-4V4zM8 9h8M8 13h6\"/></svg></span><span class=\"ds-icon-current\" aria-live=\"polite\">书本</span><button type=\"button\" class=\"ds-icon-trigger\" aria-expanded=\"false\" aria-controls=\"ds-icon-panel\">选择图标</button></div></fieldset>",
+      "css": ".ds-icon-picker{min-width:0;margin:0 0 24px;padding:0;border:0;background:var(--paper,#fff);color:var(--ink,#171717);font:400 15px/1.65 'PingFang SC','Microsoft YaHei',system-ui,sans-serif;}.ds-icon-picker>legend{padding:0;margin-bottom:9px;font-size:14px;}.ds-icon-picker-control{display:flex;align-items:center;gap:12px;}.ds-icon-preview{display:grid;place-items:center;width:52px;height:52px;flex-shrink:0;border:1px solid var(--line,#e7e7e7);border-radius:12px;color:var(--ds-icon-color,#456785);font-size:28px;}.ds-icon-current{flex:1;min-width:0;font-size:14px;}.ds-icon-trigger{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:44px;padding:9px 12px;border:1px solid #dcdcdc;border-radius:8px;background:var(--paper,#fff);color:var(--ink,#171717);font-family:inherit;font-size:13px;font-weight:500;line-height:1.4;cursor:pointer;white-space:nowrap;transition:background-color .15s,border-color .15s;}.ds-icon-trigger:hover{background:#f1f1ef;}.ds-icon-picker button:focus-visible{outline:3px solid #767676;outline-offset:4px;}@media(max-width:640px){.ds-icon-picker-control{gap:8px;}.ds-icon-preview{width:48px;height:48px;}}@media(prefers-reduced-motion:reduce){.ds-icon-picker button{transition:none;}}"
     },
     {
       "name": "图谱节点",
       "kind": "custom",
       "refersTo": "graph-node",
-      "description": "稳定知识节点按钮；选中用外描边，相邻节点用绿色边框和浅绿纸面。",
-      "html": "<button type=\"button\" class=\"ds-graph-node\" aria-pressed=\"true\" title=\"知识节点\"><span>知识节点</span></button>",
-      "css": ".ds-graph-node{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:3px;width:208px;height:64px;min-height:64px;padding:10px 14px;border:1px solid var(--line,#dfe7e1);border-radius:10px;background:var(--paper,#fff);color:var(--ink,#263e35);font:500 13px/1.4 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;text-align:left;white-space:normal;cursor:pointer;outline:2px solid var(--accent,#416b53);outline-offset:3px;transition:background-color .15s,border-color .15s;}.ds-graph-node:hover{background:#edf3ee;border-color:#abbacb;}.ds-graph-node:focus-visible{outline:3px solid #688d76;outline-offset:4px;}.ds-graph-node.ds-graph-connected{border-color:#568f79;background:#f0f7f3;}@media(prefers-reduced-motion:reduce){.ds-graph-node{transition:none;}}.ds-graph-node span{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;overflow-wrap:anywhere;line-height:1.4;flex-shrink:0;}"
-    },
-    {
-      "name": "知识坐标场",
-      "kind": "custom",
-      "refersTo": "learning-map",
-      "description": "领域链接与真实知识结构预览；每页6领域、每领域48节点。手机根标题独立使用11px HTML文本。",
-      "html": "<section class=\"ds-map\" aria-label=\"学习领域知识地图\"><a class=\"ds-map-space\" href=\"#home\" aria-label=\"查看我的领域的知识图谱\"><svg class=\"ds-map-drawing\" viewBox=\"0 0 300 274\" aria-hidden=\"true\"><circle class=\"ds-map-ring\" cx=\"150\" cy=\"137\" r=\"21\"/><circle class=\"ds-map-dot\" cx=\"150\" cy=\"137\" r=\"11\"/></svg><span class=\"ds-map-label\">我的领域</span><span class=\"ds-map-count\">0 个知识节点</span></a><p class=\"ds-map-caption\">大点是领域，小点是知识。点击领域，探索其中的连接。</p></section>",
-      "css": ".ds-map{overflow:hidden;border-radius:18px;background:#eef3ef;color:var(--ink,#263e35);font:400 15px/1.65 'PingFang SC','Microsoft YaHei',system-ui,sans-serif;}.ds-map-space{display:flex;flex-direction:column;align-items:center;padding:20px 30px 48px;color:var(--ink,#263e35);text-decoration:none;background-image:radial-gradient(#b8c8bd 1px,transparent 1px);background-size:22px 22px;}.ds-map-drawing{display:block;width:min(100%,270px);aspect-ratio:300/274;color:var(--space-color,#456785);}.ds-map-ring{fill:none;stroke:currentColor;stroke-width:.8;opacity:.35;transition:r 180ms cubic-bezier(.16,1,.3,1),opacity 180ms;}.ds-map-dot{fill:currentColor;transition:r 180ms cubic-bezier(.16,1,.3,1);}.ds-map-space:hover .ds-map-dot,.ds-map-space:focus-visible .ds-map-dot{r:15;}.ds-map-space:hover .ds-map-ring,.ds-map-space:focus-visible .ds-map-ring{r:26;opacity:.8;}.ds-map-space:focus-visible{outline:3px solid #688d76;outline-offset:4px;}.ds-map-label{font-size:18px;font-weight:500;line-height:1.5;overflow-wrap:anywhere;text-align:center;}.ds-map-count{margin-top:7px;color:var(--muted,#607267);font-size:12px;}.ds-map-caption{margin:0;padding:14px 24px;background:#e6eee8;color:var(--muted,#607267);font-size:12px;}@media(max-width:640px){.ds-map{border-radius:14px;}.ds-map-label{font-size:14px;}.ds-map-count,.ds-map-caption{font-size:11px;}}@media(prefers-reduced-motion:reduce){.ds-map-ring,.ds-map-dot{transition:none;}}"
+      "description": "稳定知识节点按钮；选中为黑底白字，相邻节点用灰边框和浅灰纸面；父子线灰色实线，用户关联为领域色虚线。",
+      "html": "<button type=\"button\" class=\"ds-graph-node ds-graph-selected\" aria-pressed=\"true\" title=\"知识节点\"><span>知识节点</span></button>",
+      "css": ".ds-graph-node{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:3px;width:208px;height:64px;min-height:64px;padding:10px 14px;border:1px solid #d6d6d6;border-radius:8px;background:var(--paper,#fff);color:var(--ink,#171717);font:500 13px/1.4 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;text-align:left;white-space:normal;cursor:pointer;box-shadow:0 3px 8px #00000004;transition:background-color .15s,border-color .15s;}.ds-graph-node:hover{border-color:#8b8b8b;background:#f1f1ef;}.ds-graph-node.ds-graph-selected{border-color:#171717;background:#171717;color:#fff;}.ds-graph-node:focus-visible{outline:3px solid #767676;outline-offset:4px;}@media(prefers-reduced-motion:reduce){.ds-graph-node{transition:none;}}.ds-graph-node span{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;overflow-wrap:anywhere;line-height:1.4;flex-shrink:0;}"
     }
   ],
   "narrative": {
-    "northStar": "时习知识坐标场",
-    "overview": "雾绿底、白色纸面与墨绿文字组成安静的个人学习界面。圆点、细线与留白形成首页的知识坐标场，领域和知识的大小关系来自实际实体；导航与编辑界面沿用轻分隔。品牌使用宋体，功能标题和正文使用系统中文黑体，不加载外部字体。\n\n当前首页是用户自建领域的知识地图：首次打开呈现可创建的空白起点，创建后才出现领域地图与紧凑列表。领域内的目标、知识树和知识图谱沿用同一组颜色、字段与按钮。保留的记忆卡片、图片和复习纸面属于另一组既有功能，不能把其分类树或卡片图谱当作新的知识节点树。",
+    "northStar": "时习白色知识展台",
+    "overview": "纯白底、黑色文字与浅灰展台组成安静而有辨识度的个人学习界面。首页在文字旁放置一颗可操作的黑色球体，球面承载时习的点线符号；学习领域以浅灰卡片陈列，卡片内嵌真实知识结构的缩略图。领域工作台由两张同级卡片组成：左侧编辑名称与笔记，右侧立即呈现笔记、图谱或手机阅读效果。保留的记忆卡片、图片和复习纸面属于另一组既有功能，不能把其分类树或卡片图谱当作新的知识节点树。",
     "keyCharacteristics": [
-      "雾绿纸面、墨绿主动作，低饱和领域标记辅助识别。",
-      "品牌有宋体特征，内容与操作以中文系统字保持清晰。",
-      "层级通过间距、细分隔和状态表达；首页以真实点线结构形成辨识度。",
-      "桌面左导航与并排内容，手机顶端品牌、底部导航和单列内容。",
-      "空态、计数与计划完成度均来自真实数据。"
+      "纯白页面、黑色主动作与品牌球体，中性灰承载层级。",
+      "品牌保留宋体特征，内容与操作以中文系统黑体保持清晰。",
+      "桌面顶部居中三入口导航，手机品牌与导航纵向居中排列。",
+      "编辑与呈现成对出现；预览使用真实知识与当前草稿，保存状态显式可见。",
+      "空态、计数与计划完成度均来自真实数据；领域标记色是用户数据。"
     ],
     "rules": [
       {
         "name": "The Structural Color Rule",
-        "body": "首页领域所属线和父子线继承领域标记色，所属线为短虚线、父子线为实线；独立知识图谱的父子线仍为蓝灰实线。用户建立的额外知识关联使用绿色虚线，选中状态同时通过描边、文字或可访问状态表达。",
+        "body": "彩色只来自用户数据：领域标记色出现在领域符号、进度与关联线上；界面本身的动作与状态保持黑白灰，选中同时通过描边、文字或可访问状态表达。",
         "section": "colors"
       },
       {
         "name": "The Readable Secondary Copy Rule",
-        "body": "辅助文字降低视觉权重时保持可读；页脚、说明和计数沿用 `muted`，不要恢复旧版更淡的次级文字颜色。",
+        "body": "辅助文字降低视觉权重时保持可读；页脚、说明和计数沿用 `muted`，不要恢复更淡的次级文字颜色。",
         "section": "typography"
       },
       {
-        "name": "The Quiet Paper Rule",
-        "body": "工作区默认以边框和色差组织信息；沿用卡片纸面或模态的既有阴影时遵循其用途，不为每个列表层级增加浮层。",
+        "name": "The Quiet Surface Rule",
+        "body": "工作台以灰面与边界组织信息；沿用卡片纸面或模态的既有阴影时遵循其用途，不为每个列表层级增加浮层。",
         "section": "elevation"
       },
       {
-        "name": "The Real Coordinates Rule",
-        "body": "地图点线来自用户的实际实体和关系；预览限制只改变呈现数量，不改变实际计数或数据。",
+        "name": "The Real Data Rule",
+        "body": "球体符号、领域卡缩略图与右侧预览都来自用户的实际实体和关系；预览限制只改变呈现数量，不改变实际计数或数据。",
+        "section": "components"
+      },
+      {
+        "name": "The Paired Editing Rule",
+        "body": "编辑与呈现成对出现；预览未保存内容不等于已经写入本机，保存状态始终在编辑区与预览区同时可见。",
         "section": "components"
       }
     ],
     "dos": [
-      "**Do** 沿用雾白、白纸、墨绿和可读灰绿文字，让结构与当前操作成为重点。",
+      "**Do** 沿用纯白、墨黑和可读灰色文字，让结构、球体与当前操作成为重点。",
       "**Do** 保留真实空态；以用户创建的领域、步骤和知识实体生成页面与计数。",
+      "**Do** 让编辑与呈现成对出现，显式保存并明确未保存状态。",
       "**Do** 让目标、知识结构与关联各自表达职责，明确区分任务进度与知识掌握。",
       "**Do** 保留展开、选中、当前页面、保存状态和可见键盘焦点的语义。",
-      "**Do** 让名称和笔记在手机换行，地图根标题采用独立（11px）HTML 文本，并为底部导航与安全区保留内容空间。",
-      "**Do** 用内联 SVG 表达应用操作；将用户自选领域颜色与符号视为个人内容。"
+      "**Do** 用内联 SVG 表达应用操作与品牌球体；将用户自选领域颜色与符号视为个人内容。"
     ],
     "donts": [
       "**Don't** 在初始学习空间预设学科、目标、知识节点或示例完成率。",
       "**Don't** 将原有卡片分类树与卡片图谱替代新的稳定知识节点树。",
       "**Don't** 把完成步骤解释为已掌握知识，或用颜色单独表达关系与完成状态。",
-      "**Don't** 引入深色主题、营销首屏、数据大屏或花哨后台来替换既有纸面语言。",
-      "**Don't** 给每个工作区容器添加重阴影、全屏模糊或循环动画。",
-      "**Don't** 将用户填写的领域符号推广为通用按钮图标，或用装饰性短标签增加标题层级。"
+      "**Don't** 引入深色主题、营销首屏、数据大屏或花哨后台来替换白色展台语言；也不要回到旧版绿色侧栏视觉。",
+      "**Don't** 给每个工作台容器添加重阴影、全屏模糊或循环动画。",
+      "**Don't** 把预览中的未保存草稿当作已持久化数据，或静默丢弃用户输入。"
     ]
   }
 }

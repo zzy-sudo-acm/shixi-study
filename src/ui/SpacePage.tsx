@@ -1,15 +1,12 @@
-import { lazy, Suspense, useEffect, useState, type CSSProperties } from 'react'
+import { useEffect, useState, type CSSProperties } from 'react'
 import type { Snapshot } from '../core/model'
 import { activeGoals, spaceProgress } from '../core/workspace'
 import { Goals } from './Goals'
-import { KnowledgeTree } from './KnowledgeTree'
-import { NodeDetails, NodeForm } from './NodeDetails'
+import { KnowledgeStudio } from './KnowledgeStudio'
+import { NodeForm } from './NodeDetails'
 import { SpaceForm } from './Home'
 import { Icon, Notice, PageHead } from './shared'
 import { ProgressView, useWorkspaceActions, type Dirty } from './workspaceShared'
-const KnowledgeGraph = lazy(() =>
-  import('./KnowledgeGraph').then((module) => ({ default: module.KnowledgeGraph })),
-)
 
 export function SpacePage({
   data,
@@ -51,8 +48,7 @@ export function SpacePage({
       </>
     )
   const progress = spaceProgress(data, spaceId)
-  const nodes = data.knowledgeNodes.filter((n) => n.spaceId === spaceId),
-    active = nodes.find((n) => n.id === selected)
+  const nodes = data.knowledgeNodes.filter((n) => n.spaceId === spaceId)
   const tab = ['goals', 'tree', 'graph'].includes(view) ? view : 'goals'
   return (
     <div className="space-page" style={{ '--space-color': space.color ?? '#456785' } as CSSProperties}>
@@ -111,52 +107,17 @@ export function SpacePage({
           focusStep={focusStep}
         />
       ) : (
-        <div className={tab === 'tree' ? 'knowledge-workspace' : 'graph-workspace'}>
-          {tab === 'tree' ? (
-            <KnowledgeTree
-              data={data}
-              spaceId={spaceId}
-              selected={selected}
-              onSelect={setSelected}
-              onAdd={() => setEditor({ mode: 'add' })}
-            />
-          ) : (
-            <Suspense fallback={<p role="status">正在打开知识图谱…</p>}>
-              <KnowledgeGraph
-                data={data}
-                spaceId={spaceId}
-                selected={selected}
-                onSelect={setSelected}
-                onAdd={() => setEditor({ mode: 'add' })}
-              />
-            </Suspense>
-          )}
-          {active ? (
-            <NodeDetails
-              key={active.id}
-              node={active}
-              data={data}
-              act={act}
-              busy={busy}
-              onSelect={setSelected}
-              onClose={() => setSelected('')}
-              onEdit={() => setEditor({ mode: 'edit', id: active.id })}
-              onMove={() => setEditor({ mode: 'move', id: active.id })}
-              onChild={() => setEditor({ mode: 'add', parentId: active.id })}
-            />
-          ) : nodes.length ? (
-            <div className="node-details-placeholder">
-              <Icon name="branch" size={28} />
-              <h2>选择一个知识节点</h2>
-              <p>查看笔记、相关知识和学习任务。</p>
-            </div>
-          ) : tab === 'tree' ? (
-            <div className="node-details-placeholder">
-              <h2>把知识留成结构</h2>
-              <p>知识树可以独立生长，也可以与目标中的步骤建立联系。</p>
-            </div>
-          ) : null}
-        </div>
+        <KnowledgeStudio
+          data={data}
+          spaceId={spaceId}
+          view={tab}
+          selected={selected}
+          onSelect={setSelected}
+          onEdit={setEditor}
+          act={act}
+          busy={busy}
+          setDirty={setDirty}
+        />
       )}
       {editor ? (
         <NodeForm

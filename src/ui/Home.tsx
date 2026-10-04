@@ -1,9 +1,10 @@
 import { useState, type CSSProperties } from 'react'
 import type { Snapshot, Space } from '../core/model'
 import { spaceProgress } from '../core/workspace'
-import { Icon, PageHead } from './shared'
+import { Icon } from './shared'
 import { SpaceIcon, SpaceIconPicker } from './SpaceIcon'
-import { LearningMap } from './LearningMap'
+import { KnowledgeDrawing } from './LearningMap'
+import { KnowledgeOrb } from './KnowledgeOrb'
 import { FormActions, Modal, ProgressView, useWorkspaceActions, type Dirty } from './workspaceShared'
 
 const colors = ['#456785', '#527668', '#826541', '#75668c', '#8b606a']
@@ -191,18 +192,23 @@ export function Home({
     [deleting, setDeleting] = useState<Space | null>(null)
   return (
     <div className="learning-home">
-      <PageHead
-        title="我的学习空间"
-        description="从一个问题开始，把所学慢慢连起来。"
-        action={
-          data.spaces.length ? (
-            <button className="primary" onClick={() => setForm('new')}>
-              <Icon name="add" />
-              新建领域
-            </button>
-          ) : undefined
-        }
-      />
+      <section className="home-intro">
+        <div className="home-lead">
+          <h1 tabIndex={-1}>我的学习空间</h1>
+          <p className="home-statement">把所学，连成自己的世界。</p>
+          <p className="home-description">
+            从一个问题开始。建立目标，整理知识，
+            <br />
+            让每一次学习都有迹可循。
+          </p>
+          {!data.spaces.length ? <p className="home-empty-note">还没有任何领域。</p> : null}
+          <button className="primary" onClick={() => setForm('new')}>
+            <Icon name="add" />
+            新建领域
+          </button>
+        </div>
+        <KnowledgeOrb empty={!data.spaces.length} onCreate={() => setForm('new')} />
+      </section>
       {data.migrationWarnings.length ? (
         <details className="migration-note">
           <summary>旧数据已安全升级 · 查看说明</summary>
@@ -212,37 +218,8 @@ export function Home({
           <a href="#library">查看保留的记忆卡片</a>
         </details>
       ) : null}
-      {!data.spaces.length ? (
-        <section className="blank-workbench map-blank">
-          <div className="map-blank-copy">
-            <h2>
-              你的知识地图，
-              <br />
-              从这里开始。
-            </h2>
-            <p>还没有任何领域。</p>
-            <p className="map-blank-description">
-              建立一个你正在学习的东西。
-              <br />
-              目标、知识和它们之间的连接，会慢慢在这里成形。
-            </p>
-            <button className="primary" onClick={() => setForm('new')}>
-              <Icon name="add" />
-              新建领域
-            </button>
-          </div>
-          <div className="map-origin">
-            <span className="origin-guide origin-guide-x" aria-hidden="true" />
-            <span className="origin-guide origin-guide-y" aria-hidden="true" />
-            <button onClick={() => setForm('new')} aria-label="创建第一个学习领域" className="origin-button">
-              <Icon name="add" size={28} />
-            </button>
-            <span className="origin-caption">点击，建立第一个领域</span>
-          </div>
-        </section>
-      ) : (
+      {data.spaces.length ? (
         <>
-          <LearningMap data={data} onCreate={() => setForm('new')} />
           <div className="space-list-heading">
             <h2>学习领域</h2>
             <span>{data.spaces.length} 个领域</span>
@@ -259,6 +236,7 @@ export function Home({
                     {
                       '--space-color': space.color ?? colors[0],
                       '--stagger': Math.min(index, 8),
+                      '--space-delay': `${Math.min(index, 5) * 35}ms`,
                     } as CSSProperties
                   }
                 >
@@ -267,16 +245,35 @@ export function Home({
                     href={`#space/${space.id}/goals`}
                     aria-label={`进入 ${space.name}`}
                   >
-                    <div className="space-title">
-                      <span className="space-symbol" aria-hidden="true">
-                        <SpaceIcon value={space.icon} size={22} />
-                      </span>
-                      <h2>{space.name}</h2>
+                    <div className="space-card-body">
+                      <div className="space-card-copy">
+                        <div className="space-title">
+                          <span className="space-symbol" aria-hidden="true">
+                            <SpaceIcon value={space.icon} size={22} />
+                          </span>
+                          <h2>{space.name}</h2>
+                        </div>
+                        <ProgressView progress={spaceProgress(data, space.id)} />
+                        <p className="space-meta">
+                          {goals} 个目标 · {count} 个知识节点
+                        </p>
+                        <p className="space-root-preview">
+                          {data.knowledgeNodes
+                            .filter((node) => node.spaceId === space.id && !node.parentId)
+                            .slice(0, 2)
+                            .map((node) => node.title)
+                            .join(' / ') || '从一个概念，长出自己的结构。'}
+                        </p>
+                      </div>
+                      <div className="space-card-visual">
+                        <KnowledgeDrawing
+                          nodes={data.knowledgeNodes.filter((node) => node.spaceId === space.id).slice(0, 18)}
+                          relations={data.knowledgeRelations.filter(
+                            (relation) => relation.spaceId === space.id,
+                          )}
+                        />
+                      </div>
                     </div>
-                    <ProgressView progress={spaceProgress(data, space.id)} />
-                    <p className="space-meta">
-                      {goals} 个目标 · {count} 个知识节点
-                    </p>
                   </a>
                   <div className="space-actions">
                     <button
@@ -306,7 +303,7 @@ export function Home({
             })}
           </div>
         </>
-      )}
+      ) : null}
       {form ? (
         <SpaceForm
           key={typeof form === 'string' ? form : form.id}

@@ -9,12 +9,14 @@ export function KnowledgeGraph({
   selected,
   onSelect,
   onAdd,
+  embedded = false,
 }: {
   data: Snapshot
   spaceId: string
   selected: string
   onSelect: (id: string) => void
   onAdd: () => void
+  embedded?: boolean
 }) {
   const viewport = useRef<HTMLDivElement>(null)
   const [scale, setScale] = useState(1),
@@ -70,9 +72,13 @@ export function KnowledgeGraph({
     return (
       <Empty title="知识图谱从一个节点开始">
         <p>建立知识树，再把相关的概念连起来。</p>
-        <button className="primary" onClick={onAdd}>
-          新建根节点
-        </button>
+        {embedded ? (
+          <p>在左侧新建根节点，图谱会同步出现。</p>
+        ) : (
+          <button className="primary" onClick={onAdd}>
+            新建根节点
+          </button>
+        )}
       </Empty>
     )
   return (
