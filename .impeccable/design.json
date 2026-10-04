@@ -1,67 +1,67 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-04T08:35:19.524Z",
+  "generatedAt": "2026-10-04T09:38:07.572Z",
   "title": "Design System: 时习",
   "extensions": {
     "colorMeta": {
       "ink": {
         "role": "primary",
-        "displayName": "墨蓝",
-        "canonical": "#263e58",
+        "displayName": "墨绿",
+        "canonical": "#263e35",
         "tonalRamp": [
-          "oklch(15% 0.0545 251.40)",
-          "oklch(26% 0.0545 251.40)",
-          "oklch(38% 0.0545 251.40)",
-          "oklch(50% 0.0545 251.40)",
-          "oklch(62% 0.0545 251.40)",
-          "oklch(74% 0.0545 251.40)",
-          "oklch(86% 0.0545 251.40)",
-          "oklch(95% 0.0545 251.40)"
+          "oklch(15% 0.0340 168.74)",
+          "oklch(26% 0.0340 168.74)",
+          "oklch(38% 0.0340 168.74)",
+          "oklch(50% 0.0340 168.74)",
+          "oklch(62% 0.0340 168.74)",
+          "oklch(74% 0.0340 168.74)",
+          "oklch(86% 0.0340 168.74)",
+          "oklch(95% 0.0340 168.74)"
         ]
       },
       "accent": {
         "role": "primary",
-        "displayName": "操作蓝",
-        "canonical": "#365d86",
+        "displayName": "操作绿",
+        "canonical": "#416b53",
         "tonalRamp": [
-          "oklch(15% 0.0804 251.00)",
-          "oklch(26% 0.0804 251.00)",
-          "oklch(38% 0.0804 251.00)",
-          "oklch(50% 0.0804 251.00)",
-          "oklch(62% 0.0804 251.00)",
-          "oklch(74% 0.0804 251.00)",
-          "oklch(86% 0.0804 251.00)",
-          "oklch(95% 0.0804 251.00)"
+          "oklch(15% 0.0612 158.08)",
+          "oklch(26% 0.0612 158.08)",
+          "oklch(38% 0.0612 158.08)",
+          "oklch(50% 0.0612 158.08)",
+          "oklch(62% 0.0612 158.08)",
+          "oklch(74% 0.0612 158.08)",
+          "oklch(86% 0.0612 158.08)",
+          "oklch(95% 0.0612 158.08)"
         ]
       },
       "muted": {
         "role": "neutral",
-        "displayName": "灰蓝文字",
-        "canonical": "#596d80",
+        "displayName": "灰绿文字",
+        "canonical": "#607267",
         "tonalRamp": [
-          "oklch(15% 0.0384 247.22)",
-          "oklch(26% 0.0384 247.22)",
-          "oklch(38% 0.0384 247.22)",
-          "oklch(50% 0.0384 247.22)",
-          "oklch(62% 0.0384 247.22)",
-          "oklch(74% 0.0384 247.22)",
-          "oklch(86% 0.0384 247.22)",
-          "oklch(95% 0.0384 247.22)"
+          "oklch(15% 0.0274 158.51)",
+          "oklch(26% 0.0274 158.51)",
+          "oklch(38% 0.0274 158.51)",
+          "oklch(50% 0.0274 158.51)",
+          "oklch(62% 0.0274 158.51)",
+          "oklch(74% 0.0274 158.51)",
+          "oklch(86% 0.0274 158.51)",
+          "oklch(95% 0.0274 158.51)"
         ]
       },
       "page": {
         "role": "neutral",
-        "displayName": "纸灰",
-        "canonical": "#f5f7f9",
+        "displayName": "雾白纸底",
+        "canonical": "#f8faf8",
         "tonalRamp": [
-          "oklch(15% 0.0034 247.86)",
-          "oklch(26% 0.0034 247.86)",
-          "oklch(38% 0.0034 247.86)",
-          "oklch(50% 0.0034 247.86)",
-          "oklch(62% 0.0034 247.86)",
-          "oklch(74% 0.0034 247.86)",
-          "oklch(86% 0.0034 247.86)",
-          "oklch(95% 0.0034 247.86)"
+          "oklch(15% 0.0034 145.55)",
+          "oklch(26% 0.0034 145.55)",
+          "oklch(38% 0.0034 145.55)",
+          "oklch(50% 0.0034 145.55)",
+          "oklch(62% 0.0034 145.55)",
+          "oklch(74% 0.0034 145.55)",
+          "oklch(86% 0.0034 145.55)",
+          "oklch(95% 0.0034 145.55)"
         ]
       },
       "paper": {
@@ -69,149 +69,149 @@
         "displayName": "白纸",
         "canonical": "#fff",
         "tonalRamp": [
-          "oklch(15% 0.0000 0)",
-          "oklch(26% 0.0000 0)",
-          "oklch(38% 0.0000 0)",
-          "oklch(50% 0.0000 0)",
-          "oklch(62% 0.0000 0)",
-          "oklch(74% 0.0000 0)",
-          "oklch(86% 0.0000 0)",
-          "oklch(95% 0.0000 0)"
+          "oklch(15% 0.0000 0.00)",
+          "oklch(26% 0.0000 0.00)",
+          "oklch(38% 0.0000 0.00)",
+          "oklch(50% 0.0000 0.00)",
+          "oklch(62% 0.0000 0.00)",
+          "oklch(74% 0.0000 0.00)",
+          "oklch(86% 0.0000 0.00)",
+          "oklch(95% 0.0000 0.00)"
         ]
       },
       "soft": {
         "role": "neutral",
-        "displayName": "浅蓝",
-        "canonical": "#e9eff6",
+        "displayName": "浅绿",
+        "canonical": "#e9f0ea",
         "tonalRamp": [
-          "oklch(15% 0.0114 252.09)",
-          "oklch(26% 0.0114 252.09)",
-          "oklch(38% 0.0114 252.09)",
-          "oklch(50% 0.0114 252.09)",
-          "oklch(62% 0.0114 252.09)",
-          "oklch(74% 0.0114 252.09)",
-          "oklch(86% 0.0114 252.09)",
-          "oklch(95% 0.0114 252.09)"
+          "oklch(15% 0.0109 149.86)",
+          "oklch(26% 0.0109 149.86)",
+          "oklch(38% 0.0109 149.86)",
+          "oklch(50% 0.0109 149.86)",
+          "oklch(62% 0.0109 149.86)",
+          "oklch(74% 0.0109 149.86)",
+          "oklch(86% 0.0109 149.86)",
+          "oklch(95% 0.0109 149.86)"
         ]
       },
       "line": {
         "role": "neutral",
         "displayName": "细分隔",
-        "canonical": "#dde4ec",
+        "canonical": "#dfe7e1",
         "tonalRamp": [
-          "oklch(15% 0.0133 251.57)",
-          "oklch(26% 0.0133 251.57)",
-          "oklch(38% 0.0133 251.57)",
-          "oklch(50% 0.0133 251.57)",
-          "oklch(62% 0.0133 251.57)",
-          "oklch(74% 0.0133 251.57)",
-          "oklch(86% 0.0133 251.57)",
-          "oklch(95% 0.0133 251.57)"
+          "oklch(15% 0.0117 153.66)",
+          "oklch(26% 0.0117 153.66)",
+          "oklch(38% 0.0117 153.66)",
+          "oklch(50% 0.0117 153.66)",
+          "oklch(62% 0.0117 153.66)",
+          "oklch(74% 0.0117 153.66)",
+          "oklch(86% 0.0117 153.66)",
+          "oklch(95% 0.0117 153.66)"
         ]
       },
       "sidebar": {
         "role": "neutral",
-        "displayName": "侧栏灰",
-        "canonical": "#edf1f5",
+        "displayName": "白色侧栏",
+        "canonical": "#fff",
         "tonalRamp": [
-          "oklch(15% 0.0069 247.90)",
-          "oklch(26% 0.0069 247.90)",
-          "oklch(38% 0.0069 247.90)",
-          "oklch(50% 0.0069 247.90)",
-          "oklch(62% 0.0069 247.90)",
-          "oklch(74% 0.0069 247.90)",
-          "oklch(86% 0.0069 247.90)",
-          "oklch(95% 0.0069 247.90)"
+          "oklch(15% 0.0000 0.00)",
+          "oklch(26% 0.0000 0.00)",
+          "oklch(38% 0.0000 0.00)",
+          "oklch(50% 0.0000 0.00)",
+          "oklch(62% 0.0000 0.00)",
+          "oklch(74% 0.0000 0.00)",
+          "oklch(86% 0.0000 0.00)",
+          "oklch(95% 0.0000 0.00)"
         ]
       },
       "navigation-text": {
         "role": "neutral",
         "displayName": "导航文字",
-        "canonical": "#5b6e82",
+        "canonical": "#607267",
         "tonalRamp": [
-          "oklch(15% 0.0389 249.89)",
-          "oklch(26% 0.0389 249.89)",
-          "oklch(38% 0.0389 249.89)",
-          "oklch(50% 0.0389 249.89)",
-          "oklch(62% 0.0389 249.89)",
-          "oklch(74% 0.0389 249.89)",
-          "oklch(86% 0.0389 249.89)",
-          "oklch(95% 0.0389 249.89)"
+          "oklch(15% 0.0274 158.51)",
+          "oklch(26% 0.0274 158.51)",
+          "oklch(38% 0.0274 158.51)",
+          "oklch(50% 0.0274 158.51)",
+          "oklch(62% 0.0274 158.51)",
+          "oklch(74% 0.0274 158.51)",
+          "oklch(86% 0.0274 158.51)",
+          "oklch(95% 0.0274 158.51)"
         ]
       },
       "tree-surface": {
         "role": "neutral",
         "displayName": "结构纸面",
-        "canonical": "#edf2f6",
+        "canonical": "#f0f5f1",
         "tonalRamp": [
-          "oklch(15% 0.0076 241.66)",
-          "oklch(26% 0.0076 241.66)",
-          "oklch(38% 0.0076 241.66)",
-          "oklch(50% 0.0076 241.66)",
-          "oklch(62% 0.0076 241.66)",
-          "oklch(74% 0.0076 241.66)",
-          "oklch(86% 0.0076 241.66)",
-          "oklch(95% 0.0076 241.66)"
+          "oklch(15% 0.0075 151.89)",
+          "oklch(26% 0.0075 151.89)",
+          "oklch(38% 0.0075 151.89)",
+          "oklch(50% 0.0075 151.89)",
+          "oklch(62% 0.0075 151.89)",
+          "oklch(74% 0.0075 151.89)",
+          "oklch(86% 0.0075 151.89)",
+          "oklch(95% 0.0075 151.89)"
         ]
       },
       "button-hover": {
         "role": "neutral",
         "displayName": "按钮悬停纸面",
-        "canonical": "#edf2f7",
+        "canonical": "#edf3ee",
         "tonalRamp": [
-          "oklch(15% 0.0086 247.92)",
-          "oklch(26% 0.0086 247.92)",
-          "oklch(38% 0.0086 247.92)",
-          "oklch(50% 0.0086 247.92)",
-          "oklch(62% 0.0086 247.92)",
-          "oklch(74% 0.0086 247.92)",
-          "oklch(86% 0.0086 247.92)",
-          "oklch(95% 0.0086 247.92)"
+          "oklch(15% 0.0092 150.69)",
+          "oklch(26% 0.0092 150.69)",
+          "oklch(38% 0.0092 150.69)",
+          "oklch(50% 0.0092 150.69)",
+          "oklch(62% 0.0092 150.69)",
+          "oklch(74% 0.0092 150.69)",
+          "oklch(86% 0.0092 150.69)",
+          "oklch(95% 0.0092 150.69)"
         ]
       },
       "focus": {
         "role": "primary",
-        "displayName": "焦点蓝",
-        "canonical": "#638fbe",
+        "displayName": "焦点绿",
+        "canonical": "#688d76",
         "tonalRamp": [
-          "oklch(15% 0.0860 250.87)",
-          "oklch(26% 0.0860 250.87)",
-          "oklch(38% 0.0860 250.87)",
-          "oklch(50% 0.0860 250.87)",
-          "oklch(62% 0.0860 250.87)",
-          "oklch(74% 0.0860 250.87)",
-          "oklch(86% 0.0860 250.87)",
-          "oklch(95% 0.0860 250.87)"
+          "oklch(15% 0.0540 157.10)",
+          "oklch(26% 0.0540 157.10)",
+          "oklch(38% 0.0540 157.10)",
+          "oklch(50% 0.0540 157.10)",
+          "oklch(62% 0.0540 157.10)",
+          "oklch(74% 0.0540 157.10)",
+          "oklch(86% 0.0540 157.10)",
+          "oklch(95% 0.0540 157.10)"
         ]
       },
       "input-line": {
         "role": "neutral",
         "displayName": "字段描边",
-        "canonical": "#b8c6d4",
+        "canonical": "#bbcbbf",
         "tonalRamp": [
-          "oklch(15% 0.0250 248.13)",
-          "oklch(26% 0.0250 248.13)",
-          "oklch(38% 0.0250 248.13)",
-          "oklch(50% 0.0250 248.13)",
-          "oklch(62% 0.0250 248.13)",
-          "oklch(74% 0.0250 248.13)",
-          "oklch(86% 0.0250 248.13)",
-          "oklch(95% 0.0250 248.13)"
+          "oklch(15% 0.0240 153.37)",
+          "oklch(26% 0.0240 153.37)",
+          "oklch(38% 0.0240 153.37)",
+          "oklch(50% 0.0240 153.37)",
+          "oklch(62% 0.0240 153.37)",
+          "oklch(74% 0.0240 153.37)",
+          "oklch(86% 0.0240 153.37)",
+          "oklch(95% 0.0240 153.37)"
         ]
       },
       "placeholder": {
         "role": "neutral",
-        "displayName": "占位灰蓝",
-        "canonical": "#647587",
+        "displayName": "占位灰绿",
+        "canonical": "#607267",
         "tonalRamp": [
-          "oklch(15% 0.0346 249.94)",
-          "oklch(26% 0.0346 249.94)",
-          "oklch(38% 0.0346 249.94)",
-          "oklch(50% 0.0346 249.94)",
-          "oklch(62% 0.0346 249.94)",
-          "oklch(74% 0.0346 249.94)",
-          "oklch(86% 0.0346 249.94)",
-          "oklch(95% 0.0346 249.94)"
+          "oklch(15% 0.0274 158.51)",
+          "oklch(26% 0.0274 158.51)",
+          "oklch(38% 0.0274 158.51)",
+          "oklch(50% 0.0274 158.51)",
+          "oklch(62% 0.0274 158.51)",
+          "oklch(74% 0.0274 158.51)",
+          "oklch(86% 0.0274 158.51)",
+          "oklch(95% 0.0274 158.51)"
         ]
       },
       "relation": {
@@ -273,6 +273,21 @@
           "oklch(86% 0.0157 32.01)",
           "oklch(95% 0.0157 32.01)"
         ]
+      },
+      "map-surface": {
+        "role": "neutral",
+        "displayName": "坐标纸面",
+        "canonical": "#eef3ef",
+        "tonalRamp": [
+          "oklch(15% 0.0075 151.89)",
+          "oklch(26% 0.0075 151.89)",
+          "oklch(38% 0.0075 151.89)",
+          "oklch(50% 0.0075 151.89)",
+          "oklch(62% 0.0075 151.89)",
+          "oklch(74% 0.0075 151.89)",
+          "oklch(86% 0.0075 151.89)",
+          "oklch(95% 0.0075 151.89)"
+        ]
       }
     },
     "typographyMeta": {
@@ -282,7 +297,7 @@
       },
       "headline": {
         "displayName": "页面标题",
-        "purpose": "页面与领域名称，手机缩小字号。"
+        "purpose": "功能页面与领域名称；首页局部标题为500、clamp(28px, 2.6vw, 38px)，手机28px。"
       },
       "title": {
         "displayName": "区域标题",
@@ -316,7 +331,7 @@
     "shadows": [
       {
         "name": "card-shadow",
-        "value": "0 4px 18px #263e580a, 0 1px 3px #263e5805",
+        "value": "0 4px 18px #263e350a, 0 1px 3px #263e3505",
         "purpose": "既有记忆卡片与复习纸面。新工作区领域卡和节点详情使用边框。"
       },
       {
@@ -350,6 +365,16 @@
         "name": "content-reveal",
         "value": "220ms cubic-bezier(0.16, 1, 0.3, 1)",
         "purpose": "既有卡片与答案展开；工作区页面入场最终被覆盖为无动画。"
+      },
+      {
+        "name": "map-feedback",
+        "value": "180ms cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "首页领域聚焦和悬停时的圆点、圆环及线透明度反馈；减少动态效果时关闭。"
+      },
+      {
+        "name": "origin-feedback",
+        "value": "220ms cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "空态创建起点圆环的局部响应；减少动态效果时关闭。"
       }
     ],
     "breakpoints": [
@@ -384,9 +409,9 @@
       "name": "主按钮",
       "kind": "button",
       "refersTo": "button-primary",
-      "description": "创建和保存动作；墨蓝纸面，悬停转为操作蓝。",
+      "description": "创建和保存动作；墨绿纸面，悬停转为操作绿。",
       "html": "<button type=\"button\" class=\"ds-primary\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M12 5v14M5 12h14\"/></svg>新建领域</button>",
-      "css": ".ds-primary{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:44px;padding:10px 19px;border-radius:8px;font:500 15px/1.4 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;cursor:pointer;text-decoration:none;white-space:nowrap;transition:background-color .15s,border-color .15s;border:1px solid var(--ink,#263e58);background:var(--ink,#263e58);color:var(--paper,#fff);}.ds-primary:hover{background:var(--accent,#365d86);}.ds-primary:disabled{opacity:.48;cursor:not-allowed;}.ds-primary:focus-visible{outline:3px solid #638fbe;outline-offset:4px;}@media(prefers-reduced-motion:reduce){.ds-primary{transition:none;}}"
+      "css": ".ds-primary{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:44px;padding:10px 19px;border-radius:8px;font:500 15px/1.4 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;cursor:pointer;text-decoration:none;white-space:nowrap;transition:background-color .15s,border-color .15s;border:1px solid var(--ink,#263e35);background:var(--ink,#263e35);color:var(--paper,#fff);}.ds-primary:hover{background:var(--accent,#416b53);}.ds-primary:disabled{opacity:.48;cursor:not-allowed;}.ds-primary:focus-visible{outline:3px solid #688d76;outline-offset:4px;}@media(prefers-reduced-motion:reduce){.ds-primary{transition:none;}}"
     },
     {
       "name": "次按钮",
@@ -394,7 +419,7 @@
       "refersTo": "button-secondary",
       "description": "新建目标等补充动作；白纸和清晰细边框。",
       "html": "<button type=\"button\" class=\"ds-secondary\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M12 5v14M5 12h14\"/></svg>新建目标</button>",
-      "css": ".ds-secondary{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:44px;padding:10px 19px;border-radius:8px;font:500 15px/1.4 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;cursor:pointer;text-decoration:none;white-space:nowrap;transition:background-color .15s,border-color .15s;border:1px solid #bdcbd9;background:var(--paper,#fff);color:var(--ink,#263e58);}.ds-secondary:hover{background:#edf2f7;border-color:#abbacb;}.ds-secondary:focus-visible{outline:3px solid #638fbe;outline-offset:4px;}.ds-secondary:disabled{opacity:.48;cursor:not-allowed;}@media(prefers-reduced-motion:reduce){.ds-secondary{transition:none;}}"
+      "css": ".ds-secondary{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:44px;padding:10px 19px;border-radius:8px;font:500 15px/1.4 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;cursor:pointer;text-decoration:none;white-space:nowrap;transition:background-color .15s,border-color .15s;border:1px solid #c5d3c9;background:var(--paper,#fff);color:var(--ink,#263e35);}.ds-secondary:hover{background:#edf3ee;border-color:#abbacb;}.ds-secondary:focus-visible{outline:3px solid #688d76;outline-offset:4px;}.ds-secondary:disabled{opacity:.48;cursor:not-allowed;}@media(prefers-reduced-motion:reduce){.ds-secondary{transition:none;}}"
     },
     {
       "name": "文字操作",
@@ -402,7 +427,7 @@
       "refersTo": "button-text",
       "description": "节点编辑、移动及任务关联等行内操作；手机扩大操作高度。",
       "html": "<button type=\"button\" class=\"ds-text\">编辑节点</button>",
-      "css": ".ds-text{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:44px;padding:10px 19px;border-radius:8px;font:500 15px/1.4 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;cursor:pointer;text-decoration:none;white-space:nowrap;transition:background-color .15s,border-color .15s;min-height:36px;padding:4px 2px;border:0;background:transparent;color:var(--accent,#365d86);font-size:12px;}.ds-text:hover{background:#edf2f7;}.ds-text:focus-visible{outline:3px solid #638fbe;outline-offset:4px;}.ds-text:disabled{opacity:.48;cursor:not-allowed;}@media(max-width:640px){.ds-text{min-height:44px;}}@media(prefers-reduced-motion:reduce){.ds-text{transition:none;}}"
+      "css": ".ds-text{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:44px;padding:10px 19px;border-radius:8px;font:500 15px/1.4 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;cursor:pointer;text-decoration:none;white-space:nowrap;transition:background-color .15s,border-color .15s;min-height:36px;padding:4px 2px;border:0;background:transparent;color:var(--accent,#416b53);font-size:12px;}.ds-text:hover{background:#edf3ee;}.ds-text:focus-visible{outline:3px solid #688d76;outline-offset:4px;}.ds-text:disabled{opacity:.48;cursor:not-allowed;}@media(max-width:640px){.ds-text{min-height:44px;}}@media(prefers-reduced-motion:reduce){.ds-text{transition:none;}}"
     },
     {
       "name": "搜索字段",
@@ -410,15 +435,15 @@
       "refersTo": "field",
       "description": "树及关联选择器使用带可访问名称的白纸搜索输入。",
       "html": "<input class=\"ds-field\" type=\"search\" aria-label=\"搜索知识节点\" placeholder=\"查找节点\"/>",
-      "css": ".ds-field{width:100%;max-width:100%;min-height:44px;padding:11px 12px;border:1px solid #b8c6d4;border-radius:7px;background:var(--paper,#fff);color:var(--ink,#263e58);font:400 15px/1.65 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;caret-color:var(--accent,#365d86);}.ds-field::placeholder{color:#647587;}.ds-field:focus-visible{outline:3px solid #638fbe;outline-offset:4px;}@media(max-width:640px){.ds-field{font-size:16px;}}"
+      "css": ".ds-field{width:100%;max-width:100%;min-height:44px;padding:11px 12px;border:1px solid #bbcbbf;border-radius:7px;background:var(--paper,#fff);color:var(--ink,#263e35);font:400 15px/1.65 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;caret-color:var(--accent,#416b53);}.ds-field::placeholder{color:#607267;}.ds-field:focus-visible{outline:3px solid #688d76;outline-offset:4px;}@media(max-width:640px){.ds-field{font-size:16px;}}"
     },
     {
-      "name": "标签",
+      "name": "建议标签",
       "kind": "chip",
       "refersTo": "tag",
-      "description": "既有记忆卡片的浅蓝药丸标签，不替代步骤关联选择按钮。",
+      "description": "既有标签建议按钮的浅绿药丸形；静态卡片标签另用4px圆角。",
       "html": "<button type=\"button\" class=\"ds-tag\">标签</button>",
-      "css": ".ds-tag{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:44px;padding:10px 19px;border-radius:8px;font:500 15px/1.4 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;cursor:pointer;text-decoration:none;white-space:nowrap;transition:background-color .15s,border-color .15s;min-height:30px;padding:3px 12px;border:1px solid transparent;border-radius:999px;background:var(--soft,#e9eff6);color:var(--ink,#263e58);font-size:12px;font-weight:400;}.ds-tag:hover{background:#dce7f2;}.ds-tag:focus-visible{outline:3px solid #638fbe;outline-offset:4px;}@media(prefers-reduced-motion:reduce){.ds-tag{transition:none;}}"
+      "css": ".ds-tag{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:44px;padding:10px 19px;border-radius:8px;font:500 15px/1.4 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;cursor:pointer;text-decoration:none;white-space:nowrap;transition:background-color .15s,border-color .15s;min-height:30px;padding:3px 12px;border:1px solid transparent;border-radius:999px;background:var(--soft,#e9f0ea);color:var(--ink,#263e35);font-size:12px;font-weight:400;}.ds-tag:hover{background:#dce7f2;}.ds-tag:focus-visible{outline:3px solid #688d76;outline-offset:4px;}@media(prefers-reduced-motion:reduce){.ds-tag{transition:none;}}"
     },
     {
       "name": "主导航",
@@ -426,15 +451,15 @@
       "refersTo": "navigation-item",
       "description": "桌面三项书签导航，手机排列为三栏并保持当前页面语义。",
       "html": "<nav class=\"ds-nav\" aria-label=\"主导航\"><a class=\"ds-nav-active\" aria-current=\"page\" href=\"#home\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M4 4h12a4 4 0 0 1 4 4v13H8a4 4 0 0 1-4-4V4zM8 9h8M8 13h6\"/></svg><span>学习空间</span></a><a href=\"#library\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><rect x=\"7\" y=\"5\" width=\"13\" height=\"16\" rx=\"2\"/><path d=\"M4 17V3a1 1 0 0 1 1-1h11M11 10h5m-5 4h3\"/></svg><span>记忆卡片</span></a><a href=\"#settings\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M4 7h16M4 17h16\"/><circle cx=\"8\" cy=\"7\" r=\"3\"/><circle cx=\"16\" cy=\"17\" r=\"3\"/></svg><span>设置与备份</span></a></nav>",
-      "css": ".ds-nav{display:grid;gap:9px;padding:20px;background:#edf1f5;font:400 15px/1.65 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;}.ds-nav a{position:relative;display:flex;align-items:center;gap:12px;min-height:49px;padding:12px 16px;text-decoration:none;color:#5b6e82;border-radius:7px;transition:background-color 160ms ease,color 160ms ease;}.ds-nav a:hover{background:#e4eaf1;}.ds-nav a.ds-nav-active{color:var(--ink,#263e58);background:var(--paper,#fff);font-weight:600;box-shadow:0 2px 3px #1e375505;}.ds-nav-active:before{position:absolute;content:'';width:3px;background:var(--ink,#263e58);height:22px;left:-20px;border-radius:0 2px 2px 0;}.ds-nav a:focus-visible{outline:3px solid #638fbe;outline-offset:4px;}.ds-nav svg{flex-shrink:0;transition:transform 180ms cubic-bezier(.16,1,.3,1);}.ds-nav a:active svg{transform:scale(.88);}@media(max-width:640px){.ds-nav{grid-template-columns:repeat(3,1fr);gap:3px;padding:6px 12px;background:var(--paper,#fff);}.ds-nav a{flex-direction:column;justify-content:center;gap:4px;min-height:56px;padding:7px 2px;font-size:11px;color:#566e83;}.ds-nav a.ds-nav-active{background:#e8eff7;color:#254c75;box-shadow:none;}.ds-nav-active:before{display:none;}.ds-nav a:not(.ds-nav-active):hover{background:transparent;}}@media(prefers-reduced-motion:reduce){.ds-nav a,.ds-nav svg{transition:none;}}"
+      "css": ".ds-nav{display:grid;gap:9px;padding:20px;background:#fff;font:400 15px/1.65 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;}.ds-nav a{position:relative;display:flex;align-items:center;gap:12px;min-height:49px;padding:12px 16px;text-decoration:none;color:#607267;border-radius:7px;transition:background-color 160ms ease,color 160ms ease;}.ds-nav a:hover{background:#eef3ef;}.ds-nav a.ds-nav-active{color:var(--ink,#263e35);background:var(--paper,#fff);font-weight:600;box-shadow:0 2px 3px #1e375505;}.ds-nav-active:before{position:absolute;content:'';width:3px;background:var(--ink,#263e35);height:22px;left:-20px;border-radius:0 2px 2px 0;}.ds-nav a:focus-visible{outline:3px solid #688d76;outline-offset:4px;}.ds-nav svg{flex-shrink:0;transition:transform 180ms cubic-bezier(.16,1,.3,1);}.ds-nav a:active svg{transform:scale(.88);}@media(max-width:640px){.ds-nav{grid-template-columns:repeat(3,1fr);gap:3px;padding:6px 12px;background:var(--paper,#fff);}.ds-nav a{flex-direction:column;justify-content:center;gap:4px;min-height:56px;padding:7px 2px;font-size:11px;color:#607267;}.ds-nav a.ds-nav-active{background:#e9f0ea;color:#263e35;box-shadow:none;}.ds-nav-active:before{display:none;}.ds-nav a:not(.ds-nav-active):hover{background:transparent;}}@media(prefers-reduced-motion:reduce){.ds-nav a,.ds-nav svg{transition:none;}}"
     },
     {
-      "name": "领域卡",
+      "name": "首页领域条目",
       "kind": "card",
       "refersTo": "space-card",
-      "description": "用户创建后出现的平面领域卡；无步骤时明确呈现尚未建立计划。",
+      "description": "透明背景、下沿细分隔的领域入口，显示真实计划状态与知识计数。",
       "html": "<article class=\"ds-space-card\"><a class=\"ds-space-open\" href=\"#home\" aria-label=\"进入我的领域\"><div class=\"ds-space-title\"><span class=\"ds-space-symbol\"><svg width=\"22\" height=\"22\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M4 4h12a4 4 0 0 1 4 4v13H8a4 4 0 0 1-4-4V4zM8 9h8M8 13h6\"/></svg></span><h2>我的领域</h2></div><p class=\"ds-space-progress\">尚未建立计划</p><p class=\"ds-space-meta\">0 个目标 · 0 个知识节点</p></a><div class=\"ds-space-actions\"><button type=\"button\">编辑</button><button type=\"button\">删除</button></div></article>",
-      "css": ".ds-space-card{min-width:0;background:var(--paper,#fff);border:1px solid var(--line,#dde4ec);border-radius:14px;overflow:hidden;color:var(--ink,#263e58);font:400 15px/1.65 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;}.ds-space-card:has(.ds-space-open:hover){border-color:#9aafbf;}.ds-space-open{display:block;padding:25px 25px 13px;color:var(--ink,#263e58);text-decoration:none;}.ds-space-title{display:flex;gap:13px;align-items:center;margin-bottom:32px;}.ds-space-symbol{display:grid;place-items:center;color:var(--space-color,#456785);flex-shrink:0;width:40px;height:40px;}.ds-space-title h2{margin:0;font-size:20px;font-weight:600;overflow-wrap:anywhere;}.ds-space-progress{margin:0;color:var(--muted,#596d80);font-size:14px;}.ds-space-meta{margin:25px 0 0;font-size:13px;color:var(--muted,#596d80);}.ds-space-actions{display:flex;gap:18px;padding:0 25px 12px;}.ds-space-actions button{min-height:36px;padding:4px 2px;border:0;background:transparent;color:var(--accent,#365d86);font:500 12px/1.4 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;cursor:pointer;}.ds-space-actions button:hover{background:#edf2f7;}.ds-space-open:focus-visible,.ds-space-actions button:focus-visible{outline:3px solid #638fbe;outline-offset:4px;}@media(max-width:640px){.ds-space-open{padding:22px 22px 12px;}.ds-space-title{margin-bottom:25px;}}"
+      "css": ".ds-space-card{min-width:0;background:transparent;border:0;border-bottom:1px solid var(--line,#dfe7e1);border-radius:0;overflow:hidden;color:var(--ink,#263e35);font:400 15px/1.65 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;}.ds-space-card:has(.ds-space-open:hover){border-color:#9aafbf;}.ds-space-open{display:block;padding:22px 0 10px;color:var(--ink,#263e35);text-decoration:none;}.ds-space-title{display:flex;gap:11px;align-items:center;margin-bottom:14px;}.ds-space-symbol{display:grid;place-items:center;color:var(--space-color,#456785);flex-shrink:0;width:28px;height:28px;}.ds-space-title h2{margin:0;font-size:18px;font-weight:500;overflow-wrap:anywhere;}.ds-space-progress{margin:0;color:var(--muted,#607267);font-size:14px;}.ds-space-meta{margin:12px 0 0;font-size:12px;color:var(--muted,#607267);}.ds-space-actions{display:flex;gap:18px;padding:0 0 12px;}.ds-space-actions button{min-height:36px;padding:4px 2px;border:0;background:transparent;color:var(--accent,#416b53);font:500 12px/1.4 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;cursor:pointer;}.ds-space-actions button:hover{background:#edf3ee;}.ds-space-open:focus-visible,.ds-space-actions button:focus-visible{outline:3px solid #688d76;outline-offset:4px;}.ds-space-open:hover h2{text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:5px;}"
     },
     {
       "name": "SpaceIconPicker",
@@ -442,15 +467,7 @@
       "refersTo": "space-icon-picker",
       "description": "新建和编辑领域的图标点选器：默认书本、12 个内联 SVG 与 10 个常用 emoji；SVG 继承领域颜色，旧符号保留原值。点选收起并返回焦点，Escape 先收起面板；表单记录按钮选择的未保存状态，面板随原生对话框内部滚动。尺寸与网格只属于本组件。预览展示展开及自定义区域状态。",
       "html": "<fieldset class=\"ds-icon-picker\" style=\"--ds-icon-color:#456785\"><legend>图标（可选）</legend><div class=\"ds-icon-picker-control\"><span class=\"ds-icon-preview\" aria-hidden=\"true\"><svg width=\"28\" height=\"28\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M4 4h12a4 4 0 0 1 4 4v13H8a4 4 0 0 1-4-4V4zM8 9h8M8 13h6\"/></svg></span><span class=\"ds-icon-current\" aria-live=\"polite\">书本</span><button type=\"button\" class=\"ds-icon-trigger\" aria-expanded=\"true\" aria-controls=\"ds-icon-panel\">收起图标</button></div><div class=\"ds-icon-panel\" id=\"ds-icon-panel\"><div class=\"ds-icon-grid\" role=\"group\" aria-label=\"线条图标\"><button type=\"button\" class=\"ds-icon-choice\" aria-label=\"选择图标 书本\" aria-pressed=\"true\"><svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M4 4h12a4 4 0 0 1 4 4v13H8a4 4 0 0 1-4-4V4zM8 9h8M8 13h6\"/></svg><span>书本</span></button><button type=\"button\" class=\"ds-icon-choice\" aria-label=\"选择图标 代码\" aria-pressed=\"false\"><svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"m8 6-6 6 6 6m8-12 6 6-6 6m-3-15-2 18\"/></svg><span>代码</span></button><button type=\"button\" class=\"ds-icon-choice\" aria-label=\"选择图标 计算器\" aria-pressed=\"false\"><svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><rect x=\"5\" y=\"2\" width=\"14\" height=\"20\" rx=\"2\"/><path d=\"M8 6h8M8 11h1m6 0h1m-8 4h1m6 0h1m-8 4h1m6 0h1\"/></svg><span>计算器</span></button><button type=\"button\" class=\"ds-icon-choice\" aria-label=\"选择图标 地球\" aria-pressed=\"false\"><svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><circle cx=\"12\" cy=\"12\" r=\"10\"/><ellipse cx=\"12\" cy=\"12\" rx=\"4\" ry=\"10\"/><path d=\"M2 12h20\"/></svg><span>地球</span></button><button type=\"button\" class=\"ds-icon-choice\" aria-label=\"选择图标 植物\" aria-pressed=\"false\"><svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M20 3C10 2 3 6 3 13a7 7 0 0 0 7 7c7 0 11-7 10-17ZM4 20 15 9\"/></svg><span>植物</span></button><button type=\"button\" class=\"ds-icon-choice\" aria-label=\"选择图标 语言\" aria-pressed=\"false\"><svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M3 5h11M8 2v3m3 0c0 5-3 8-7 10m1-7c1 3 4 6 7 7m1 6 4-10 4 10m-7-3h6\"/></svg><span>语言</span></button><button type=\"button\" class=\"ds-icon-choice\" aria-label=\"选择图标 灵感\" aria-pressed=\"false\"><svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M8 16a7 7 0 1 1 8 0l-1 2H9l-1-2Zm1 5h6\"/></svg><span>灵感</span></button><button type=\"button\" class=\"ds-icon-choice\" aria-label=\"选择图标 实验\" aria-pressed=\"false\"><svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M9 2h6m-5 0v7L4 19a2 2 0 0 0 2 3h12a2 2 0 0 0 2-3L14 9V2M7 15h10\"/></svg><span>实验</span></button><button type=\"button\" class=\"ds-icon-choice\" aria-label=\"选择图标 音乐\" aria-pressed=\"false\"><svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M9 18V5l11-2v13M9 8l11-2\"/><ellipse cx=\"6\" cy=\"18\" rx=\"3\" ry=\"2\"/><ellipse cx=\"17\" cy=\"16\" rx=\"3\" ry=\"2\"/></svg><span>音乐</span></button><button type=\"button\" class=\"ds-icon-choice\" aria-label=\"选择图标 绘画\" aria-pressed=\"false\"><svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M12 2a10 10 0 1 0 0 20h2a2 2 0 0 0 0-4h-1a2 2 0 0 1 0-4h5a4 4 0 0 0 4-4c0-4-5-8-10-8Z\"/><circle cx=\"7\" cy=\"10\" r=\".6\"/><circle cx=\"10\" cy=\"6\" r=\".6\"/><circle cx=\"15\" cy=\"6\" r=\".6\"/><circle cx=\"18\" cy=\"10\" r=\".6\"/></svg><span>绘画</span></button><button type=\"button\" class=\"ds-icon-choice\" aria-label=\"选择图标 目标\" aria-pressed=\"false\"><svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><circle cx=\"12\" cy=\"12\" r=\"10\"/><circle cx=\"12\" cy=\"12\" r=\"6\"/><circle cx=\"12\" cy=\"12\" r=\"2\"/></svg><span>目标</span></button><button type=\"button\" class=\"ds-icon-choice\" aria-label=\"选择图标 文件夹\" aria-pressed=\"false\"><svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M3 7V4h6l2 3h10v13H3V7Z\"/></svg><span>文件夹</span></button></div><button type=\"button\" class=\"ds-icon-custom-trigger\" aria-expanded=\"true\" aria-controls=\"ds-icon-custom\">收起自定义 emoji</button><div class=\"ds-icon-custom\" id=\"ds-icon-custom\"><div class=\"ds-emoji-grid\" role=\"group\" aria-label=\"常用 emoji\"><button type=\"button\" class=\"ds-emoji-choice\" aria-label=\"选择 emoji 📐\" aria-pressed=\"false\">📐</button><button type=\"button\" class=\"ds-emoji-choice\" aria-label=\"选择 emoji 🌱\" aria-pressed=\"false\">🌱</button><button type=\"button\" class=\"ds-emoji-choice\" aria-label=\"选择 emoji 🐱\" aria-pressed=\"false\">🐱</button><button type=\"button\" class=\"ds-emoji-choice\" aria-label=\"选择 emoji 📚\" aria-pressed=\"false\">📚</button><button type=\"button\" class=\"ds-emoji-choice\" aria-label=\"选择 emoji 💻\" aria-pressed=\"false\">💻</button><button type=\"button\" class=\"ds-emoji-choice\" aria-label=\"选择 emoji 🌍\" aria-pressed=\"false\">🌍</button><button type=\"button\" class=\"ds-emoji-choice\" aria-label=\"选择 emoji 🎨\" aria-pressed=\"false\">🎨</button><button type=\"button\" class=\"ds-emoji-choice\" aria-label=\"选择 emoji 🎵\" aria-pressed=\"false\">🎵</button><button type=\"button\" class=\"ds-emoji-choice\" aria-label=\"选择 emoji 🔬\" aria-pressed=\"false\">🔬</button><button type=\"button\" class=\"ds-emoji-choice\" aria-label=\"选择 emoji ✨\" aria-pressed=\"false\">✨</button></div><label class=\"ds-icon-label\">其他 emoji 或符号<input class=\"ds-icon-input\" maxlength=\"16\" placeholder=\"粘贴或输入你喜欢的符号\"></label></div></div></fieldset>",
-      "css": ".ds-icon-picker{min-width:0;margin:0 0 24px;padding:0;border:0;background:var(--paper,#fff);color:var(--ink,#263e58);font:400 15px/1.65 'PingFang SC','Microsoft YaHei',system-ui,sans-serif;}.ds-icon-picker>legend{padding:0;margin-bottom:9px;font-size:14px;}.ds-icon-picker-control{display:flex;align-items:center;gap:12px;}.ds-icon-preview{display:grid;place-items:center;width:52px;height:52px;flex-shrink:0;border:1px solid var(--line,#dde4ec);border-radius:12px;color:var(--ds-icon-color,#456785);font-size:28px;}.ds-icon-current{flex:1;min-width:0;font-size:14px;}.ds-icon-trigger,.ds-icon-choice,.ds-emoji-choice,.ds-icon-custom-trigger{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:44px;border:1px solid var(--line,#dde4ec);border-radius:8px;background:var(--paper,#fff);color:var(--ink,#263e58);font-family:inherit;font-weight:500;line-height:1.4;cursor:pointer;transition:background-color .15s,border-color .15s;}.ds-icon-trigger{padding:9px 12px;font-size:13px;white-space:nowrap;border-color:#bdcbd9;}.ds-icon-trigger:hover{background:#edf2f7;border-color:#abbacb;}.ds-icon-panel{margin-top:14px;}.ds-icon-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;}.ds-icon-choice{flex-direction:column;gap:7px;min-height:72px;padding:9px 3px;color:var(--muted,#596d80);font-size:12px;}.ds-icon-choice svg{color:var(--ds-icon-color,#456785);flex-shrink:0;}.ds-icon-choice:hover,.ds-emoji-choice:hover{background:#f5f7f9;border-color:#abbacb;}.ds-icon-choice[aria-pressed='true'],.ds-emoji-choice[aria-pressed='true']{border-color:var(--accent,#365d86);background:var(--soft,#e9eff6);color:var(--ink,#263e58);}.ds-icon-custom-trigger{margin-top:10px;padding:4px 2px;min-height:44px;border:0;background:transparent;color:var(--accent,#365d86);font-size:15px;}.ds-icon-custom-trigger:hover{background:#edf2f7;}.ds-emoji-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;}.ds-emoji-choice{min-height:46px;padding:7px;font-size:24px;}.ds-icon-label{display:grid;gap:7px;margin-top:16px;font-size:14px;}.ds-icon-input{width:100%;min-height:44px;padding:11px 12px;border:1px solid #b8c6d4;border-radius:7px;background:var(--paper,#fff);color:var(--ink,#263e58);font:inherit;}.ds-icon-input::placeholder{color:#647587;}.ds-icon-picker button:focus-visible,.ds-icon-input:focus-visible{outline:3px solid #638fbe;outline-offset:4px;}.ds-icon-picker button:disabled{opacity:.48;cursor:not-allowed;}@media(max-width:640px){.ds-icon-grid{grid-template-columns:repeat(4,minmax(0,1fr));}.ds-icon-picker-control{gap:8px;}.ds-icon-preview{width:48px;height:48px;}.ds-icon-input{font-size:16px;}}@media(prefers-reduced-motion:reduce){.ds-icon-picker button{transition:none;}}"
-    },
-    {
-      "name": "知识树选中行",
-      "kind": "custom",
-      "refersTo": "tree-item-selected",
-      "description": "独立知识节点的选中状态、分支指示及后代数。",
-      "html": "<div class=\"ds-tree-panel\"><div class=\"ds-tree-row\"><button type=\"button\" class=\"ds-tree-toggle\" aria-expanded=\"true\" aria-label=\"收起知识节点\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"m9 5 7 7-7 7\"/></svg></button><button type=\"button\" class=\"ds-tree-name\" aria-pressed=\"true\"><span>知识节点</span><small aria-label=\"0 个后代节点\">0</small></button></div></div>",
-      "css": ".ds-tree-panel{padding:20px 18px;border-radius:14px;background:#edf2f6;font:400 15px/1.65 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;}.ds-tree-row{display:flex;align-items:center;gap:2px;min-height:46px;}.ds-tree-toggle{display:inline-flex;align-items:center;justify-content:center;min-width:28px;min-height:44px;padding:0;border:0;background:transparent;color:var(--ink,#263e58);cursor:pointer;}.ds-tree-toggle:hover{background:#edf2f7;}.ds-tree-toggle svg{transform:rotate(90deg);transition:transform 180ms cubic-bezier(.16,1,.3,1);}.ds-tree-name{display:inline-flex;align-items:center;justify-content:space-between;flex:1;min-width:0;min-height:44px;gap:7px;padding:9px 10px;border:0;border-radius:7px;background:var(--accent,#365d86);color:var(--paper,#fff);font:500 13px/1.4 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;text-align:left;white-space:normal;cursor:pointer;}.ds-tree-name span{overflow-wrap:anywhere;}.ds-tree-name small{font-size:11px;color:#e1eaf4;font-variant-numeric:tabular-nums;}.ds-tree-name:focus-visible,.ds-tree-toggle:focus-visible{outline:3px solid #638fbe;outline-offset:4px;}@media(prefers-reduced-motion:reduce){.ds-tree-toggle svg{transition:none;}}"
+      "css": ".ds-icon-picker{min-width:0;margin:0 0 24px;padding:0;border:0;background:var(--paper,#fff);color:var(--ink,#263e35);font:400 15px/1.65 'PingFang SC','Microsoft YaHei',system-ui,sans-serif;}.ds-icon-picker>legend{padding:0;margin-bottom:9px;font-size:14px;}.ds-icon-picker-control{display:flex;align-items:center;gap:12px;}.ds-icon-preview{display:grid;place-items:center;width:52px;height:52px;flex-shrink:0;border:1px solid var(--line,#dfe7e1);border-radius:12px;color:var(--ds-icon-color,#456785);font-size:28px;}.ds-icon-current{flex:1;min-width:0;font-size:14px;}.ds-icon-trigger,.ds-icon-choice,.ds-emoji-choice,.ds-icon-custom-trigger{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:44px;border:1px solid var(--line,#dfe7e1);border-radius:8px;background:var(--paper,#fff);color:var(--ink,#263e35);font-family:inherit;font-weight:500;line-height:1.4;cursor:pointer;transition:background-color .15s,border-color .15s;}.ds-icon-trigger{padding:9px 12px;font-size:13px;white-space:nowrap;border-color:#c5d3c9;}.ds-icon-trigger:hover{background:#edf3ee;border-color:#abbacb;}.ds-icon-panel{margin-top:14px;}.ds-icon-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;}.ds-icon-choice{flex-direction:column;gap:7px;min-height:72px;padding:9px 3px;color:var(--muted,#607267);font-size:12px;}.ds-icon-choice svg{color:var(--ds-icon-color,#456785);flex-shrink:0;}.ds-icon-choice:hover,.ds-emoji-choice:hover{background:#f8faf8;border-color:#abbacb;}.ds-icon-choice[aria-pressed='true'],.ds-emoji-choice[aria-pressed='true']{border-color:var(--accent,#416b53);background:var(--soft,#e9f0ea);color:var(--ink,#263e35);}.ds-icon-custom-trigger{margin-top:10px;padding:4px 2px;min-height:44px;border:0;background:transparent;color:var(--accent,#416b53);font-size:15px;}.ds-icon-custom-trigger:hover{background:#edf3ee;}.ds-emoji-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;}.ds-emoji-choice{min-height:46px;padding:7px;font-size:24px;}.ds-icon-label{display:grid;gap:7px;margin-top:16px;font-size:14px;}.ds-icon-input{width:100%;min-height:44px;padding:11px 12px;border:1px solid #bbcbbf;border-radius:7px;background:var(--paper,#fff);color:var(--ink,#263e35);font:inherit;}.ds-icon-input::placeholder{color:#607267;}.ds-icon-picker button:focus-visible,.ds-icon-input:focus-visible{outline:3px solid #688d76;outline-offset:4px;}.ds-icon-picker button:disabled{opacity:.48;cursor:not-allowed;}@media(max-width:640px){.ds-icon-grid{grid-template-columns:repeat(4,minmax(0,1fr));}.ds-icon-picker-control{gap:8px;}.ds-icon-preview{width:48px;height:48px;}.ds-icon-input{font-size:16px;}}@media(prefers-reduced-motion:reduce){.ds-icon-picker button{transition:none;}}"
     },
     {
       "name": "图谱节点",
@@ -458,31 +475,31 @@
       "refersTo": "graph-node",
       "description": "稳定知识节点按钮；选中用外描边，相邻节点用绿色边框和浅绿纸面。",
       "html": "<button type=\"button\" class=\"ds-graph-node\" aria-pressed=\"true\" title=\"知识节点\"><span>知识节点</span></button>",
-      "css": ".ds-graph-node{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:3px;width:208px;height:64px;min-height:64px;padding:10px 14px;border:1px solid var(--line,#dde4ec);border-radius:10px;background:var(--paper,#fff);color:var(--ink,#263e58);font:500 13px/1.4 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;text-align:left;white-space:normal;cursor:pointer;outline:2px solid var(--accent,#365d86);outline-offset:3px;transition:background-color .15s,border-color .15s;}.ds-graph-node:hover{background:#edf2f7;border-color:#abbacb;}.ds-graph-node:focus-visible{outline:3px solid #638fbe;outline-offset:4px;}.ds-graph-node.ds-graph-connected{border-color:#568f79;background:#f0f7f3;}@media(prefers-reduced-motion:reduce){.ds-graph-node{transition:none;}}.ds-graph-node span{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;overflow-wrap:anywhere;line-height:1.4;flex-shrink:0;}"
+      "css": ".ds-graph-node{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:3px;width:208px;height:64px;min-height:64px;padding:10px 14px;border:1px solid var(--line,#dfe7e1);border-radius:10px;background:var(--paper,#fff);color:var(--ink,#263e35);font:500 13px/1.4 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;text-align:left;white-space:normal;cursor:pointer;outline:2px solid var(--accent,#416b53);outline-offset:3px;transition:background-color .15s,border-color .15s;}.ds-graph-node:hover{background:#edf3ee;border-color:#abbacb;}.ds-graph-node:focus-visible{outline:3px solid #688d76;outline-offset:4px;}.ds-graph-node.ds-graph-connected{border-color:#568f79;background:#f0f7f3;}@media(prefers-reduced-motion:reduce){.ds-graph-node{transition:none;}}.ds-graph-node span{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;overflow-wrap:anywhere;line-height:1.4;flex-shrink:0;}"
     },
     {
-      "name": "真实计划进度",
+      "name": "知识坐标场",
       "kind": "custom",
-      "refersTo": "progress-track",
-      "description": "展示步骤完成度；未创建步骤时以尚未建立计划文本取代进度条。",
-      "html": "<div class=\"ds-progress\"><p>尚未建立计划</p><progress aria-label=\"计划完成度\" max=\"1\" value=\"0\" hidden></progress></div>",
-      "css": ".ds-progress{max-width:440px;font:400 14px/1.65 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;}.ds-progress p{margin:0;color:var(--muted,#596d80);}.ds-progress progress:not([hidden]){appearance:none;display:block;width:100%;height:6px;border:0;border-radius:3px;overflow:hidden;background:var(--soft,#e9eff6);color:var(--space-color,var(--accent,#365d86));}.ds-progress progress::-webkit-progress-bar{background:var(--soft,#e9eff6);}.ds-progress progress::-webkit-progress-value{background:var(--space-color,var(--accent,#365d86));border-radius:3px;}.ds-progress progress::-moz-progress-bar{background:var(--space-color,var(--accent,#365d86));}"
+      "refersTo": "learning-map",
+      "description": "领域链接与真实知识结构预览；每页6领域、每领域48节点。手机根标题独立使用11px HTML文本。",
+      "html": "<section class=\"ds-map\" aria-label=\"学习领域知识地图\"><a class=\"ds-map-space\" href=\"#home\" aria-label=\"查看我的领域的知识图谱\"><svg class=\"ds-map-drawing\" viewBox=\"0 0 300 274\" aria-hidden=\"true\"><circle class=\"ds-map-ring\" cx=\"150\" cy=\"137\" r=\"21\"/><circle class=\"ds-map-dot\" cx=\"150\" cy=\"137\" r=\"11\"/></svg><span class=\"ds-map-label\">我的领域</span><span class=\"ds-map-count\">0 个知识节点</span></a><p class=\"ds-map-caption\">大点是领域，小点是知识。点击领域，探索其中的连接。</p></section>",
+      "css": ".ds-map{overflow:hidden;border-radius:18px;background:#eef3ef;color:var(--ink,#263e35);font:400 15px/1.65 'PingFang SC','Microsoft YaHei',system-ui,sans-serif;}.ds-map-space{display:flex;flex-direction:column;align-items:center;padding:20px 30px 48px;color:var(--ink,#263e35);text-decoration:none;background-image:radial-gradient(#b8c8bd 1px,transparent 1px);background-size:22px 22px;}.ds-map-drawing{display:block;width:min(100%,270px);aspect-ratio:300/274;color:var(--space-color,#456785);}.ds-map-ring{fill:none;stroke:currentColor;stroke-width:.8;opacity:.35;transition:r 180ms cubic-bezier(.16,1,.3,1),opacity 180ms;}.ds-map-dot{fill:currentColor;transition:r 180ms cubic-bezier(.16,1,.3,1);}.ds-map-space:hover .ds-map-dot,.ds-map-space:focus-visible .ds-map-dot{r:15;}.ds-map-space:hover .ds-map-ring,.ds-map-space:focus-visible .ds-map-ring{r:26;opacity:.8;}.ds-map-space:focus-visible{outline:3px solid #688d76;outline-offset:4px;}.ds-map-label{font-size:18px;font-weight:500;line-height:1.5;overflow-wrap:anywhere;text-align:center;}.ds-map-count{margin-top:7px;color:var(--muted,#607267);font-size:12px;}.ds-map-caption{margin:0;padding:14px 24px;background:#e6eee8;color:var(--muted,#607267);font-size:12px;}@media(max-width:640px){.ds-map{border-radius:14px;}.ds-map-label{font-size:14px;}.ds-map-count,.ds-map-caption{font-size:11px;}}@media(prefers-reduced-motion:reduce){.ds-map-ring,.ds-map-dot{transition:none;}}"
     }
   ],
   "narrative": {
-    "northStar": "时习纸面工作台",
-    "overview": "纸灰底、白色纸面与墨蓝文字组成安静的个人学习界面。沿用原有书签侧栏、中文系统字与轻分隔，通过留白和小范围选中状态突出当前操作。品牌使用宋体，功能标题和正文使用系统中文黑体，不加载外部字体。\n\n当前首页是用户自建领域的工作台：首次打开呈现真实空白，创建后才出现领域卡。领域内的目标、知识树和知识图谱沿用同一组颜色、字段与按钮。保留的记忆卡片、图片和复习纸面属于另一组既有功能，不能把其分类树或卡片图谱当作新的知识节点树。",
+    "northStar": "时习知识坐标场",
+    "overview": "雾绿底、白色纸面与墨绿文字组成安静的个人学习界面。圆点、细线与留白形成首页的知识坐标场，领域和知识的大小关系来自实际实体；导航与编辑界面沿用轻分隔。品牌使用宋体，功能标题和正文使用系统中文黑体，不加载外部字体。\n\n当前首页是用户自建领域的知识地图：首次打开呈现可创建的空白起点，创建后才出现领域地图与紧凑列表。领域内的目标、知识树和知识图谱沿用同一组颜色、字段与按钮。保留的记忆卡片、图片和复习纸面属于另一组既有功能，不能把其分类树或卡片图谱当作新的知识节点树。",
     "keyCharacteristics": [
-      "浅色纸面、墨蓝主动作，低饱和标记辅助识别。",
+      "雾绿纸面、墨绿主动作，低饱和领域标记辅助识别。",
       "品牌有宋体特征，内容与操作以中文系统字保持清晰。",
-      "层级通过间距、细分隔和状态表达，工作区以平面纸面为主。",
+      "层级通过间距、细分隔和状态表达；首页以真实点线结构形成辨识度。",
       "桌面左导航与并排内容，手机顶端品牌、底部导航和单列内容。",
       "空态、计数与计划完成度均来自真实数据。"
     ],
     "rules": [
       {
         "name": "The Structural Color Rule",
-        "body": "父子结构使用蓝灰实线，用户建立的额外知识关联使用绿色虚线；选中状态同时通过描边、文字或可访问状态表达，不能只靠颜色解释关系。",
+        "body": "首页领域所属线和父子线继承领域标记色，所属线为短虚线、父子线为实线；独立知识图谱的父子线仍为蓝灰实线。用户建立的额外知识关联使用绿色虚线，选中状态同时通过描边、文字或可访问状态表达。",
         "section": "colors"
       },
       {
@@ -494,14 +511,19 @@
         "name": "The Quiet Paper Rule",
         "body": "工作区默认以边框和色差组织信息；沿用卡片纸面或模态的既有阴影时遵循其用途，不为每个列表层级增加浮层。",
         "section": "elevation"
+      },
+      {
+        "name": "The Real Coordinates Rule",
+        "body": "地图点线来自用户的实际实体和关系；预览限制只改变呈现数量，不改变实际计数或数据。",
+        "section": "components"
       }
     ],
     "dos": [
-      "**Do** 沿用纸灰、白纸、墨蓝和可读灰蓝文字，让结构与当前操作成为重点。",
+      "**Do** 沿用雾白、白纸、墨绿和可读灰绿文字，让结构与当前操作成为重点。",
       "**Do** 保留真实空态；以用户创建的领域、步骤和知识实体生成页面与计数。",
       "**Do** 让目标、知识结构与关联各自表达职责，明确区分任务进度与知识掌握。",
       "**Do** 保留展开、选中、当前页面、保存状态和可见键盘焦点的语义。",
-      "**Do** 让名称和笔记在手机换行，并为底部导航与安全区保留内容空间。",
+      "**Do** 让名称和笔记在手机换行，地图根标题采用独立（11px）HTML 文本，并为底部导航与安全区保留内容空间。",
       "**Do** 用内联 SVG 表达应用操作；将用户自选领域颜色与符号视为个人内容。"
     ],
     "donts": [

@@ -219,12 +219,12 @@
 }
 .icon-choice:hover,
 .emoji-choice-grid button:hover {
-  background: #f5f7f9;
+  background: #f8faf8;
 }
 .icon-choice[aria-pressed='true'],
 .emoji-choice-grid button[aria-pressed='true'] {
   border-color: var(--accent);
-  background: #e9eff6;
+  background: #e9f0ea;
   color: var(--ink);
 }
 .icon-custom-trigger {
@@ -560,7 +560,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  border-bottom: 1px solid #edf1f5;
+  border-bottom: 1px solid #fff;
   min-height: 44px;
 }
 .detail-links button {
@@ -651,7 +651,7 @@
   max-height: 55dvh;
 }
 .graph-lines path.highlighted {
-  stroke: #365d86;
+  stroke: #416b53;
   stroke-width: 2.4;
 }
 .graph-branch-filter {

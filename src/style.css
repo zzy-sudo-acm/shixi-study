@@ -1,18 +1,18 @@
 @charset "UTF-8";
 :root {
   font-family: 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;
-  color: #263e58;
-  background: #f5f7f9;
+  color: #263e35;
+  background: #f8faf8;
   font-synthesis: none;
   line-height: 1.65;
   font-size: 15px;
-  --ink: #263e58;
-  --muted: #596d80;
-  --line: #dde4ec;
-  --accent: #365d86;
+  --ink: #263e35;
+  --muted: #607267;
+  --line: #dfe7e1;
+  --accent: #416b53;
   --paper: #fff;
-  --soft: #e9eff6;
-  --card-shadow: 0 4px 18px #263e580a, 0 1px 3px #263e5805;
+  --soft: #e9f0ea;
+  --card-shadow: 0 4px 18px #263e350a, 0 1px 3px #263e3505;
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
 }
 ::selection {
@@ -20,7 +20,7 @@
   color: #173c60;
 }
 html {
-  scrollbar-color: #b4c3d1 #f5f7f9;
+  scrollbar-color: #b4c3d1 #f8faf8;
   scroll-padding-bottom: 100px;
 }
 input,
@@ -73,7 +73,7 @@ button,
 }
 button:hover,
 .button:hover {
-  background: #edf2f7;
+  background: #edf3ee;
   border-color: #abbacb;
 }
 button:disabled {
@@ -86,7 +86,7 @@ input:focus-visible,
 textarea:focus-visible,
 select:focus-visible,
 summary:focus-visible {
-  outline: 3px solid #638fbe;
+  outline: 3px solid #688d76;
   outline-offset: 4px;
 }
 button.primary,
@@ -97,12 +97,12 @@ button.primary,
 }
 button.primary:hover,
 .button.primary:hover {
-  background: #365d86;
+  background: #416b53;
 }
 button.secondary,
 .button.secondary {
   background: white;
-  border-color: #bdcbd9;
+  border-color: #c5d3c9;
 }
 button.subtle,
 .button.subtle {
@@ -111,7 +111,7 @@ button.subtle,
 }
 button.subtle:hover,
 .button.subtle:hover {
-  background: #e9eff6;
+  background: #e9f0ea;
 }
 button.small,
 .button.small {
@@ -166,7 +166,7 @@ p {
 input,
 select,
 textarea {
-  border: 1px solid #b8c6d4;
+  border: 1px solid #bbcbbf;
   background: #fff;
   border-radius: 7px;
   color: var(--ink);
@@ -177,7 +177,7 @@ textarea {
 }
 input::placeholder,
 textarea::placeholder {
-  color: #647587;
+  color: #607267;
 }
 textarea {
   width: 100%;
@@ -331,7 +331,7 @@ dialog::backdrop {
   inset: 0 auto 0 0;
   display: flex;
   flex-direction: column;
-  background: #edf1f5;
+  background: #fff;
   border-right: 1px solid var(--line);
   padding: 38px 20px 28px;
   z-index: 10;
@@ -357,7 +357,7 @@ dialog::backdrop {
   color: #fff;
   width: 43px;
   height: 47px;
-  border-radius: 11px 11px 4px 11px;
+  border-radius: 50%;
 }
 .brand small {
   display: block;
@@ -380,11 +380,11 @@ dialog::backdrop {
   min-height: 49px;
   padding: 12px 16px;
   text-decoration: none;
-  color: #5b6e82;
+  color: #607267;
   border-radius: 7px;
 }
 .sidebar nav a:hover {
-  background: #e4eaf1;
+  background: #eef3ef;
 }
 .sidebar nav a.active {
   color: var(--ink);
@@ -405,7 +405,7 @@ dialog::backdrop {
   margin-top: auto;
   padding: 22px 12px 0;
   font-size: 12px;
-  color: #53697c;
+  color: #607267;
 }
 .sidebar-foot p {
   font-size: 11px;
@@ -648,7 +648,7 @@ dialog::backdrop {
   transition: outline-color 0.15s;
 }
 .content-editor.dragging {
-  outline: 3px dashed #638fbe;
+  outline: 3px dashed #688d76;
   outline-offset: 5px;
   border-radius: 5px;
 }
@@ -688,7 +688,7 @@ dialog::backdrop {
   gap: 18px;
   align-items: center;
   padding: 5px 16px;
-  border: 1px solid #b8c6d4;
+  border: 1px solid #bbcbbf;
   border-top: 1px solid var(--line);
   border-radius: 0 0 8px 8px;
   background: white;
@@ -705,7 +705,7 @@ dialog::backdrop {
 .editor-preview {
   min-height: 150px;
   padding: 18px;
-  border: 1px solid #b8c6d4;
+  border: 1px solid #bbcbbf;
   border-bottom: 0;
   border-radius: 8px 8px 0 0;
   background: white;
@@ -772,7 +772,7 @@ dialog::backdrop {
 }
 .editor-images {
   background: #fff;
-  border-inline: 1px solid #b8c6d4;
+  border-inline: 1px solid #bbcbbf;
   padding: 0 16px;
   display: flex !important;
   flex-wrap: wrap;
@@ -1027,7 +1027,7 @@ dialog::backdrop {
 }
 .fam-badge.fam-2 {
   background: #e3ebf5;
-  color: #365d86;
+  color: #416b53;
 }
 .fam-badge.fam-3 {
   background: #dcebe2;
@@ -1060,8 +1060,8 @@ dialog::backdrop {
 }
 .fam-option.active.fam-2 {
   background: #e3ebf5;
-  border-color: #365d86;
-  color: #365d86;
+  border-color: #416b53;
+  color: #416b53;
 }
 .fam-option.active.fam-3 {
   background: #dcebe2;
@@ -1363,7 +1363,7 @@ dialog::backdrop {
 }
 .privacy-note {
   padding: 20px 22px;
-  background: #edf1f5;
+  background: #fff;
   border-radius: 8px;
   margin-top: 22px;
   font-size: 12px;
@@ -1375,7 +1375,7 @@ dialog::backdrop {
 .privacy-note ul {
   padding-left: 17px;
   margin: 9px 0 0;
-  color: #5b6e82;
+  color: #607267;
 }
 .privacy-note li {
   margin: 6px 0;
@@ -1498,7 +1498,7 @@ dialog::backdrop {
     justify-content: space-between;
     padding: 19px 21px 15px;
     border-bottom: 1px solid var(--line);
-    background: #edf1f5;
+    background: #fff;
   }
   .mobile-brand a {
     display: flex;
@@ -1529,7 +1529,7 @@ dialog::backdrop {
   }
   .sidebar nav {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 3px;
   }
   .sidebar nav a {
@@ -1543,7 +1543,7 @@ dialog::backdrop {
     color: #6f8191;
   }
   .sidebar nav a.active {
-    background: #eaf0f7;
+    background: #e8f1ea;
     box-shadow: none;
   }
   .sidebar nav a.active:before {
@@ -1736,7 +1736,7 @@ dialog::backdrop {
   .save-bar {
     position: relative;
     padding-block: 10px;
-    background: #f5f7f9;
+    background: #f8faf8;
     border-top: 1px solid var(--line);
     z-index: 5;
   }

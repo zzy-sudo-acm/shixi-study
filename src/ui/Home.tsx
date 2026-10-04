@@ -3,6 +3,7 @@ import type { Snapshot, Space } from '../core/model'
 import { spaceProgress } from '../core/workspace'
 import { Icon, PageHead } from './shared'
 import { SpaceIcon, SpaceIconPicker } from './SpaceIcon'
+import { LearningMap } from './LearningMap'
 import { FormActions, Modal, ProgressView, useWorkspaceActions, type Dirty } from './workspaceShared'
 
 const colors = ['#456785', '#527668', '#826541', '#75668c', '#8b606a']
@@ -189,10 +190,10 @@ export function Home({
   const [form, setForm] = useState<Space | 'new' | null>(null),
     [deleting, setDeleting] = useState<Space | null>(null)
   return (
-    <>
+    <div className="learning-home">
       <PageHead
         title="我的学习空间"
-        description={data.spaces.length ? '把正在学习的东西，放在这里。' : undefined}
+        description="从一个问题开始，把所学慢慢连起来。"
         action={
           data.spaces.length ? (
             <button className="primary" onClick={() => setForm('new')}>
@@ -212,62 +213,94 @@ export function Home({
         </details>
       ) : null}
       {!data.spaces.length ? (
-        <section className="blank-workbench">
-          <Icon name="book" size={36} />
-          <h2>还没有任何领域。</h2>
-          <p>建立一个你正在学习的东西。</p>
-          <button className="primary" onClick={() => setForm('new')}>
-            <Icon name="add" />
-            新建领域
-          </button>
+        <section className="blank-workbench map-blank">
+          <div className="map-blank-copy">
+            <h2>
+              你的知识地图，
+              <br />
+              从这里开始。
+            </h2>
+            <p>还没有任何领域。</p>
+            <p className="map-blank-description">
+              建立一个你正在学习的东西。
+              <br />
+              目标、知识和它们之间的连接，会慢慢在这里成形。
+            </p>
+            <button className="primary" onClick={() => setForm('new')}>
+              <Icon name="add" />
+              新建领域
+            </button>
+          </div>
+          <div className="map-origin">
+            <span className="origin-guide origin-guide-x" aria-hidden="true" />
+            <span className="origin-guide origin-guide-y" aria-hidden="true" />
+            <button onClick={() => setForm('new')} aria-label="创建第一个学习领域" className="origin-button">
+              <Icon name="add" size={28} />
+            </button>
+            <span className="origin-caption">点击，建立第一个领域</span>
+          </div>
         </section>
       ) : (
-        <div className="space-grid">
-          {data.spaces.map((space) => {
-            const goals = data.goals.filter((g) => g.spaceId === space.id && !g.parentGoalId).length
-            const count = data.knowledgeNodes.filter((n) => n.spaceId === space.id).length
-            return (
-              <article
-                className="space-card"
-                key={space.id}
-                style={{ '--space-color': space.color ?? colors[0] } as CSSProperties}
-              >
-                <a className="space-open" href={`#space/${space.id}/goals`} aria-label={`进入 ${space.name}`}>
-                  <div className="space-title">
-                    <span className="space-symbol" aria-hidden="true">
-                      <SpaceIcon value={space.icon} size={22} />
-                    </span>
-                    <h2>{space.name}</h2>
+        <>
+          <LearningMap data={data} onCreate={() => setForm('new')} />
+          <div className="space-list-heading">
+            <h2>学习领域</h2>
+            <span>{data.spaces.length} 个领域</span>
+          </div>
+          <div className="space-grid">
+            {data.spaces.map((space) => {
+              const goals = data.goals.filter((g) => g.spaceId === space.id && !g.parentGoalId).length
+              const count = data.knowledgeNodes.filter((n) => n.spaceId === space.id).length
+              return (
+                <article
+                  className="space-card"
+                  key={space.id}
+                  style={{ '--space-color': space.color ?? colors[0] } as CSSProperties}
+                >
+                  <a
+                    className="space-open"
+                    href={`#space/${space.id}/goals`}
+                    aria-label={`进入 ${space.name}`}
+                  >
+                    <div className="space-title">
+                      <span className="space-symbol" aria-hidden="true">
+                        <SpaceIcon value={space.icon} size={22} />
+                      </span>
+                      <h2>{space.name}</h2>
+                    </div>
+                    <ProgressView progress={spaceProgress(data, space.id)} />
+                    <p className="space-meta">
+                      {goals} 个目标 · {count} 个知识节点
+                    </p>
+                  </a>
+                  <div className="space-actions">
+                    <button
+                      className="text-button"
+                      aria-label={`编辑 ${space.name}`}
+                      onClick={() => setForm(space)}
+                    >
+                      编辑
+                    </button>
+                    <button
+                      className="text-button"
+                      aria-label={`删除 ${space.name}`}
+                      onClick={() => setDeleting(space)}
+                    >
+                      删除
+                    </button>
+                    <a
+                      className="space-continue"
+                      href={`#space/${space.id}/goals`}
+                      aria-label={`继续学习 ${space.name}`}
+                    >
+                      <Icon name="arrow" size={18} />
+                    </a>
                   </div>
-                  <ProgressView progress={spaceProgress(data, space.id)} />
-                  <p className="space-meta">
-                    {goals} 个目标 · {count} 个知识节点
-                  </p>
-                </a>
-                <div className="space-actions">
-                  <button
-                    className="text-button"
-                    aria-label={`编辑 ${space.name}`}
-                    onClick={() => setForm(space)}
-                  >
-                    编辑
-                  </button>
-                  <button
-                    className="text-button"
-                    aria-label={`删除 ${space.name}`}
-                    onClick={() => setDeleting(space)}
-                  >
-                    删除
-                  </button>
-                </div>
-              </article>
-            )
-          })}
-          <button className="new-space-tile" onClick={() => setForm('new')}>
-            <Icon name="add" size={25} />
-            新建学习领域
-          </button>
-        </div>
+                </article>
+              )
+            })}
+          </div>
+        </>
       )}
       {form ? (
         <SpaceForm
@@ -288,6 +321,6 @@ export function Home({
           setDirty={setDirty}
         />
       ) : null}
-    </>
+    </div>
   )
 }

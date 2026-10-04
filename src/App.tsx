@@ -22,6 +22,15 @@ const MemoLibrary = lazy(() => import('./ui/Library').then((m) => ({ default: m.
 const MemoReview = lazy(() => import('./ui/Review').then((m) => ({ default: m.ReviewPage })))
 const CardsHome = lazy(() => import('./ui/CardsHome').then((m) => ({ default: m.CardsHome })))
 
+const brandSymbol = (
+  <svg width="25" height="25" viewBox="0 0 25 25" aria-hidden="true">
+    <path d="M6 18 12 6 20 16" fill="none" stroke="currentColor" strokeWidth="1.4" />
+    <circle cx="6" cy="18" r="2.7" fill="currentColor" />
+    <circle cx="12" cy="6" r="3.2" fill="currentColor" />
+    <circle cx="20" cy="16" r="2.7" fill="currentColor" />
+  </svg>
+)
+
 export class ErrorBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
   state = { failed: false }
   static getDerivedStateFromError() {
@@ -205,9 +214,7 @@ export default function App() {
         <>
           <aside className="sidebar">
             <a href="#home" className="brand" aria-label="时习首页">
-              <span className="brand-mark">
-                <Icon name="book" size={24} />
-              </span>
+              <span className="brand-mark">{brandSymbol}</span>
               <span>
                 时习<small>个人学习空间</small>
               </span>
@@ -243,7 +250,7 @@ export default function App() {
           </aside>
           <header className="mobile-brand">
             <a href="#home">
-              <Icon name="book" />
+              {brandSymbol}
               时习
             </a>
             <span>个人学习空间</span>
