@@ -125,28 +125,18 @@ export function NodeForm({
     </Modal>
   )
 }
-export function NodeDetails({
+export function NodeRelations({
   node,
   data,
   act,
   busy,
   onSelect,
-  onClose,
-  onEdit,
-  onChild,
-  onMove,
-  showTools = true,
 }: {
   node: KnowledgeNode
   data: Snapshot
   act: Act
   busy: boolean
   onSelect: (id: string) => void
-  onClose: () => void
-  onEdit: () => void
-  onChild: () => void
-  onMove: () => void
-  showTools?: boolean
 }) {
   const [relating, setRelating] = useState(false),
     [search, setSearch] = useState('')
@@ -170,61 +160,8 @@ export function NodeDetails({
   const links = data.stepKnowledgeLinks.filter((l) => l.knowledgeNodeId === node.id)
   const steps = new Map(data.steps.map((s) => [s.id, s])),
     goals = new Map(data.goals.map((g) => [g.id, g]))
-  const depth = nodePath(node.id, nodes).length
   return (
-    <section className="node-details" aria-label={`知识详情 ${node.title}`}>
-      <div className="section-head">
-        <h2>{node.title}</h2>
-        <button aria-label="关闭节点详情" onClick={onClose}>
-          <Icon name="close" size={18} />
-        </button>
-      </div>
-      <p className="node-breadcrumb">
-        {data.spaces.find((s) => s.id === node.spaceId)?.name} ›{' '}
-        {nodePath(node.id, nodes).slice(0, -1).join(' › ') || '根层级'}
-      </p>
-      {showTools ? (
-        <div className="node-tools">
-          <button className="text-button" disabled={busy || depth >= 5} onClick={onChild}>
-            <Icon name="branch" size={16} />
-            添加子节点
-          </button>
-          <button className="text-button" disabled={busy} onClick={onEdit}>
-            编辑节点
-          </button>
-          <button className="text-button" disabled={busy} onClick={onEdit}>
-            重命名
-          </button>
-          <button className="text-button" disabled={busy} onClick={onMove}>
-            移动节点
-          </button>
-          <button
-            className="text-button"
-            disabled={busy}
-            onClick={() => {
-              const branch = descendants(node.id, nodes, (n) => n.parentId)
-              const text =
-                branch.size > 1
-                  ? `“${node.title}”包含 ${branch.size - 1} 个子节点。删除整个分支及关联？如需保留子节点，请取消后先移动。`
-                  : `删除“${node.title}”及其知识、步骤关联？`
-              if (window.confirm(text))
-                void act({ type: 'deleteNode', id: node.id, branch: true }).then((ok) => {
-                  if (ok) onClose()
-                })
-            }}
-          >
-            删除节点
-          </button>
-        </div>
-      ) : null}
-      <div className="node-detail-section">
-        <h3>笔记</h3>
-        {node.note ? (
-          <p className="node-note">{node.note}</p>
-        ) : (
-          <p className="muted">还没有笔记。编辑节点，留下自己的理解。</p>
-        )}
-      </div>
+    <div className="node-relations">
       <div className="node-detail-section">
         <div className="section-head">
           <h3>相关知识</h3>
@@ -331,6 +268,6 @@ export function NodeDetails({
           <p className="muted">还没有相关任务。到目标中为步骤关联这个知识节点。</p>
         )}
       </div>
-    </section>
+    </div>
   )
 }

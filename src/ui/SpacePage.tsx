@@ -49,7 +49,7 @@ export function SpacePage({
     )
   const progress = spaceProgress(data, spaceId)
   const nodes = data.knowledgeNodes.filter((n) => n.spaceId === spaceId)
-  const tab = ['goals', 'tree', 'graph'].includes(view) ? view : 'goals'
+  const tab = view === 'tree' || view === 'graph' ? 'tree' : 'goals'
   return (
     <div className="space-page" style={{ '--space-color': space.color ?? '#456785' } as CSSProperties}>
       <a className="space-back" href="#home">
@@ -77,7 +77,6 @@ export function SpacePage({
         {[
           ['goals', '目标', 'check'],
           ['tree', '知识树', 'branch'],
-          ['graph', '知识图谱', 'tree'],
         ].map(([key, label, icon]) => (
           <a
             key={key}
@@ -85,7 +84,7 @@ export function SpacePage({
             className={tab === key ? 'active' : ''}
             aria-current={tab === key ? 'page' : undefined}
           >
-            <Icon name={icon as 'check' | 'branch' | 'tree'} size={18} />
+            <Icon name={icon as 'check' | 'branch'} size={18} />
             {label}
           </a>
         ))}
@@ -110,7 +109,6 @@ export function SpacePage({
         <KnowledgeStudio
           data={data}
           spaceId={spaceId}
-          view={tab}
           selected={selected}
           onSelect={setSelected}
           onEdit={setEditor}

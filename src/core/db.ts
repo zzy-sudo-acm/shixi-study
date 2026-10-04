@@ -388,6 +388,9 @@ export async function undoReview(snapshot: Snapshot): Promise<string> {
 export async function readImage(id: string) {
   return (await database()).get('images', id)
 }
+export async function saveImage(image: StoredImage) {
+  await (await database()).put('images', image)
+}
 export async function readAllData() {
   const db = await database()
   const tx = db.transaction(stores, 'readonly')

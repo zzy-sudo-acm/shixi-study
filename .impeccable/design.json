@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-04T11:57:15.000Z",
+  "generatedAt": "2026-10-04T15:48:21.882Z",
   "title": "Design System: 时习",
   "extensions": {
     "colorMeta": {
@@ -214,21 +214,6 @@
           "oklch(95% 0.0954 85.06)"
         ]
       },
-      "phone-frame": {
-        "role": "neutral",
-        "displayName": "手机边框",
-        "canonical": "#303030",
-        "tonalRamp": [
-          "oklch(15% 0.0000 0.00)",
-          "oklch(26% 0.0000 0.00)",
-          "oklch(38% 0.0000 0.00)",
-          "oklch(50% 0.0000 0.00)",
-          "oklch(62% 0.0000 0.00)",
-          "oklch(74% 0.0000 0.00)",
-          "oklch(86% 0.0000 0.00)",
-          "oklch(95% 0.0000 0.00)"
-        ]
-      },
       "danger": {
         "role": "secondary",
         "displayName": "危险色",
@@ -324,19 +309,9 @@
         "purpose": "首页黑色球体的轻微投影。"
       },
       {
-        "name": "phone-shadow",
-        "value": "8px 16px 34px #00000010",
-        "purpose": "工作台手机预览框架。"
-      },
-      {
         "name": "graph-node",
         "value": "0 3px 8px #00000004",
         "purpose": "预览图谱中的节点按钮。"
-      },
-      {
-        "name": "card-shadow",
-        "value": "0 4px 18px #263e350a, 0 1px 3px #263e3505",
-        "purpose": "既有记忆卡片与复习纸面。新工作台卡片使用灰面不使用阴影。"
       },
       {
         "name": "dialog",
@@ -361,14 +336,9 @@
         "purpose": "列表与卡片交错弹入，逐项30ms、封顶8项。"
       },
       {
-        "name": "orb-form-in",
-        "value": "700ms cubic-bezier(0.16, 1, 0.3, 1)",
-        "purpose": "球体符号入场圆形裁切展开；no-preference 门控。"
-      },
-      {
-        "name": "studio-note-in",
-        "value": "220ms cubic-bezier(0.16, 1, 0.3, 1)",
-        "purpose": "工作台笔记呈现纵向裁切进入；no-preference 门控。"
+        "name": "orb-live-in",
+        "value": "480ms ease-out",
+        "purpose": "球体轮播切换淡入；no-preference 门控。"
       },
       {
         "name": "graph-canvas",
@@ -448,7 +418,7 @@
       "name": "知识球体",
       "kind": "custom",
       "refersTo": "knowledge-orb",
-      "description": "首页黑色球体与创建入口：SVG 径向渐变球面、白色经纬网格与点线符号；指针跟随、悬停网格旋转、按压缩放，点击新建领域。",
+      "description": "首页珍珠白球体与创建入口：白到浅灰径向渐变球面、墨色经纬网格；球面按领域轮播真实知识树点线（自转约26秒、7秒切换），悬停展开为环绕轨道，空态为线框球。",
       "html": "<button type=\"button\" class=\"ds-orb\" aria-label=\"在学习空间新建领域\"><svg viewBox=\"0 0 440 440\" aria-hidden=\"true\"><circle cx=\"220\" cy=\"220\" r=\"194\" fill=\"#151515\"/><g stroke=\"#fff\" fill=\"none\" opacity=\".5\"><ellipse cx=\"220\" cy=\"220\" rx=\"214\" ry=\"72\" transform=\"rotate(-24 220 220)\"/></g><path d=\"M139 273 208 133 299 250\" stroke=\"#fff\" stroke-width=\"3\" fill=\"none\"/><circle cx=\"139\" cy=\"273\" r=\"19\" fill=\"#fff\"/><circle cx=\"208\" cy=\"133\" r=\"24\" fill=\"#fff\"/><circle cx=\"299\" cy=\"250\" r=\"19\" fill=\"#fff\"/></svg><span class=\"ds-orb-mark\" aria-hidden=\"true\">+</span><span class=\"ds-orb-caption\">从一个想法开始</span></button>",
       "css": ".ds-orb{position:relative;display:block;padding:0;width:min(100%,440px);aspect-ratio:1;border:0;border-radius:50%;background:transparent;color:#171717;cursor:pointer;}.ds-orb>svg{display:block;width:100%;height:100%;filter:drop-shadow(10px 18px 22px #00000015);transition:transform .3s cubic-bezier(.16,1,.3,1);}.ds-orb:active>svg{transform:scale(.97);}.ds-orb-mark{position:absolute;right:7%;bottom:16%;display:grid;place-items:center;width:52px;height:52px;font:300 30px/1 system-ui;background:#fff;border:1px solid #dedede;border-radius:50%;transition:transform .18s,background-color .18s,color .18s;}.ds-orb:hover .ds-orb-mark,.ds-orb:focus-visible .ds-orb-mark{transform:scale(1.1);background:#171717;color:#fff;}.ds-orb-caption{position:absolute;bottom:-6px;left:0;right:0;color:#686868;font-size:12px;}.ds-orb:focus-visible{outline:3px solid #767676;outline-offset:4px;}@media(max-width:640px){.ds-orb{width:min(100%,310px);}.ds-orb-mark{width:44px;height:44px;font-size:26px;}}@media(prefers-reduced-motion:reduce){.ds-orb>svg,.ds-orb-mark{transition:none;transform:none;}}"
     },
@@ -456,25 +426,9 @@
       "name": "首页领域卡片",
       "kind": "card",
       "refersTo": "space-card",
-      "description": "浅灰圆角卡片：名称、真实计划完成度、目标与知识计数、根节点预览，右侧真实知识结构缩略图；悬停时缩略结构舒展。",
+      "description": "整行浅灰卡片，只含该领域完整知识树点线图（根节点领域色、全部节点带名字、关联为领域色虚线），超高内部滚动；底部保留编辑、删除与继续入口。",
       "html": "<article class=\"ds-space-card\" style=\"--space-color:#456785\"><a class=\"ds-space-open\" href=\"#home\" aria-label=\"进入我的领域\"><div class=\"ds-space-card-body\"><div class=\"ds-space-card-copy\"><div class=\"ds-space-title\"><span class=\"ds-space-symbol\"><svg width=\"22\" height=\"22\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M4 4h12a4 4 0 0 1 4 4v13H8a4 4 0 0 1-4-4V4zM8 9h8M8 13h6\"/></svg></span><h2>我的领域</h2></div><p class=\"ds-space-progress\">尚未建立计划</p><p class=\"ds-space-meta\">0 个目标 · 0 个知识节点</p><p class=\"ds-space-root-preview\">从一个概念，长出自己的结构。</p></div><div class=\"ds-space-card-visual\"><svg viewBox=\"0 0 300 274\" class=\"ds-space-drawing\" aria-hidden=\"true\"><circle cx=\"150\" cy=\"137\" r=\"21\" fill=\"none\" stroke=\"#456785\" stroke-width=\".8\" opacity=\".35\"/><circle cx=\"150\" cy=\"137\" r=\"11\" fill=\"#456785\"/></svg></div></div></a><div class=\"ds-space-actions\"><button type=\"button\">编辑</button><button type=\"button\">删除</button></div></article>",
       "css": ".ds-space-card{min-width:0;background:#f6f6f4;border:0;border-radius:24px;overflow:hidden;color:var(--ink,#171717);font:400 15px/1.65 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;}.ds-space-open{display:block;padding:28px 28px 8px;color:inherit;text-decoration:none;}.ds-space-card-body{display:grid;grid-template-columns:1.2fr 1fr;align-items:center;gap:8px;}.ds-space-card-copy{min-width:0;}.ds-space-title{display:flex;gap:11px;align-items:flex-start;margin-bottom:22px;}.ds-space-symbol{display:grid;place-items:center;color:var(--space-color,#456785);flex-shrink:0;width:25px;height:30px;}.ds-space-title h2{margin:0;font-size:21px;font-weight:500;overflow-wrap:anywhere;}.ds-space-progress{margin:0;color:#171717;font-size:14px;}.ds-space-meta{margin:12px 0 0;font-size:12px;color:#686868;}.ds-space-root-preview{margin:16px 0 0;font-size:12px;line-height:1.7;color:#686868;overflow-wrap:anywhere;}.ds-space-card-visual{min-width:0;}.ds-space-drawing{width:100%;transition:transform .3s cubic-bezier(.16,1,.3,1);}.ds-space-card:has(.ds-space-open:hover) .ds-space-drawing{transform:scale(1.07);}.ds-space-actions{display:flex;gap:18px;padding:0 28px 18px;}.ds-space-actions button{min-height:36px;padding:4px 2px;border:0;background:transparent;color:#505050;font:500 12px/1.4 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;cursor:pointer;}.ds-space-actions button:hover{color:#111;}.ds-space-open:focus-visible,.ds-space-actions button:focus-visible{outline:3px solid #767676;outline-offset:4px;}@media(max-width:640px){.ds-space-card{border-radius:20px;}.ds-space-open{padding:24px 22px 10px;}.ds-space-actions{padding-inline:22px;}.ds-space-title h2{font-size:19px;}}@media(prefers-reduced-motion:reduce){.ds-space-drawing{transition:none;transform:none;}}"
-    },
-    {
-      "name": "呈现方式分段控件",
-      "kind": "custom",
-      "refersTo": "preview-mode-control",
-      "description": "工作台右卡片切换笔记、图谱、手机三种实时呈现；选中为白纸黑字，aria-pressed 表达。",
-      "html": "<div class=\"ds-mode\" aria-label=\"呈现方式\"><button type=\"button\" aria-pressed=\"true\">笔记预览</button><button type=\"button\" aria-pressed=\"false\">图谱预览</button><button type=\"button\" aria-pressed=\"false\">手机预览</button></div>",
-      "css": ".ds-mode{display:flex;gap:4px;padding:4px;background:#eaeae7;border-radius:13px;font:400 12px/1.65 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;}.ds-mode button{flex:1;min-height:40px;padding:8px 10px;border:0;background:transparent;border-radius:10px;color:#686868;font:inherit;cursor:pointer;transition:background-color .15s,color .15s;}.ds-mode button[aria-pressed='true']{color:#171717;background:#fff;box-shadow:0 2px 4px #00000005;}.ds-mode button:focus-visible{outline:3px solid #767676;outline-offset:4px;}@media(prefers-reduced-motion:reduce){.ds-mode button{transition:none;}}"
-    },
-    {
-      "name": "手机预览",
-      "kind": "custom",
-      "refersTo": "phone-preview",
-      "description": "带状态栏、胶囊感应区与主页指示条的手机框架，实时呈现当前节点名称与笔记；内容随左侧编辑同步。",
-      "html": "<div class=\"ds-phone\"><div class=\"ds-phone-status\"><span>时习</span></div><div class=\"ds-phone-island\" aria-hidden=\"true\"></div><div class=\"ds-phone-screen\"><p class=\"ds-phone-space\">我的领域</p><article class=\"ds-phone-note\"><h3>知识节点</h3><p>先理解概念，再把它与已有的知识连接。</p><button type=\"button\">收起笔记</button></article><div class=\"ds-phone-bottom\">内容随左侧编辑同步</div></div><span class=\"ds-phone-home\" aria-hidden=\"true\"></span></div>",
-      "css": ".ds-phone{position:relative;width:min(100%,310px);height:548px;margin:28px auto 0;border:6px solid #303030;border-radius:46px;background:#fff;box-shadow:8px 16px 34px #00000010;overflow:hidden;font:400 14px/1.65 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;color:#171717;}.ds-phone-status{display:flex;justify-content:space-between;align-items:center;padding:17px 24px 0;font-size:11px;font-weight:500;}.ds-phone-island{position:absolute;top:12px;left:50%;transform:translateX(-50%);width:94px;height:25px;background:#111;border-radius:999px;}.ds-phone-screen{display:flex;flex-direction:column;height:calc(100% - 39px);padding:32px 21px 38px;overflow-y:auto;}.ds-phone-space{padding-bottom:20px;color:#686868;font-size:12px;text-align:center;}.ds-phone-note h3{font-size:27px;font-weight:500;line-height:1.45;overflow-wrap:anywhere;margin:0;}.ds-phone-note p{margin-top:24px;font-size:14px;line-height:1.9;white-space:pre-wrap;overflow-wrap:anywhere;}.ds-phone-note button{display:flex;justify-content:space-between;width:100%;margin-top:26px;font-size:12px;border:0;padding:12px 0;border-radius:0;border-bottom:1px solid #ededed;background:transparent;color:#171717;cursor:pointer;}.ds-phone-bottom{display:flex;justify-content:center;gap:7px;font-size:11px;color:#686868;margin-top:auto;padding-top:30px;}.ds-phone-home{position:absolute;bottom:10px;left:calc(50% - 43px);width:86px;height:4px;background:#111;border-radius:99px;}@media(max-width:640px){.ds-phone{height:530px;}}"
     },
     {
       "name": "SpaceIconPicker",
@@ -488,20 +442,20 @@
       "name": "图谱节点",
       "kind": "custom",
       "refersTo": "graph-node",
-      "description": "稳定知识节点按钮；选中为黑底白字，相邻节点用灰边框和浅灰纸面；父子线灰色实线，用户关联为领域色虚线。",
+      "description": "稳定知识节点按钮；选中为黑底白字，相邻节点用灰边框和浅灰纸面；父子线灰色实线，用户关联为领域色虚线；点击节点在图谱下方呈现其知识点面板。",
       "html": "<button type=\"button\" class=\"ds-graph-node ds-graph-selected\" aria-pressed=\"true\" title=\"知识节点\"><span>知识节点</span></button>",
       "css": ".ds-graph-node{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:3px;width:208px;height:64px;min-height:64px;padding:10px 14px;border:1px solid #d6d6d6;border-radius:8px;background:var(--paper,#fff);color:var(--ink,#171717);font:500 13px/1.4 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;text-align:left;white-space:normal;cursor:pointer;box-shadow:0 3px 8px #00000004;transition:background-color .15s,border-color .15s;}.ds-graph-node:hover{border-color:#8b8b8b;background:#f1f1ef;}.ds-graph-node.ds-graph-selected{border-color:#171717;background:#171717;color:#fff;}.ds-graph-node:focus-visible{outline:3px solid #767676;outline-offset:4px;}@media(prefers-reduced-motion:reduce){.ds-graph-node{transition:none;}}.ds-graph-node span{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;overflow-wrap:anywhere;line-height:1.4;flex-shrink:0;}"
     }
   ],
   "narrative": {
     "northStar": "时习白色知识展台",
-    "overview": "纯白底、黑色文字与浅灰展台组成安静而有辨识度的个人学习界面。首页在文字旁放置一颗可操作的黑色球体，球面承载时习的点线符号；学习领域以浅灰卡片陈列，卡片内嵌真实知识结构的缩略图。领域工作台由两张同级卡片组成：左侧编辑名称与笔记，右侧立即呈现笔记、图谱或手机阅读效果。保留的记忆卡片、图片和复习纸面属于另一组既有功能，不能把其分类树或卡片图谱当作新的知识节点树。",
+    "overview": "纯白底、墨色文字与浅灰展台组成安静而有辨识度的个人学习界面。首页在文字旁放置一颗珍珠白球体：球面轮播用户真实的知识树点线，缓慢自转，悬停时知识树展开成环绕轨道。学习领域以整行浅灰卡片陈列，卡片只承载该领域完整的点线树图（每个节点带名字）。知识库页把每棵知识树的根节点陈列成卡片，点进去看单树图谱。编辑器始终成对：左侧文件夹式知识树与 Markdown 知识点编辑，右侧知识图谱，点节点看知识点。复习卡片与 FSRS 界面已于 2026-10 移除；旧卡片、图片与复习历史保留在本机与完整备份中。",
     "keyCharacteristics": [
-      "纯白页面、黑色主动作与品牌球体，中性灰承载层级。",
+      "纯白页面、珍珠球体、黑色主动作，中性灰承载层级；领域标记色只用于个人内容。",
       "品牌保留宋体特征，内容与操作以中文系统黑体保持清晰。",
-      "桌面顶部居中三入口导航，手机品牌与导航纵向居中排列。",
+      "桌面顶部居中三入口导航（学习空间 / 知识库 / 设置与备份），手机品牌与导航纵向居中排列。",
       "编辑与呈现成对出现；预览使用真实知识与当前草稿，保存状态显式可见。",
-      "空态、计数与计划完成度均来自真实数据；领域标记色是用户数据。"
+      "空态、计数与计划完成度均来自真实数据；球体只展出真实知识树，空账号为线框球。"
     ],
     "rules": [
       {
@@ -540,11 +494,12 @@
     ],
     "donts": [
       "**Don't** 在初始学习空间预设学科、目标、知识节点或示例完成率。",
-      "**Don't** 将原有卡片分类树与卡片图谱替代新的稳定知识节点树。",
+      "**Don't** 以任何形式恢复复习卡片界面替代知识树结构；旧复习数据只通过备份保留与导出。",
       "**Don't** 把完成步骤解释为已掌握知识，或用颜色单独表达关系与完成状态。",
       "**Don't** 引入深色主题、营销首屏、数据大屏或花哨后台来替换白色展台语言；也不要回到旧版绿色侧栏视觉。",
-      "**Don't** 给每个工作台容器添加重阴影、全屏模糊或循环动画。",
-      "**Don't** 把预览中的未保存草稿当作已持久化数据，或静默丢弃用户输入。"
+      "**Don't** 给每个工作台容器添加重阴影、全屏模糊或循环动画；球体自转是唯一持续动画，页面隐藏即暂停。",
+      "**Don't** 把预览中的未保存草稿当作已持久化数据，或静默丢弃用户输入。",
+      "**Don't** 让 Markdown 渲染原始 HTML；公式与图片只走受控通道（KaTeX 与 IndexedDB 图片）。"
     ]
   }
 }

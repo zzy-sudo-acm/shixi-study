@@ -1,3 +1,4 @@
+import { readFile } from 'node:fs/promises'
 import { test, expect, type Page } from '@playwright/test'
 
 async function noOverflow(page: Page) {
@@ -41,7 +42,7 @@ async function addNode(page: Page, title: string, note = '', child = false) {
   if (note) await page.getByLabel('笔记', { exact: true }).fill(note)
   await page.getByRole('button', { name: '保存节点', exact: true }).click()
   await expect(page.getByRole('dialog')).toHaveCount(0)
-  await expect(page.getByRole('region', { name: `知识详情 ${title}`, exact: true })).toBeVisible()
+  await expect(page.locator('.node-point')).toContainText(title)
 }
 async function readWorkspace(page: Page) {
   return page.evaluate(async () => {
@@ -122,7 +123,10 @@ test('图标点选预览、颜色跟随、键盘与旧符号持久化', async ({
   await expect(page.getByRole('dialog')).toHaveCount(0)
   expect((await readWorkspace(page)).spaces[0].icon).toBe('icon:code')
   await page.reload()
-  await expect(page.locator('.space-symbol [data-icon="code"] svg')).toBeVisible()
+  await page.getByRole('button', { name: '编辑 图标体验', exact: true }).click()
+  await expect(preview.locator('[data-icon="code"] svg')).toBeVisible()
+  await page.getByRole('button', { name: '关闭对话框', exact: true }).click()
+  await expect(page.getByRole('dialog')).toHaveCount(0)
 
   await page.getByRole('button', { name: '编辑 图标体验', exact: true }).click()
   await page.getByRole('button', { name: '选择图标', exact: true }).click()
@@ -132,7 +136,10 @@ test('图标点选预览、颜色跟随、键盘与旧符号持久化', async ({
   await page.getByRole('button', { name: '保存修改', exact: true }).click()
   await expect(page.getByRole('dialog')).toHaveCount(0)
   await page.reload()
-  await expect(page.locator('.space-symbol')).toHaveText('🐱')
+  await page.getByRole('button', { name: '编辑 图标体验', exact: true }).click()
+  await expect(preview).toHaveText('🐱')
+  await page.getByRole('button', { name: '关闭对话框', exact: true }).click()
+  await expect(page.getByRole('dialog')).toHaveCount(0)
 
   await page.getByRole('button', { name: '编辑 图标体验', exact: true }).click()
   await page.getByRole('button', { name: '选择图标', exact: true }).click()
@@ -143,7 +150,10 @@ test('图标点选预览、颜色跟随、键盘与旧符号持久化', async ({
   await page.getByRole('button', { name: '保存修改', exact: true }).click()
   await expect(page.getByRole('dialog')).toHaveCount(0)
   await page.reload()
-  await expect(page.locator('.space-symbol')).toHaveText('⌘')
+  await page.getByRole('button', { name: '编辑 图标体验', exact: true }).click()
+  await expect(preview).toHaveText('⌘')
+  await page.getByRole('button', { name: '关闭对话框', exact: true }).click()
+  await expect(page.getByRole('dialog')).toHaveCount(0)
   expect((await readWorkspace(page)).spaces[0].icon).toBe('⌘')
 })
 
@@ -197,9 +207,8 @@ test('知识树 ID 稳定、移动、折叠、笔记与五层上限', async ({ p
   await page.getByRole('button', { name: '重命名', exact: true }).click()
   await page.getByLabel('节点名称').fill('协议体系')
   await page.getByRole('button', { name: '保存节点' }).click()
-  await expect(page.getByRole('region', { name: '知识详情 协议体系' })).toContainText(
-    '<script>只是文字</script>',
-  )
+  await expect(page.locator('.node-point')).toContainText('<script>只是文字</script>')
+  await expect(page.locator('.node-point h3')).toHaveText('协议体系')
   expect((await readWorkspace(page)).knowledgeNodes.find((n: any) => n.id === rootId).title).toBe('协议体系')
   await page.getByRole('button', { name: '收起 协议体系', exact: true }).click()
   await expect(page.locator('.tree-name').filter({ hasText: '慢启动' })).toHaveCount(0)
@@ -236,7 +245,6 @@ test('知识关系、图谱高亮、步骤双向关联、完成不改变知识',
   await expect(
     page.locator('.relation-choices').getByRole('button', { name: '极限', exact: true }),
   ).toHaveCount(0)
-  await page.getByRole('link', { name: '知识图谱', exact: true }).click()
   await expect(page.locator('.graph-relation')).toHaveCount(1)
   await page.locator('.stable-graph-node').filter({ hasText: '偏导数' }).click()
   await expect(page.locator('.stable-graph-node.connected')).toHaveCount(2)
@@ -268,7 +276,7 @@ test('知识关系、图谱高亮、步骤双向关联、完成不改变知识',
   await expect(page.locator('.task-links').getByLabel('未完成')).toBeVisible()
   page.once('dialog', (d) => void d.accept())
   await page.getByRole('button', { name: '删除节点', exact: true }).click()
-  await expect(page.locator('.node-details')).toHaveCount(0)
+  await expect(page.locator('.node-point')).toHaveCount(0)
   const after = await readWorkspace(page)
   expect(after.knowledgeRelations).toEqual([])
   expect(after.stepKnowledgeLinks).toEqual([])
@@ -400,6 +408,9 @@ test('真实浏览器 v2 升级保留旧卡片，不创建空科目', async ({ p
   await expect(page.locator('.space-summary')).toContainText('尚未建立计划')
   await page.getByRole('link', { name: '知识树', exact: true }).click()
   await expect(page.locator('.tree-name')).toHaveCount(2)
-  await page.goto('#library')
-  await expect(page.getByRole('heading', { name: 'ありがとう', exact: true })).toBeVisible()
+  await page.goto('#settings')
+  const downloadPromise = page.waitForEvent('download')
+  await page.getByRole('button', { name: '导出完整备份', exact: true }).click()
+  const backup = JSON.parse(await readFile((await (await downloadPromise).path())!, 'utf8')).payload
+  expect(backup.cards.some((card: { id: string }) => card.id === 'old-card')).toBe(true)
 })

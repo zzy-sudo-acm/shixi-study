@@ -1,11 +1,10 @@
 import { useState, type CSSProperties } from 'react'
 import type { Snapshot, Space } from '../core/model'
-import { spaceProgress } from '../core/workspace'
 import { Icon } from './shared'
-import { SpaceIcon, SpaceIconPicker } from './SpaceIcon'
-import { KnowledgeDrawing } from './LearningMap'
+import { SpaceIconPicker } from './SpaceIcon'
 import { KnowledgeOrb } from './KnowledgeOrb'
-import { FormActions, Modal, ProgressView, useWorkspaceActions, type Dirty } from './workspaceShared'
+import { KnowledgeTreeFigure } from './KnowledgeTreeFigure'
+import { FormActions, Modal, useWorkspaceActions, type Dirty } from './workspaceShared'
 
 const colors = ['#456785', '#527668', '#826541', '#75668c', '#8b606a']
 export function SpaceForm({
@@ -207,7 +206,7 @@ export function Home({
             新建领域
           </button>
         </div>
-        <KnowledgeOrb empty={!data.spaces.length} onCreate={() => setForm('new')} />
+        <KnowledgeOrb data={data} onCreate={() => setForm('new')} />
       </section>
       {data.migrationWarnings.length ? (
         <details className="migration-note">
@@ -215,7 +214,7 @@ export function Home({
           {data.migrationWarnings.map((message, i) => (
             <p key={i}>{message}</p>
           ))}
-          <a href="#library">查看保留的记忆卡片</a>
+          <a href="#settings">在设置中导出完整备份</a>
         </details>
       ) : null}
       {data.spaces.length ? (
@@ -226,7 +225,6 @@ export function Home({
           </div>
           <div className="space-grid">
             {data.spaces.map((space, index) => {
-              const goals = data.goals.filter((g) => g.spaceId === space.id && !g.parentGoalId).length
               const count = data.knowledgeNodes.filter((n) => n.spaceId === space.id).length
               return (
                 <article
@@ -245,35 +243,22 @@ export function Home({
                     href={`#space/${space.id}/goals`}
                     aria-label={`进入 ${space.name}`}
                   >
-                    <div className="space-card-body">
-                      <div className="space-card-copy">
-                        <div className="space-title">
-                          <span className="space-symbol" aria-hidden="true">
-                            <SpaceIcon value={space.icon} size={22} />
-                          </span>
-                          <h2>{space.name}</h2>
-                        </div>
-                        <ProgressView progress={spaceProgress(data, space.id)} />
-                        <p className="space-meta">
-                          {goals} 个目标 · {count} 个知识节点
-                        </p>
-                        <p className="space-root-preview">
-                          {data.knowledgeNodes
-                            .filter((node) => node.spaceId === space.id && !node.parentId)
-                            .slice(0, 2)
-                            .map((node) => node.title)
-                            .join(' / ') || '从一个概念，长出自己的结构。'}
-                        </p>
-                      </div>
-                      <div className="space-card-visual">
-                        <KnowledgeDrawing
-                          nodes={data.knowledgeNodes.filter((node) => node.spaceId === space.id).slice(0, 18)}
+                    {count ? (
+                      <div className="tree-figure">
+                        <KnowledgeTreeFigure
+                          nodes={data.knowledgeNodes.filter((node) => node.spaceId === space.id)}
                           relations={data.knowledgeRelations.filter(
                             (relation) => relation.spaceId === space.id,
                           )}
+                          color={space.color ?? colors[0]}
+                          labeled
                         />
                       </div>
-                    </div>
+                    ) : (
+                      <p className="space-card-figure-empty">
+                        {space.name}：还没有知识节点，进入领域种下第一个。
+                      </p>
+                    )}
                   </a>
                   <div className="space-actions">
                     <button

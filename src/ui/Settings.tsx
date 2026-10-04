@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import {
   exportBackup,
   MAX_BACKUP_BYTES,
@@ -6,14 +6,12 @@ import {
   validateBackup,
   type ValidBackup,
 } from '../core/backup'
-import { saveSettings } from '../core/db'
-import { DATA_VERSION, friendlyError, type Settings, type Snapshot } from '../core/model'
+import { DATA_VERSION, friendlyError, type Snapshot } from '../core/model'
 import { localDay } from '../core/scheduler'
 import { Icon, Notice, PageHead } from './shared'
 
 export function SettingsPage({ data, refresh }: { data: Snapshot; refresh: () => Promise<void> }) {
-  const [settings, setSettings] = useState<Settings>(data.settings),
-    [busy, setBusy] = useState(false),
+  const [busy, setBusy] = useState(false),
     [error, setError] = useState(''),
     [message, setMessage] = useState('')
   const [backup, setBackup] = useState<ValidBackup | null>(null),
@@ -22,7 +20,6 @@ export function SettingsPage({ data, refresh }: { data: Snapshot; refresh: () =>
   const dialog = useRef<HTMLDialogElement>(null),
     fileInput = useRef<HTMLInputElement>(null)
   const lock = useRef(false)
-  useEffect(() => setSettings(data.settings), [data.settings])
   async function run(action: () => Promise<void>) {
     if (lock.current) return
     lock.current = true
@@ -65,7 +62,6 @@ export function SettingsPage({ data, refresh }: { data: Snapshot; refresh: () =>
     await run(async () => {
       await restoreBackup(backup, importRevision.current)
       await refresh()
-      setSettings(backup.settings)
       dialog.current?.close()
       setBackup(null)
       setMessage('恢复完成。内容、图片、设置、历史和调度状态已全部写入本机。')
@@ -73,69 +69,7 @@ export function SettingsPage({ data, refresh }: { data: Snapshot; refresh: () =>
   }
   return (
     <>
-      <PageHead title="设置与备份" description="学习节奏由你决定，学习数据由你保管。" />
-      <section className="settings-section">
-        <h2>复习节奏</h2>
-        <form
-          onSubmit={(e) => {
-            e.preventDefault()
-            void run(async () => {
-              await saveSettings(settings, data.revision)
-              await refresh()
-              setMessage('设置已保存。')
-            })
-          }}
-        >
-          <div className="setting-row">
-            <div>
-              <label htmlFor="new-limit">每日新学上限</label>
-              <p>所有记忆卡片共用，到期内容优先。设为 0 时只复习已学内容。</p>
-            </div>
-            <input
-              id="new-limit"
-              type="number"
-              inputMode="numeric"
-              min="0"
-              max="200"
-              required
-              value={Number.isNaN(settings.dailyNewLimit) ? '' : settings.dailyNewLimit}
-              onChange={(e) =>
-                setSettings((s) => ({
-                  ...s,
-                  dailyNewLimit: e.target.value === '' ? NaN : Number(e.target.value),
-                }))
-              }
-            />
-          </div>
-          <div className="setting-row">
-            <div>
-              <label htmlFor="reminder-time">希望复习的时间</label>
-              <p>按设备本地时间，在网页内提示今日到期内容。</p>
-            </div>
-            <input
-              id="reminder-time"
-              type="time"
-              required
-              value={settings.reminderTime}
-              onChange={(e) => setSettings((s) => ({ ...s, reminderTime: e.target.value }))}
-            />
-          </div>
-          <label className="check-label">
-            <input
-              type="checkbox"
-              checked={settings.reminderEnabled}
-              onChange={(e) => setSettings((s) => ({ ...s, reminderEnabled: e.target.checked }))}
-            />
-            开启应用内时间提示
-          </label>
-          <p className="subtle-info">
-            网页关闭后不会推送通知，也不会唤醒设备。第一版不申请系统通知权限；需要准时提醒时，可使用手机闹钟。
-          </p>
-          <button className="secondary" disabled={busy} type="submit">
-            {busy ? '处理中…' : '保存设置'}
-          </button>
-        </form>
-      </section>
+      <PageHead title="设置与备份" description="学习数据由你保管。" />
       <section className="settings-section">
         <h2>备份与恢复</h2>
         <p>
@@ -172,21 +106,6 @@ export function SettingsPage({ data, refresh }: { data: Snapshot; refresh: () =>
             <li>不上传题目、笔记或备份，不加入统计追踪。备份未加密，请妥善保管。</li>
           </ul>
         </div>
-      </section>
-      <section className="settings-section algorithm-note">
-        <h2>复习如何安排</h2>
-        <p>
-          使用 ts-fsrs 5.4.2 的默认参数，目标保留率参数为
-          90%。这是调度目标，不是你的掌握率，也没有拟合个人遗忘曲线。每次评分都会更新这条内容的实际状态，并保留历史用于未来优化。
-        </p>
-        <p>
-          “困难”表示不用看答案也能想起。看过答案才想起来，请选“忘了”。漏学不会清空进度，到期内容会一直保留。
-        </p>
-        <p>
-          <a href="https://open-spaced-repetition.github.io/ts-fsrs/" target="_blank" rel="noreferrer">
-            查看 FSRS 实现文档
-          </a>
-        </p>
       </section>
       {message && !backup && <Notice>{message}</Notice>}
       {error && !backup && <Notice error>{error}</Notice>}

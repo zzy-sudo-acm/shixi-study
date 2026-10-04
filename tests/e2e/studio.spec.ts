@@ -38,32 +38,49 @@ async function storedNodes(page: Page) {
   })
 }
 
-test('左侧草稿实时呈现于笔记、图谱与手机，保存后 ID 和内容持久化', async ({ page }) => {
+test('左侧草稿实时更新图谱与知识点面板，Markdown 渲染，保存后 ID 和内容持久化', async ({ page }) => {
   await setup(page)
   const original = (await storedNodes(page)).find((node) => node.title === '原始名称')
   await page.getByLabel('实时编辑知识名称', { exact: true }).fill('新的知识名称')
-  await page.getByLabel('实时编辑知识内容', { exact: true }).fill('第一行理解\n第二行总结')
-  await expect(page.getByRole('region', { name: '知识详情 新的知识名称', exact: true })).toContainText(
-    '第二行总结',
-  )
-  expect((await storedNodes(page)).find((node) => node.id === original.id).title).toBe('原始名称')
-  await page.getByRole('button', { name: '图谱预览', exact: true }).click()
+  await page
+    .getByLabel('实时编辑知识内容', { exact: true })
+    .fill('**重点**：极限描述的是变化趋势，如 $\\lim_{x \\to 0} e^x = 1$。\n\n- 第一条\n- 第二条')
   await expect(page.locator('.stable-graph-node').filter({ hasText: '新的知识名称' })).toBeVisible()
-  await page.getByRole('button', { name: '手机预览', exact: true }).click()
-  await expect(page.locator('.phone-note h3')).toHaveText('新的知识名称')
-  await page.getByRole('button', { name: '阅读笔记', exact: true }).click()
-  await expect(page.locator('.phone-note')).toContainText('第二行总结')
-  await page.getByRole('button', { name: '收起笔记', exact: true }).click()
-  await expect(page.locator('.phone-note')).not.toContainText('第二行总结')
+  const point = page.locator('.node-point')
+  await expect(point).toContainText('极限描述的是变化趋势')
+  await expect(point.locator('strong')).toHaveText('重点')
+  await expect(point.locator('li')).toHaveCount(2)
+  await expect(point.locator('.math-inline .katex')).toBeVisible()
+  expect((await storedNodes(page)).find((node) => node.id === original.id).title).toBe('原始名称')
   await page.locator('.inline-save-actions').getByRole('button', { name: '保存修改', exact: true }).click()
   await expect(page.locator('.inline-editor-heading')).toContainText('已保存在本机')
   await page.reload()
   await page.locator('.tree-name').filter({ hasText: '新的知识名称' }).click()
-  await expect(page.getByLabel('实时编辑知识内容', { exact: true })).toHaveValue('第一行理解\n第二行总结')
+  await expect(page.getByLabel('实时编辑知识内容', { exact: true })).toHaveValue(
+    '**重点**：极限描述的是变化趋势，如 $\\lim_{x \\to 0} e^x = 1$。\n\n- 第一条\n- 第二条',
+  )
   const saved = (await storedNodes(page)).find((node) => node.id === original.id)
   expect(saved.title).toBe('新的知识名称')
-  expect(saved.note).toBe('第一行理解\n第二行总结')
+  expect(saved.note).toContain('**重点**')
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true)
+})
+
+test('插入图片后知识点面板显示图片', async ({ page }) => {
+  await setup(page)
+  const png = Buffer.from(
+    'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
+    'base64',
+  )
+  await page
+    .locator('input[type=file]')
+    .setInputFiles({ name: 'pixel.png', mimeType: 'image/png', buffer: png })
+  await expect(page.getByLabel('实时编辑知识内容', { exact: true })).toHaveValue(/!\[pixel\.png\]\(img:/)
+  await expect(page.locator('.node-point .image-thumb img')).toBeVisible()
+  await page.locator('.inline-save-actions').getByRole('button', { name: '保存修改', exact: true }).click()
+  await expect(page.locator('.inline-editor-heading')).toContainText('已保存在本机')
+  await page.reload()
+  await page.locator('.tree-name').filter({ hasText: '原始名称' }).click()
+  await expect(page.locator('.node-point .image-thumb img')).toBeVisible()
 })
 
 test('未保存的编辑在切换节点和离开页面时保护，确认放弃后不写入数据', async ({ page }) => {
@@ -97,9 +114,7 @@ test('保存失败保留左侧草稿和右侧呈现，可恢复后再次保存',
   await page.locator('.inline-save-actions').getByRole('button', { name: '保存修改', exact: true }).click()
   await expect(page.locator('.notice.error')).toBeVisible()
   await expect(page.getByLabel('实时编辑知识内容', { exact: true })).toHaveValue('保存失败仍需保留的内容')
-  await expect(page.getByRole('region', { name: '知识详情 原始名称', exact: true })).toContainText(
-    '保存失败仍需保留的内容',
-  )
+  await expect(page.locator('.node-point')).toContainText('保存失败仍需保留的内容')
   await page.evaluate(() => (window as any).restoreStudioPut())
   await page.locator('.inline-save-actions').getByRole('button', { name: '保存修改', exact: true }).click()
   await expect(page.locator('.inline-editor-heading')).toContainText('已保存在本机')

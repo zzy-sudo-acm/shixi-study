@@ -11,16 +11,13 @@ import {
   type ReactNode,
 } from 'react'
 import { DB_NAME, readSnapshot } from './core/db'
-import { friendlyError, subjectsFor, type Snapshot, type Subject } from './core/model'
+import { friendlyError, type Snapshot } from './core/model'
 import { Home } from './ui/Home'
 import { SpacePage } from './ui/SpacePage'
 import { Icon, Notice, type IconName } from './ui/shared'
-const MemoEditor = lazy(() => import('./ui/Editor').then((m) => ({ default: m.Editor })))
 const MemoSettings = lazy(() => import('./ui/Settings').then((m) => ({ default: m.SettingsPage })))
 const MemoHome = memo(Home)
-const MemoLibrary = lazy(() => import('./ui/Library').then((m) => ({ default: m.Library })))
-const MemoReview = lazy(() => import('./ui/Review').then((m) => ({ default: m.ReviewPage })))
-const CardsHome = lazy(() => import('./ui/CardsHome').then((m) => ({ default: m.CardsHome })))
+const MemoLibrary = lazy(() => import('./ui/KnowledgeLibrary').then((m) => ({ default: m.KnowledgeLibrary })))
 
 const brandSymbol = (
   <svg width="25" height="25" viewBox="0 0 25 25" aria-hidden="true">
@@ -60,7 +57,6 @@ export default function App() {
   const [data, setData] = useState<Snapshot | null>(null),
     [fatal, setFatal] = useState(''),
     [route, setRoute] = useState(routeValue),
-    [now, setNow] = useState(Date.now()),
     [external, setExternal] = useState(false)
   const [navRoute, setNavRoute] = useState(route)
   const [recoveryError, setRecoveryError] = useState(''),
@@ -87,7 +83,6 @@ export default function App() {
     const next = await readSnapshot()
     setData(next)
     setExternal(false)
-    setNow(Date.now())
   }, [])
   const load = useCallback(() => {
     setFatal('')
@@ -104,34 +99,25 @@ export default function App() {
         event.returnValue = ''
       }
     }
-    function tick() {
-      if (!document.hidden) setNow(Date.now())
-    }
     function blocked() {
       setFatal('数据库升级被其他页面阻塞。请关闭其他时习页面后重新加载。')
     }
-    const timer = window.setInterval(tick, 15000)
     window.addEventListener('hashchange', hash)
     window.addEventListener('beforeunload', beforeUnload)
-    window.addEventListener('focus', tick)
-    document.addEventListener('visibilitychange', tick)
     window.addEventListener('shixi-db-blocked', blocked)
     const channel = typeof BroadcastChannel === 'undefined' ? null : new BroadcastChannel(DB_NAME)
     if (channel) channel.onmessage = () => setExternal(true)
     return () => {
-      clearInterval(timer)
       window.removeEventListener('hashchange', hash)
       window.removeEventListener('beforeunload', beforeUnload)
-      window.removeEventListener('focus', tick)
-      document.removeEventListener('visibilitychange', tick)
       window.removeEventListener('shixi-db-blocked', blocked)
       channel?.close()
     }
   }, [navigate])
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' })
-    document.title = `${route.startsWith('space') ? '学习领域' : route.startsWith('review') ? '专注复习' : route.startsWith('library') ? '记忆卡片' : route.startsWith('settings') ? '设置与备份' : route.startsWith('add') || route.startsWith('edit') ? '添加与编辑' : route.startsWith('today') ? '今天复习' : '我的学习空间'} · 时习`
-    if (!route.startsWith('review')) document.querySelector<HTMLElement>('h1')?.focus()
+    document.title = `${route.startsWith('space') ? '学习领域' : route.startsWith('library') ? '知识库' : route.startsWith('settings') ? '设置与备份' : '我的学习空间'} · 时习`
+    document.querySelector<HTMLElement>('h1')?.focus()
   }, [route, !!data])
   if (fatal)
     return (
@@ -181,25 +167,15 @@ export default function App() {
     /* invalid route is shown as missing */
   }
   const activeRoute = navRoute.split('/')[0].split('?')[0]
-  const activePage = ['space', 'home'].includes(activeRoute)
-    ? 'home'
-    : ['today', 'review', 'add', 'edit', 'library'].includes(activeRoute)
-      ? 'library'
-      : activeRoute
+  const activePage = ['space', 'home'].includes(activeRoute) ? 'home' : activeRoute
   const params = new URLSearchParams(routeQuery)
-  const requestedSubject = params.get('subject') ?? argument
-  const subject = subjectsFor(data).includes(requestedSubject as Subject)
-    ? (requestedSubject as Subject)
-    : undefined
-  const reviewing = page === 'review'
   const nav: { key: string; name: string; icon: IconName }[] = [
     { key: 'home', name: '学习空间', icon: 'book' },
-    { key: 'library', name: '记忆卡片', icon: 'cards' },
+    { key: 'library', name: '知识库', icon: 'branch' },
     { key: 'settings', name: '设置与备份', icon: 'settings' },
   ]
-  const editing = data.cards.find((c) => c.id === argument)
   return (
-    <div className={reviewing ? 'app studio-app review-app' : 'app studio-app'}>
+    <div className="app studio-app">
       <a
         className="skip-link"
         href="#main"
@@ -210,53 +186,43 @@ export default function App() {
       >
         跳至内容
       </a>
-      {!reviewing && (
-        <>
-          <aside className="sidebar">
-            <a href="#home" className="brand" aria-label="时习首页">
-              <span className="brand-mark">{brandSymbol}</span>
-              <span>
-                时习<small>个人学习空间</small>
-              </span>
+      <aside className="sidebar">
+        <a href="#home" className="brand" aria-label="时习首页">
+          <span className="brand-mark">{brandSymbol}</span>
+          <span>
+            时习<small>个人学习空间</small>
+          </span>
+        </a>
+        <nav aria-label="主导航">
+          {nav.map((item) => (
+            <a
+              key={item.key}
+              href={`#${item.key}`}
+              className={activePage === item.key ? 'active' : ''}
+              aria-current={activePage === item.key ? 'page' : undefined}
+              onClick={(event) => {
+                if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return
+                event.preventDefault()
+                navigate(item.key)
+              }}
+            >
+              <Icon name={item.icon} />
+              <span>{item.name}</span>
             </a>
-            <nav aria-label="主导航">
-              {nav.map((item) => (
-                <a
-                  key={item.key}
-                  href={`#${item.key}`}
-                  className={
-                    activePage === item.key || (activePage === 'edit' && item.key === 'add') ? 'active' : ''
-                  }
-                  aria-current={
-                    activePage === item.key || (activePage === 'edit' && item.key === 'add')
-                      ? 'page'
-                      : undefined
-                  }
-                  onClick={(event) => {
-                    if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return
-                    event.preventDefault()
-                    navigate(item.key)
-                  }}
-                >
-                  <Icon name={item.icon} />
-                  <span>{item.name}</span>
-                </a>
-              ))}
-            </nav>
-            <div className="sidebar-foot">
-              <span className="local-dot" />
-              保存在本机<p>记得定期导出备份</p>
-            </div>
-          </aside>
-          <header className="mobile-brand">
-            <a href="#home">
-              {brandSymbol}
-              时习
-            </a>
-            <span>个人学习空间</span>
-          </header>
-        </>
-      )}
+          ))}
+        </nav>
+        <div className="sidebar-foot">
+          <span className="local-dot" />
+          保存在本机<p>记得定期导出备份</p>
+        </div>
+      </aside>
+      <header className="mobile-brand">
+        <a href="#home">
+          {brandSymbol}
+          时习
+        </a>
+        <span>个人学习空间</span>
+      </header>
       <main id="main" tabIndex={-1} className="main-content">
         {external && (
           <Notice>
@@ -286,44 +252,16 @@ export default function App() {
                 refresh={refresh}
                 setDirty={setDirty}
               />
-            ) : page === 'add' || page === 'edit' ? (
-              page === 'edit' && !editing ? (
-                <Notice error>没有找到这条内容，请返回“我的内容”。</Notice>
-              ) : (
-                <MemoEditor
-                  key={route}
-                  data={data}
-                  existing={page === 'edit' ? editing : undefined}
-                  subject={subject}
-                  initialCategory={params.get('category') ?? undefined}
-                  setDirty={setDirty}
-                  onSaved={refresh}
-                />
-              )
             ) : page === 'library' ? (
-              <MemoLibrary
-                key={route}
-                data={data}
-                now={now}
-                refresh={refresh}
-                draftOnly={argument === 'draft'}
-                initialSubject={subject}
-                initialGraph={params.get('view') === 'graph'}
-              />
+              <MemoLibrary key={route} data={data} rootId={argument} />
             ) : page === 'settings' ? (
               <MemoSettings data={data} refresh={refresh} />
-            ) : reviewing ? (
-              <MemoReview key={route} data={data} now={now} subject={subject} refresh={refresh} />
-            ) : page === 'today' ? (
-              <CardsHome data={data} now={now} />
             ) : (
               <MemoHome data={data} refresh={refresh} setDirty={setDirty} />
             )}
           </Suspense>
         </div>
-        {!reviewing && (
-          <footer className="page-footer">无需登录 · 内容仅保存在当前浏览器 · 设备之间不自动同步</footer>
-        )}
+        <footer className="page-footer">无需登录 · 内容仅保存在当前浏览器 · 设备之间不自动同步</footer>
       </main>
     </div>
   )

@@ -1,9 +1,13 @@
-import { lazy, Suspense, useEffect, useMemo, useState } from 'react'
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import type { KnowledgeNode, Snapshot } from '../core/model'
+import { friendlyError } from '../core/model'
+import { saveImage } from '../core/db'
+import { prepareImage } from '../core/images'
 import { descendants, nodePath } from '../core/workspace'
 import { KnowledgeTree } from './KnowledgeTree'
-import { NodeDetails } from './NodeDetails'
-import { Icon } from './shared'
+import { NodeRelations } from './NodeDetails'
+import { Icon, Notice } from './shared'
+import { Markdown } from './Markdown'
 import type { Act, Dirty } from './workspaceShared'
 
 const KnowledgeGraph = lazy(() =>
@@ -15,7 +19,6 @@ type Draft = { id: string; title: string; note: string }
 export function KnowledgeStudio({
   data,
   spaceId,
-  view,
   selected,
   onSelect,
   onEdit,
@@ -25,7 +28,6 @@ export function KnowledgeStudio({
 }: {
   data: Snapshot
   spaceId: string
-  view: string
   selected: string
   onSelect: (id: string) => void
   onEdit: (editor: Editor) => void
@@ -34,8 +36,9 @@ export function KnowledgeStudio({
   setDirty: Dirty
 }) {
   const [draft, setDraft] = useState<Draft | null>(null)
-  const [mode, setMode] = useState(view === 'graph' ? 'graph' : 'note')
-  const [reading, setReading] = useState(false)
+  const [imageError, setImageError] = useState('')
+  const noteArea = useRef<HTMLTextAreaElement>(null)
+  const imageInput = useRef<HTMLInputElement>(null)
   const nodes = data.knowledgeNodes.filter((node) => node.spaceId === spaceId)
   const active = nodes.find((node) => node.id === selected)
   const changed = !!(
@@ -58,13 +61,10 @@ export function KnowledgeStudio({
     [data, draft],
   )
   useEffect(() => {
-    setMode(view === 'graph' ? 'graph' : 'note')
-  }, [view])
-  useEffect(() => {
     setDraft(null)
-    setReading(false)
+    setImageError('')
     setDirty(false)
-  }, [selected, view, setDirty])
+  }, [selected, setDirty])
   useEffect(() => () => setDirty(false), [setDirty])
 
   function discard() {
@@ -96,6 +96,19 @@ export function KnowledgeStudio({
     ) {
       setDraft(null)
       setDirty(false)
+    }
+  }
+  async function addImage(file: File) {
+    setImageError('')
+    try {
+      const image = await prepareImage(file)
+      await saveImage(image)
+      const current = shown?.note ?? ''
+      const at = noteArea.current?.selectionStart ?? current.length
+      const snippet = `\n![${image.name}](img:${image.id})\n`
+      update('note', current.slice(0, at) + snippet + current.slice(at))
+    } catch (error) {
+      setImageError(friendlyError(error))
     }
   }
   async function remove(node: KnowledgeNode) {
@@ -189,16 +202,31 @@ export function KnowledgeStudio({
                     />
                   </label>
                   <label>
-                    笔记
+                    知识点（支持 Markdown 与图片）
                     <textarea
+                      ref={noteArea}
                       aria-label="实时编辑知识内容"
-                      rows={5}
+                      rows={8}
                       maxLength={100000}
                       value={shown.note ?? ''}
                       onChange={(event) => update('note', event.target.value)}
-                      placeholder="写下自己的理解，右侧会同步呈现。"
+                      placeholder={
+                        '写下自己的理解，右侧图谱里点节点就能看到。\n支持 **加粗**、列表、$公式$、代码、链接、图片。'
+                      }
                     />
                   </label>
+                  <input
+                    ref={imageInput}
+                    type="file"
+                    accept="image/png,image/jpeg,image/webp"
+                    hidden
+                    aria-hidden="true"
+                    onChange={(event) => {
+                      const file = event.target.files?.[0]
+                      if (file) void addImage(file)
+                      event.target.value = ''
+                    }}
+                  />
                   <div className="inline-save-actions">
                     <button className="primary" disabled={!changed || busy} type="submit">
                       {busy ? '正在保存…' : '保存修改'}
@@ -206,112 +234,52 @@ export function KnowledgeStudio({
                     <button type="button" disabled={!changed || busy} onClick={discard}>
                       放弃修改
                     </button>
+                    <button
+                      type="button"
+                      className="text-button insert-image"
+                      disabled={busy}
+                      onClick={() => imageInput.current?.click()}
+                    >
+                      <Icon name="image" size={16} />
+                      插入图片
+                    </button>
                   </div>
                 </fieldset>
               </form>
+              {imageError ? <Notice error>{imageError}</Notice> : null}
+              <NodeRelations node={active} data={data} act={act} busy={busy} onSelect={choose} />
             </div>
           ) : (
-            <p className="studio-editor-hint">选择一个节点，在这里编辑名称与笔记。</p>
+            <p className="studio-editor-hint">选择一个节点，在这里编辑名称与知识点。</p>
           )}
         </section>
-        <section id="knowledge-preview" className="studio-preview" aria-label="知识实时呈现">
+        <section id="knowledge-preview" className="studio-preview" aria-label="知识图谱实时呈现">
           <div className="studio-preview-heading">
-            <h2>实时呈现</h2>
+            <h2>知识图谱</h2>
             <span>{changed ? '预览未保存的修改' : '与你的知识同步'}</span>
           </div>
-          <div className="preview-mode-control" aria-label="呈现方式">
-            {[
-              ['note', '笔记预览'],
-              ['graph', '图谱预览'],
-              ['phone', '手机预览'],
-            ].map(([key, label]) => (
-              <button key={key} aria-pressed={mode === key} onClick={() => setMode(key)}>
-                {label}
-              </button>
-            ))}
-          </div>
-          {mode === 'graph' ? (
-            <Suspense fallback={<p role="status">正在打开知识图谱…</p>}>
-              <KnowledgeGraph
-                embedded
-                data={preview}
-                spaceId={spaceId}
-                selected={selected}
-                onSelect={choose}
-                onAdd={() => edit({ mode: 'add' })}
-              />
-            </Suspense>
-          ) : null}
-          {mode === 'phone' ? (
-            <div className="phone-preview">
-              <div className="phone-status">
-                <span>时习</span>
-                <svg width="18" height="10" viewBox="0 0 18 10" aria-hidden="true">
-                  <rect x="1" y="1" width="13" height="8" rx="2" fill="none" stroke="currentColor" />
-                  <rect x="3" y="3" width="9" height="4" rx="1" fill="currentColor" />
-                  <path d="M16 3v4" stroke="currentColor" strokeWidth="2" />
-                </svg>
-              </div>
-              <div className="phone-island" aria-hidden="true" />
-              <div className="phone-screen">
-                <p className="phone-space-name">{data.spaces.find((space) => space.id === spaceId)?.name}</p>
-                {shown ? (
-                  <article className="phone-note">
-                    <h3>{shown.title || '未命名知识'}</h3>
-                    {reading ? (
-                      <p>{shown.note || '还没有笔记。可以在左侧写下自己的理解。'}</p>
-                    ) : (
-                      <p className="muted">点击下方按钮，阅读这个知识节点的笔记。</p>
-                    )}
-                    <button onClick={() => setReading((value) => !value)}>
-                      {reading ? '收起笔记' : '阅读笔记'}
-                      <Icon name="chevron" size={16} />
-                    </button>
-                  </article>
-                ) : (
-                  <p className="phone-empty">
-                    选择左侧节点，
-                    <br />
-                    看看知识在手机里的样子。
-                  </p>
-                )}
-                <div className="phone-bottom-note">
-                  <Icon name="book" size={16} />
-                  <span>内容随左侧编辑同步</span>
-                </div>
-              </div>
-              <span className="phone-home-indicator" aria-hidden="true" />
-            </div>
-          ) : shown ? (
-            <NodeDetails
-              key={shown.id}
-              showTools={false}
-              node={shown}
+          <Suspense fallback={<p role="status">正在打开知识图谱…</p>}>
+            <KnowledgeGraph
+              embedded
               data={preview}
-              act={act}
-              busy={busy}
+              spaceId={spaceId}
+              selected={selected}
               onSelect={choose}
-              onClose={() => choose('')}
-              onEdit={() => edit({ mode: 'edit', id: shown.id })}
-              onMove={() => edit({ mode: 'move', id: shown.id })}
-              onChild={() => edit({ mode: 'add', parentId: shown.id })}
+              onAdd={() => edit({ mode: 'add' })}
             />
-          ) : mode === 'note' ? (
-            <div className="studio-preview-empty">
-              <svg viewBox="0 0 240 180" aria-hidden="true">
-                <path d="M65 125 120 48 185 115" />
-                <circle cx="65" cy="125" r="10" />
-                <circle cx="120" cy="48" r="15" />
-                <circle cx="185" cy="115" r="10" />
-              </svg>
-              <h3>{nodes.length ? '选一个节点，看看它的内容' : '你的知识，会在这里成形'}</h3>
-              <p>
-                左侧编辑，右侧呈现。
-                <br />
-                笔记、连接和手机阅读，都可以切换查看。
-              </p>
-            </div>
-          ) : null}
+          </Suspense>
+          {shown ? (
+            <article className="node-point" aria-label={`知识点 ${shown.title}`}>
+              <h3>{shown.title || '未命名知识'}</h3>
+              {shown.note ? (
+                <Markdown text={shown.note} />
+              ) : (
+                <p className="muted">这个节点还没有知识点。在左侧写下自己的理解，支持 Markdown 与图片。</p>
+              )}
+            </article>
+          ) : (
+            <p className="node-point-hint">点击图谱中的节点，查看里面的知识点。</p>
+          )}
         </section>
       </div>
     </>
