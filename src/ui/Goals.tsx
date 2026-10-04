@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, type CSSProperties } from 'react'
 import type { Goal, Snapshot, Step } from '../core/model'
 import { depthOf, descendants, goalProgress } from '../core/workspace'
 import { Empty, Icon } from './shared'
@@ -233,12 +233,17 @@ export function Goals({
       return () => clearTimeout(timer)
     }
   }, [focusStep, goals.length, data.steps.length])
-  function renderGoal(goal: Goal, depth: number) {
+  function renderGoal(goal: Goal, depth: number, stagger?: number) {
     const ownSteps = stepsByGoal.get(goal.id) ?? [],
       nested = children.get(goal.id) ?? [],
       open = !collapsed.has(goal.id)
     return (
-      <section className={`goal-branch goal-depth-${depth}`} key={goal.id} aria-label={`目标 ${goal.title}`}>
+      <section
+        className={`goal-branch goal-depth-${depth}`}
+        key={goal.id}
+        aria-label={`目标 ${goal.title}`}
+        style={stagger === undefined ? undefined : ({ '--stagger': Math.min(stagger, 8) } as CSSProperties)}
+      >
         <div className="goal-heading">
           <button
             className="goal-toggle"
@@ -404,7 +409,7 @@ export function Goals({
           </button>
         </Empty>
       ) : (
-        <div className="goal-outline">{roots.slice(0, limit).map((g) => renderGoal(g, 1))}</div>
+        <div className="goal-outline">{roots.slice(0, limit).map((g, i) => renderGoal(g, 1, i))}</div>
       )}
       {roots.length > limit ? (
         <button className="text-button" onClick={() => setLimit((n) => n + 40)}>

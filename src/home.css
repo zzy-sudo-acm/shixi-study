@@ -265,7 +265,7 @@
   background: var(--soft);
 }
 .space-continue svg {
-  transition: transform 180ms var(--ease-out);
+  transition: transform 180ms var(--ease-spring);
 }
 .space-continue:is(:hover, :focus-visible) svg {
   transform: translateX(4px);

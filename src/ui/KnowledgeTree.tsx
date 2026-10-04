@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useState, type CSSProperties } from 'react'
 import type { Snapshot } from '../core/model'
 import { buildKnowledgeTree, flattenKnowledgeTree } from '../core/graph'
 import { Icon } from './shared'
@@ -64,8 +64,16 @@ export function KnowledgeTree({
             }}
           />
           <ul className="stable-tree-list">
-            {filtered.slice(0, limit).map((row) => (
-              <li key={row.node.id} style={{ paddingLeft: (row.depth - 1) * 16 }}>
+            {filtered.slice(0, limit).map((row, index) => (
+              <li
+                key={row.node.id}
+                style={
+                  {
+                    paddingLeft: (row.depth - 1) * 16,
+                    '--stagger': Math.min(index, 8),
+                  } as CSSProperties
+                }
+              >
                 <div className="tree-row">
                   {row.children ? (
                     <button

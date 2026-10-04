@@ -1,4 +1,4 @@
-import { useDeferredValue, useMemo, useState } from 'react'
+import { useDeferredValue, useMemo, useState, type CSSProperties } from 'react'
 import { deleteCard, setFamiliarity } from '../core/db'
 import {
   categoryUnder,
@@ -22,11 +22,13 @@ function Item({
   card,
   data,
   now,
+  stagger,
   onChanged,
 }: {
   card: StudyCard
   data: Snapshot
   now: number
+  stagger: number
   onChanged: () => Promise<void>
 }) {
   const [expanded, setExpanded] = useState(false),
@@ -60,7 +62,11 @@ function Item({
           ? '已到期'
           : `下次 ${formatTime(card.schedule.due)}`
   return (
-    <article className={`library-item ${expanded ? 'expanded' : ''}`} data-subject={card.subject}>
+    <article
+      className={`library-item ${expanded ? 'expanded' : ''}`}
+      data-subject={card.subject}
+      style={{ '--stagger': stagger } as CSSProperties}
+    >
       <button
         className="item-trigger"
         aria-expanded={expanded}
@@ -377,12 +383,13 @@ export function Library({
               </p>
               {cards.length ? (
                 <div className="library-list">
-                  {cards.slice(0, limit).map((card) => (
+                  {cards.slice(0, limit).map((card, index) => (
                     <Item
                       key={`${card.id}-${card.updatedAt}`}
                       card={card}
                       data={data}
                       now={now}
+                      stagger={Math.min(index, 8)}
                       onChanged={refresh}
                     />
                   ))}

@@ -1,15 +1,12 @@
 /* Knowledge surfaces share the notebook palette and typography. */
-.page-surface {
-  animation: page-arrive 240ms var(--ease-out);
-}
-@keyframes page-arrive {
-  from {
-    opacity: 0.65;
-    transform: translateY(5px);
+@media (prefers-reduced-motion: no-preference) {
+  .page-surface {
+    animation: rise-in 320ms var(--ease-out);
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+  .item-detail,
+  .graph-inspector,
+  .answer-block {
+    animation: content-reveal 180ms var(--ease-out);
   }
 }
 @keyframes content-reveal {
@@ -21,11 +18,6 @@
     opacity: 1;
     transform: translateY(0);
   }
-}
-.item-detail,
-.graph-inspector,
-.answer-block {
-  animation: content-reveal 220ms var(--ease-out);
 }
 .sidebar nav a {
   transition:
@@ -59,7 +51,7 @@
 }
 .graph-entry > svg {
   margin-left: auto;
-  transition: transform 180ms var(--ease-out);
+  transition: transform 180ms var(--ease-spring);
 }
 .graph-entry:hover > svg {
   transform: translateX(4px);
@@ -487,6 +479,22 @@
 .graph-node.connected {
   border-color: #568f79;
   background: #f0f7f3;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .graph-node {
+    transition:
+      background-color 0.15s,
+      border-color 0.15s,
+      transform 240ms var(--ease-spring);
+  }
+  .graph-node:is(:hover, :focus-visible) {
+    transform: scale(1.15);
+  }
+  .graph-lines path {
+    transition:
+      opacity 180ms ease,
+      stroke 180ms ease;
+  }
 }
 .graph-caption {
   display: flex;

@@ -53,6 +53,7 @@ async function addText(
   await page.goto('#add')
   if (category) {
     const tree = page.getByRole('region', { name: '选择卡片分类' })
+    await expect(tree.locator('.tree-branches, .tree-empty')).toBeVisible()
     const segments = category.split('/')
     for (let i = 0; i < segments.length; i++) {
       const existing = tree.locator('.tree-name').filter({ hasText: segments[i] }).first()

@@ -14,6 +14,27 @@
   --soft: #e9f0ea;
   --card-shadow: 0 4px 18px #263e350a, 0 1px 3px #263e3505;
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    transform: scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 ::selection {
   background: #cedeed;
@@ -1963,6 +1984,31 @@ dialog::backdrop {
   .confirm-modal .actions button {
     padding-inline: 14px;
     font-size: 13px;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  button,
+  .button {
+    transition:
+      background-color 0.15s,
+      border-color 0.15s,
+      transform 0.18s var(--ease-spring);
+  }
+  button:active,
+  .button:active {
+    transform: scale(0.97);
+  }
+  dialog[open] {
+    animation: pop-in 240ms var(--ease-out);
+  }
+  .library-list > .library-item {
+    animation: pop-in 240ms var(--ease-out) calc(var(--stagger, 0) * 30ms) backwards;
+  }
+  .library-item {
+    transition: transform 180ms var(--ease-spring);
+  }
+  .library-item:hover {
+    transform: translateY(-2px);
   }
 }
 @media (prefers-reduced-motion: reduce) {

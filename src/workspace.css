@@ -332,7 +332,7 @@
   color: var(--ink);
   font-weight: 600;
 }
-.space-tabs a.active::after {
+.space-tabs a::after {
   content: '';
   position: absolute;
   bottom: -1px;
@@ -340,6 +340,28 @@
   right: 0;
   height: 2px;
   background: var(--space-color);
+  transform: scaleX(0);
+}
+.space-tabs a.active::after {
+  transform: scaleX(1);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .space-tabs a::after {
+    transition: transform 300ms var(--ease-out);
+  }
+  .space-card {
+    transition:
+      transform 180ms var(--ease-spring),
+      border-color 150ms;
+  }
+  .space-card:has(.space-open:hover) {
+    transform: translateY(-2px);
+  }
+  .space-grid > .space-card,
+  .goal-outline > .goal-branch,
+  .stable-tree-list > li {
+    animation: pop-in 240ms var(--ease-out) calc(var(--stagger, 0) * 30ms) backwards;
+  }
 }
 .goal-outline {
   margin-top: 12px;
@@ -672,9 +694,6 @@
 }
 .memory-navigation a {
   font-size: 13px;
-}
-.page-surface {
-  animation: none;
 }
 @media (max-width: 1000px) {
   .knowledge-workspace {

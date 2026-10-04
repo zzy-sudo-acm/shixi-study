@@ -248,14 +248,19 @@ export function Home({
             <span>{data.spaces.length} 个领域</span>
           </div>
           <div className="space-grid">
-            {data.spaces.map((space) => {
+            {data.spaces.map((space, index) => {
               const goals = data.goals.filter((g) => g.spaceId === space.id && !g.parentGoalId).length
               const count = data.knowledgeNodes.filter((n) => n.spaceId === space.id).length
               return (
                 <article
                   className="space-card"
                   key={space.id}
-                  style={{ '--space-color': space.color ?? colors[0] } as CSSProperties}
+                  style={
+                    {
+                      '--space-color': space.color ?? colors[0],
+                      '--stagger': Math.min(index, 8),
+                    } as CSSProperties
+                  }
                 >
                   <a
                     className="space-open"
