@@ -20,7 +20,68 @@ export type IconName =
   | 'chevron'
   | 'link'
   | 'cards'
+  | 'code'
+  | 'calculator'
+  | 'globe'
+  | 'leaf'
+  | 'languages'
+  | 'lightbulb'
+  | 'flask'
+  | 'music'
+  | 'palette'
+  | 'target'
+  | 'folder'
 const paths: Record<IconName, ReactNode> = {
+  code: <path d="m8 6-6 6 6 6m8-12 6 6-6 6m-3-15-2 18" />,
+  calculator: (
+    <>
+      <rect x="5" y="2" width="14" height="20" rx="2" />
+      <path d="M8 6h8M8 11h1m6 0h1m-8 4h1m6 0h1m-8 4h1m6 0h1" />
+    </>
+  ),
+  globe: (
+    <>
+      <circle cx="12" cy="12" r="10" />
+      <ellipse cx="12" cy="12" rx="4" ry="10" />
+      <path d="M2 12h20" />
+    </>
+  ),
+  leaf: <path d="M20 3C10 2 3 6 3 13a7 7 0 0 0 7 7c7 0 11-7 10-17ZM4 20 15 9" />,
+  languages: (
+    <>
+      <path d="M3 5h11M8 2v3m3 0c0 5-3 8-7 10m1-7c1 3 4 6 7 7m1 6 4-10 4 10m-7-3h6" />
+    </>
+  ),
+  lightbulb: (
+    <>
+      <path d="M8 16a7 7 0 1 1 8 0l-1 2H9l-1-2Zm1 5h6" />
+    </>
+  ),
+  flask: <path d="M9 2h6m-5 0v7L4 19a2 2 0 0 0 2 3h12a2 2 0 0 0 2-3L14 9V2M7 15h10" />,
+  music: (
+    <>
+      <path d="M9 18V5l11-2v13M9 8l11-2" />
+      <ellipse cx="6" cy="18" rx="3" ry="2" />
+      <ellipse cx="17" cy="16" rx="3" ry="2" />
+    </>
+  ),
+  palette: (
+    <>
+      <path d="M12 2a10 10 0 1 0 0 20h2a2 2 0 0 0 0-4h-1a2 2 0 0 1 0-4h5a4 4 0 0 0 4-4c0-4-5-8-10-8Z" />
+      <circle cx="7" cy="10" r=".6" />
+      <circle cx="10" cy="6" r=".6" />
+      <circle cx="15" cy="6" r=".6" />
+      <circle cx="18" cy="10" r=".6" />
+    </>
+  ),
+  target: (
+    <>
+      <circle cx="12" cy="12" r="10" />
+      <circle cx="12" cy="12" r="6" />
+      <circle cx="12" cy="12" r="2" />
+    </>
+  ),
+  folder: <path d="M3 7V4h6l2 3h10v13H3V7Z" />,
   tree: (
     <>
       <circle cx="5" cy="12" r="3" />

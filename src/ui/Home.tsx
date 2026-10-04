@@ -2,6 +2,7 @@ import { useState, type CSSProperties } from 'react'
 import type { Snapshot, Space } from '../core/model'
 import { spaceProgress } from '../core/workspace'
 import { Icon, PageHead } from './shared'
+import { SpaceIcon, SpaceIconPicker } from './SpaceIcon'
 import { FormActions, Modal, ProgressView, useWorkspaceActions, type Dirty } from './workspaceShared'
 
 const colors = ['#456785', '#527668', '#826541', '#75668c', '#8b606a']
@@ -20,7 +21,8 @@ export function SpaceForm({
 }) {
   const [name, setName] = useState(existing?.name ?? ''),
     [icon, setIcon] = useState(existing?.icon ?? ''),
-    [color, setColor] = useState(existing?.color ?? colors[0])
+    [color, setColor] = useState(existing?.color ?? colors[0]),
+    [customizationChanged, setCustomizationChanged] = useState(false)
   const { act, busy, error } = useWorkspaceActions(data, refresh)
   return (
     <Modal
@@ -29,6 +31,7 @@ export function SpaceForm({
       busy={busy}
       error={error}
       setDirty={setDirty}
+      hasChanges={customizationChanged}
     >
       <form
         onSubmit={(e) => {
@@ -64,15 +67,15 @@ export function SpaceForm({
               placeholder="你正在学习什么？"
             />
           </label>
-          <label>
-            图标（可选）
-            <input
-              maxLength={16}
-              value={icon}
-              onChange={(e) => setIcon(e.target.value)}
-              placeholder="一个你喜欢的符号"
-            />
-          </label>
+          <SpaceIconPicker
+            value={icon}
+            color={color}
+            onChange={(next) => {
+              setIcon(next)
+              setCustomizationChanged(true)
+              setDirty(true)
+            }}
+          />
           <fieldset className="color-picker">
             <legend>标记颜色</legend>
             {colors.map((c) => (
@@ -82,7 +85,11 @@ export function SpaceForm({
                 aria-label={`选择颜色 ${c}`}
                 aria-pressed={c === color}
                 style={{ background: c }}
-                onClick={() => setColor(c)}
+                onClick={() => {
+                  setColor(c)
+                  setCustomizationChanged(true)
+                  setDirty(true)
+                }}
               />
             ))}
             <label className="custom-color">
@@ -228,7 +235,7 @@ export function Home({
                 <a className="space-open" href={`#space/${space.id}/goals`} aria-label={`进入 ${space.name}`}>
                   <div className="space-title">
                     <span className="space-symbol" aria-hidden="true">
-                      {space.icon || <Icon name="book" size={22} />}
+                      <SpaceIcon value={space.icon} size={22} />
                     </span>
                     <h2>{space.name}</h2>
                   </div>

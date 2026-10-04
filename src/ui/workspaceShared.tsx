@@ -62,6 +62,7 @@ export function Modal({
   setDirty,
   error,
   trackChanges = true,
+  hasChanges = false,
 }: {
   title: string
   children: ReactNode
@@ -70,6 +71,7 @@ export function Modal({
   setDirty: Dirty
   error?: string
   trackChanges?: boolean
+  hasChanges?: boolean
 }) {
   const ref = useRef<HTMLDialogElement>(null),
     id = useId(),
@@ -79,7 +81,7 @@ export function Modal({
     return () => setDirty(false)
   }, [setDirty])
   function close() {
-    if (busy || (changed.current && !window.confirm('有尚未保存的编辑，确定放弃吗？'))) return
+    if (busy || ((changed.current || hasChanges) && !window.confirm('有尚未保存的编辑，确定放弃吗？'))) return
     setDirty(false)
     onClose()
   }

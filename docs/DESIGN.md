@@ -120,6 +120,9 @@ components:
   navigation-item-active:
     backgroundColor: '{colors.paper}'
     textColor: '{colors.ink}'
+  space-icon-picker:
+    backgroundColor: '{colors.paper}'
+    textColor: '{colors.ink}'
   space-card:
     backgroundColor: '{colors.paper}'
     textColor: '{colors.ink}'
@@ -275,6 +278,18 @@ Sidecar 的合成色阶仅供设计面板浏览，不表示应用已采用完整
 字段采用白纸、字段描边和输入圆角，最小高度（44px）。标签显式关联字段；搜索具有可访问名称，空结果说明建议下一步。多行笔记保持换行并允许纵向调整大小；手机表单、搜索和选择框采用（16px）字，避免输入时意外缩放。
 
 工作区使用原生 `dialog` 并通过 `showModal()` 打开，标题以 `aria-labelledby` 关联；宽（520px），受视口宽高限制。保存期间禁用表单，显示保存状态；关闭有未保存修改时提示确认，错误使用可见消息。
+
+领域新建与编辑共用 `SpaceForm`：名称下方使用 `SpaceIconPicker`，其后保留标记颜色和保存操作。图标及颜色按钮的点选也计入未保存修改；关闭按钮或对话框取消事件沿用放弃确认。选择面板在原生对话框内部展开，超出视口时由对话框内部滚动承载。
+
+### SpaceIconPicker
+
+领域身份标记延续纸灰、白纸与墨蓝，使用彩色预览和点选面板；不需要新图片素材。图标可留空，预览及首页领域卡均通过 `SpaceIcon` 显示默认书本。内置（12）个线条 SVG 与常用（10）个 emoji；自定义输入保留原有 emoji 或符号原值。内置选择以 `icon:<name>` 保存，继续使用原有（16 字符）图标字段。
+
+- **预览与排布：** 预览为（52px）方形、圆角（12px），图形为（28px）；手机预览缩为（48px）。图标网格桌面（6 列）、手机（4 列），间距（8px）；选项最小高度（72px），标签（12px）。emoji 网格（5 列），选项最小高度（46px）。这些值仅属于本组件。
+- **图形与状态：** SVG 使用（24 × 24）viewBox、（1.7）线宽与圆端点，继承所选领域颜色。白纸选项使用细边框，悬停为纸灰；选中增加操作蓝边框与浅蓝纸面，并通过 `aria-pressed` 表达。
+- **展开与键盘：** “选择图标”按钮使用 `aria-expanded` 和 `aria-controls`；当前图标名称通过 `aria-live="polite"` 更新。按钮可由 Enter 选中；点选后收起面板并将焦点返回触发按钮。面板展开时 Escape 先收起面板，再次取消对话框才走关闭流程；控件沿用既有可见焦点样式。
+
+依据：`src/ui/SpaceIcon.tsx`、`src/ui/Home.tsx`、`src/ui/workspaceShared.tsx` 与 `src/workspace.css`；局部方向见 `docs/ICON-PICKER-BRIEF.md`。
 
 ### Navigation
 

@@ -152,6 +152,103 @@
 .form-actions {
   margin-top: 24px;
 }
+.space-icon-glyph {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+.icon-picker {
+  min-width: 0;
+  margin-bottom: 24px;
+}
+.icon-picker > legend {
+  margin-bottom: 9px;
+  font-size: 14px;
+}
+.icon-picker-control {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.icon-preview {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  flex-shrink: 0;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  color: var(--icon-color);
+  font-size: 28px;
+}
+.icon-picker-current {
+  flex: 1;
+  min-width: 0;
+  font-size: 14px;
+}
+.icon-picker-control > button {
+  padding: 9px 12px;
+  font-size: 13px;
+  white-space: nowrap;
+}
+.icon-choice-panel {
+  margin-top: 14px;
+}
+.icon-choice-grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 8px;
+}
+.icon-choice {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 72px;
+  padding: 9px 3px;
+  border: 1px solid var(--line);
+  background: white;
+  color: var(--muted);
+  font-size: 12px;
+}
+.icon-choice svg {
+  color: var(--icon-color);
+  flex-shrink: 0;
+}
+.icon-choice:hover,
+.emoji-choice-grid button:hover {
+  background: #f5f7f9;
+}
+.icon-choice[aria-pressed='true'],
+.emoji-choice-grid button[aria-pressed='true'] {
+  border-color: var(--accent);
+  background: #e9eff6;
+  color: var(--ink);
+}
+.icon-custom-trigger {
+  margin-top: 10px;
+  min-height: 44px;
+}
+.emoji-choice-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+}
+.emoji-choice-grid button {
+  min-height: 46px;
+  padding: 7px;
+  border: 1px solid var(--line);
+  background: white;
+  font-size: 24px;
+}
+.icon-custom label {
+  display: grid;
+  gap: 7px;
+  margin-top: 16px;
+  font-size: 14px;
+}
 .color-picker {
   display: flex;
   flex-wrap: wrap;
@@ -619,6 +716,16 @@
   .workspace-modal textarea,
   .workspace-modal select {
     font-size: 16px;
+  }
+  .icon-choice-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  .icon-picker-control {
+    gap: 8px;
+  }
+  .icon-preview {
+    width: 48px;
+    height: 48px;
   }
   .space-page .page-head {
     gap: 12px;
