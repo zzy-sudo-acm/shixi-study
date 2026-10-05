@@ -1,8 +1,9 @@
 import type { CSSProperties } from 'react'
 import type { KnowledgeNode, KnowledgeRelation } from '../core/model'
+import { namedTreeNodes } from '../core/graph'
 
-const DEPTH_GAP = 156
-const LEAF_GAP = 42
+const DEPTH_GAP = 220
+const LEAF_GAP = 64
 const PAD_X = 26
 const PAD_Y = 30
 const LABEL_ROOM = 190
@@ -45,13 +46,27 @@ export function KnowledgeTreeFigure({
   relations,
   color,
   labeled = false,
+  rootTitle,
+  rootHref,
+  hrefForNode,
 }: {
   nodes: KnowledgeNode[]
   relations: KnowledgeRelation[]
   color: string
   labeled?: boolean
+  rootTitle?: string
+  rootHref?: string
+  hrefForNode?: (id: string) => string
 }) {
-  const { placed, width, height } = layout(nodes, labeled)
+  const named = rootTitle ? namedTreeNodes(nodes, rootTitle, nodes[0]?.spaceId ?? '') : null
+  const result = layout(named?.nodes ?? nodes, labeled)
+  const width = Math.max(900, result.width),
+    height = Math.max(300, result.height)
+  const placed = result.placed.map((point) => ({
+    ...point,
+    x: point.x + (width - result.width) / 2,
+    y: point.y + (height - result.height) / 2,
+  }))
   const points = new Map(placed.map((item) => [item.node.id, item]))
   return (
     <svg
@@ -59,7 +74,7 @@ export function KnowledgeTreeFigure({
       viewBox={`0 0 ${width} ${height}`}
       width={width}
       height={height}
-      role="img"
+      role={hrefForNode ? 'group' : 'img'}
       aria-label={`知识树，共 ${nodes.length} 个节点`}
     >
       {placed.map(({ node, x, y }) => {
@@ -84,22 +99,37 @@ export function KnowledgeTreeFigure({
           />
         ) : null
       })}
-      {placed.map(({ node, x, y, depth }) => (
-        <g key={node.id}>
-          <circle
-            className={depth === 0 ? 'tree-figure-root' : 'tree-figure-node'}
-            cx={x}
-            cy={y}
-            r={depth === 0 ? 5.5 : 3.5}
-            style={{ '--figure-color': color } as CSSProperties}
-          />
-          {labeled ? (
-            <text className="tree-figure-label" x={x + 13} y={y + 4}>
-              {node.title.length > 10 ? `${node.title.slice(0, 10)}…` : node.title}
-            </text>
-          ) : null}
-        </g>
-      ))}
+      {placed.map(({ node, x, y, depth }) => {
+        const point = (
+          <g>
+            <circle cx={x} cy={y} r={24} className="tree-figure-hit" />
+            <circle
+              className={depth === 0 ? 'tree-figure-root' : 'tree-figure-node'}
+              cx={x}
+              cy={y}
+              r={depth === 0 ? 9 : 6}
+              style={{ '--figure-color': color } as CSSProperties}
+            />
+            {labeled ? (
+              <text className="tree-figure-label" x={x + 13} y={y + 4}>
+                {node.title.length > 10 ? `${node.title.slice(0, 10)}…` : node.title}
+              </text>
+            ) : null}
+          </g>
+        )
+        const href = node.id === named?.rootId ? rootHref : hrefForNode?.(node.id)
+        return href ? (
+          <a
+            key={node.id}
+            href={href}
+            aria-label={node.id === named?.rootId ? `查看领域 ${node.title}` : `阅读知识点 ${node.title}`}
+          >
+            {point}
+          </a>
+        ) : (
+          <g key={node.id}>{point}</g>
+        )
+      })}
     </svg>
   )
 }

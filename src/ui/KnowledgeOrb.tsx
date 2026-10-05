@@ -43,7 +43,7 @@ function buildShow(name: string, color: string, all: KnowledgeNode[]): Show {
   return { name, color, nodes, edges }
 }
 
-export function KnowledgeOrb({ data, onCreate }: { data: Snapshot; onCreate: () => void }) {
+export function KnowledgeOrb({ data }: { data: Snapshot }) {
   const id = useId()
   const shows = useMemo(
     () =>
@@ -140,7 +140,7 @@ export function KnowledgeOrb({ data, onCreate }: { data: Snapshot; onCreate: () 
     return () => cancelAnimationFrame(frame)
   }, [current])
 
-  function enter(event: PointerEvent<HTMLButtonElement>) {
+  function enter(event: PointerEvent<HTMLDivElement>) {
     if (event.pointerType === 'mouse') hovering.current = true
   }
   function leave() {
@@ -149,11 +149,7 @@ export function KnowledgeOrb({ data, onCreate }: { data: Snapshot; onCreate: () 
 
   if (!current)
     return (
-      <button
-        className="knowledge-orb orb-empty"
-        onClick={onCreate}
-        aria-label={data.spaces.length ? '在学习空间新建领域' : '创建第一个学习领域'}
-      >
+      <div className="knowledge-orb orb-empty" role="img" aria-label="等待知识树的球体">
         <svg viewBox="0 0 440 440" aria-hidden="true">
           <defs>
             <clipPath id={`${id}-clip`}>
@@ -169,19 +165,16 @@ export function KnowledgeOrb({ data, onCreate }: { data: Snapshot; onCreate: () 
             </g>
           </g>
         </svg>
-        <span className="orb-create-mark" aria-hidden="true">
-          +
-        </span>
         <span className="orb-caption">从一个想法开始</span>
-      </button>
+      </div>
     )
   return (
-    <button
+    <div
       className="knowledge-orb"
-      onClick={onCreate}
+      role="img"
       onPointerEnter={enter}
       onPointerLeave={leave}
-      aria-label="在学习空间新建领域"
+      aria-label={`知识球体，正在展出：${current.name}`}
     >
       <svg viewBox="0 0 440 440" aria-hidden="true">
         <defs>
@@ -234,10 +227,7 @@ export function KnowledgeOrb({ data, onCreate }: { data: Snapshot; onCreate: () 
           )}
         </g>
       </svg>
-      <span className="orb-create-mark" aria-hidden="true">
-        +
-      </span>
       <span className="orb-caption">正在展出：{current.name}</span>
-    </button>
+    </div>
   )
 }

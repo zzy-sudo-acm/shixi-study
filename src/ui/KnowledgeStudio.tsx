@@ -1,11 +1,11 @@
-import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react'
+import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react'
 import type { KnowledgeNode, Snapshot } from '../core/model'
 import { friendlyError } from '../core/model'
 import { saveImage } from '../core/db'
 import { prepareImage } from '../core/images'
 import { descendants, nodePath } from '../core/workspace'
 import { KnowledgeTree } from './KnowledgeTree'
-import { NodeRelations } from './NodeDetails'
+import { NodeMoveForm } from './NodeDetails'
 import { Icon, Notice } from './shared'
 import { Markdown } from './Markdown'
 import type { Act, Dirty } from './workspaceShared'
@@ -13,275 +13,352 @@ import type { Act, Dirty } from './workspaceShared'
 const KnowledgeGraph = lazy(() =>
   import('./KnowledgeGraph').then((module) => ({ default: module.KnowledgeGraph })),
 )
-type Editor = { mode: 'add' | 'edit' | 'move'; id?: string; parentId?: string }
-type Draft = { id: string; title: string; note: string }
+type Draft = { id: string; note: string }
 
 export function KnowledgeStudio({
   data,
   spaceId,
   selected,
   onSelect,
-  onEdit,
+  initialNode,
   act,
   busy,
+  error,
   setDirty,
 }: {
   data: Snapshot
   spaceId: string
   selected: string
   onSelect: (id: string) => void
-  onEdit: (editor: Editor) => void
+  initialNode?: string
   act: Act
   busy: boolean
+  error: string
   setDirty: Dirty
 }) {
+  const [writing, setWriting] = useState(!!initialNode)
   const [draft, setDraft] = useState<Draft | null>(null)
+  const [moving, setMoving] = useState('')
   const [imageError, setImageError] = useState('')
+  const [uploading, setUploading] = useState(false)
+  const [directoryChanged, setDirectoryChanged] = useState(false)
+  const trackDirectory = useCallback(
+    (value: boolean) => {
+      setDirectoryChanged(value)
+      setDirty(value)
+    },
+    [setDirty],
+  )
   const noteArea = useRef<HTMLTextAreaElement>(null)
   const imageInput = useRef<HTMLInputElement>(null)
+  const draftRef = useRef(draft)
+  const imageLock = useRef(false)
+  const mounted = useRef(true)
   const nodes = data.knowledgeNodes.filter((node) => node.spaceId === spaceId)
   const active = nodes.find((node) => node.id === selected)
-  const changed = !!(
-    active &&
-    draft?.id === active.id &&
-    (draft.title !== active.title || draft.note !== (active.note ?? ''))
-  )
-  const shown =
-    active && draft?.id === active.id ? { ...active, title: draft.title, note: draft.note } : active
-  const preview = useMemo(
-    () =>
-      draft
-        ? {
-            ...data,
-            knowledgeNodes: data.knowledgeNodes.map((node) =>
-              node.id === draft.id ? { ...node, title: draft.title, note: draft.note } : node,
-            ),
-          }
-        : data,
-    [data, draft],
-  )
+  const editing = writing && !!active
+  const note = active && draft?.id === active.id ? draft.note : (active?.note ?? '')
+  const changed = !!(active && draft?.id === active.id && draft.note !== (active.note ?? ''))
+  const moveNode = nodes.find((node) => node.id === moving)
+
   useEffect(() => {
+    mounted.current = true
+    return () => {
+      mounted.current = false
+      setDirty(false)
+    }
+  }, [setDirty])
+  useEffect(() => {
+    setWriting(!!initialNode)
     setDraft(null)
+    draftRef.current = null
     setImageError('')
     setDirty(false)
-  }, [selected, setDirty])
-  useEffect(() => () => setDirty(false), [setDirty])
+  }, [initialNode, setDirty])
 
-  function discard() {
-    if (busy || (changed && !window.confirm('有尚未保存的编辑，确定放弃吗？'))) return false
+  function resetDraft() {
     setDraft(null)
+    draftRef.current = null
+    setImageError('')
     setDirty(false)
-    return true
   }
-  function choose(id: string) {
-    if (id === selected) return
-    if (discard()) onSelect(id)
+  function open(id: string) {
+    if (busy || imageLock.current) return
+    resetDraft()
+    onSelect(id)
+    setWriting(true)
   }
-  function edit(editor: Editor) {
-    if (discard()) onEdit(editor)
+  function back() {
+    if (busy || imageLock.current || (changed && !window.confirm('有尚未保存的编辑，确定放弃并返回目录吗？')))
+      return
+    resetDraft()
+    setWriting(false)
   }
-  function update(field: 'title' | 'note', value: string) {
+  function update(value: string) {
     if (!active) return
-    const next = { id: active.id, title: shown!.title, note: shown!.note ?? '', [field]: value }
+    const next = { id: active.id, note: value }
+    draftRef.current = next
     setDraft(next)
-    setDirty(next.title !== active.title || next.note !== (active.note ?? ''))
+    setDirty(value !== (active.note ?? ''))
   }
   async function save() {
-    if (!active || !draft || !changed) return
-    if (
-      await act({
-        type: 'saveNode',
-        value: { ...active, title: draft.title, note: draft.note, updatedAt: Date.now() },
-      })
-    ) {
-      setDraft(null)
-      setDirty(false)
+    if (!active || !draft || !changed || imageLock.current) return
+    if (await act({ type: 'saveNode', value: { ...active, note: draft.note, updatedAt: Date.now() } }))
+      resetDraft()
+  }
+  function discard() {
+    if (busy || imageLock.current || (changed && !window.confirm('有尚未保存的编辑，确定放弃吗？'))) return
+    resetDraft()
+  }
+  async function saveNode(node: KnowledgeNode) {
+    const saved = await act({ type: 'saveNode', value: node })
+    if (saved) onSelect(node.id)
+    return saved
+  }
+  async function move(id: string, parentId: string | null) {
+    const node = nodes.find((item) => item.id === id)
+    if (!node) return false
+    if (node.parentId === parentId) return true
+    return act({ type: 'saveNode', value: { ...node, parentId, updatedAt: Date.now() } })
+  }
+  async function remove(id: string) {
+    const node = nodes.find((item) => item.id === id)
+    if (!node || busy) return
+    const branch = descendants(id, nodes, (item) => item.parentId)
+    const message =
+      branch.size > 1
+        ? `删除「${node.title}」及其 ${branch.size - 1} 个子节点？其中的知识点和关联也会删除。此操作无法撤销。`
+        : `删除「${node.title}」及其中的知识点？此操作无法撤销。`
+    if (window.confirm(message) && (await act({ type: 'deleteNode', id, branch: true }))) {
+      if (branch.has(selected)) onSelect('')
     }
   }
   async function addImage(file: File) {
+    if (!active || imageLock.current || busy) return
+    imageLock.current = true
+    setUploading(true)
+    setDirty(true)
     setImageError('')
+    const current = draftRef.current?.id === active.id ? draftRef.current.note : (active.note ?? '')
+    const start = noteArea.current?.selectionStart ?? current.length
+    const end = noteArea.current?.selectionEnd ?? start
     try {
       const image = await prepareImage(file)
       await saveImage(image)
-      const current = shown?.note ?? ''
-      const at = noteArea.current?.selectionStart ?? current.length
-      const snippet = `\n![${image.name}](img:${image.id})\n`
-      update('note', current.slice(0, at) + snippet + current.slice(at))
-    } catch (error) {
-      setImageError(friendlyError(error))
+      if (!mounted.current) return
+      const name = image.name.replace(/[\[\]\\\r\n]/g, '_')
+      const snippet = `\n![${name}](img:${image.id})\n`
+      update(current.slice(0, start) + snippet + current.slice(end))
+      requestAnimationFrame(() => {
+        noteArea.current?.focus()
+        noteArea.current?.setSelectionRange(start + snippet.length, start + snippet.length)
+      })
+    } catch (cause) {
+      if (mounted.current) {
+        setImageError(friendlyError(cause))
+        setDirty(changed)
+      }
+    } finally {
+      imageLock.current = false
+      if (mounted.current) setUploading(false)
     }
   }
-  async function remove(node: KnowledgeNode) {
-    if (!discard()) return
-    const branch = descendants(node.id, nodes, (item) => item.parentId)
-    const message =
-      branch.size > 1
-        ? `“${node.title}”包含 ${branch.size - 1} 个子节点。删除整个分支及关联？如需保留子节点，请取消后先移动。`
-        : `删除“${node.title}”及其知识、步骤关联？`
-    if (window.confirm(message) && (await act({ type: 'deleteNode', id: node.id, branch: true })))
-      onSelect('')
-  }
-  function jump(id: string) {
-    document.getElementById(id)?.scrollIntoView({
-      behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth',
-      block: 'start',
-    })
-  }
+
   return (
     <>
-      <div className="studio-mobile-switch">
-        <button onClick={() => jump('knowledge-editor')}>前往编辑</button>
-        <button onClick={() => jump('knowledge-preview')}>查看呈现</button>
+      <div className="studio-mobile-switch" aria-label="工作区视图">
+        <a
+          className="button"
+          href="#knowledge-editor"
+          onClick={(event) => {
+            event.preventDefault()
+            document.getElementById('knowledge-editor')?.scrollIntoView({ block: 'start' })
+          }}
+        >
+          {editing ? '编辑' : '目录'}
+        </a>
+        <a
+          className="button"
+          href="#knowledge-preview"
+          onClick={(event) => {
+            event.preventDefault()
+            document.getElementById('knowledge-preview')?.scrollIntoView({ block: 'start' })
+          }}
+        >
+          {editing ? '预览' : '节点图'}
+        </a>
       </div>
-      <div className="knowledge-studio">
-        <section id="knowledge-editor" className="studio-editor" aria-label="编辑知识">
-          <KnowledgeTree
-            data={data}
-            spaceId={spaceId}
-            selected={selected}
-            onSelect={choose}
-            onAdd={() => edit({ mode: 'add' })}
-          />
-          {active && shown ? (
-            <div className="inline-node-editor">
-              <div className="inline-editor-heading">
-                <h2>编辑内容</h2>
-                <span className={changed ? 'unsaved-state' : ''}>
-                  {changed ? '尚未保存' : '已保存在本机'}
-                </span>
-              </div>
-              <div className="node-tools">
-                <button
-                  className="text-button"
-                  disabled={busy || nodePath(active.id, nodes).length >= 5}
-                  onClick={() => edit({ mode: 'add', parentId: active.id })}
-                >
-                  <Icon name="branch" size={16} />
-                  添加子节点
-                </button>
-                <button
-                  className="text-button"
-                  disabled={busy}
-                  onClick={() => edit({ mode: 'edit', id: active.id })}
-                >
-                  编辑节点
-                </button>
-                <button
-                  className="text-button"
-                  disabled={busy}
-                  onClick={() => edit({ mode: 'edit', id: active.id })}
-                >
-                  重命名
-                </button>
-                <button
-                  className="text-button"
-                  disabled={busy}
-                  onClick={() => edit({ mode: 'move', id: active.id })}
-                >
-                  移动节点
-                </button>
-                <button className="text-button" disabled={busy} onClick={() => void remove(active)}>
-                  删除节点
-                </button>
-              </div>
-              <form
-                onSubmit={(event) => {
-                  event.preventDefault()
-                  void save()
-                }}
-              >
-                <fieldset disabled={busy}>
-                  <label>
-                    名称
-                    <input
-                      aria-label="实时编辑知识名称"
-                      required
-                      maxLength={200}
-                      value={shown.title}
-                      onChange={(event) => update('title', event.target.value)}
-                    />
-                  </label>
-                  <label>
-                    知识点（支持 Markdown 与图片）
-                    <textarea
-                      ref={noteArea}
-                      aria-label="实时编辑知识内容"
-                      rows={8}
-                      maxLength={100000}
-                      value={shown.note ?? ''}
-                      onChange={(event) => update('note', event.target.value)}
-                      placeholder={
-                        '写下自己的理解，右侧图谱里点节点就能看到。\n支持 **加粗**、列表、$公式$、代码、链接、图片。'
-                      }
-                    />
-                  </label>
-                  <input
-                    ref={imageInput}
-                    type="file"
-                    accept="image/png,image/jpeg,image/webp"
-                    hidden
-                    aria-hidden="true"
-                    onChange={(event) => {
-                      const file = event.target.files?.[0]
-                      if (file) void addImage(file)
-                      event.target.value = ''
-                    }}
-                  />
-                  <div className="inline-save-actions">
-                    <button className="primary" disabled={!changed || busy} type="submit">
-                      {busy ? '正在保存…' : '保存修改'}
-                    </button>
-                    <button type="button" disabled={!changed || busy} onClick={discard}>
-                      放弃修改
-                    </button>
-                    <button
-                      type="button"
-                      className="text-button insert-image"
-                      disabled={busy}
-                      onClick={() => imageInput.current?.click()}
-                    >
-                      <Icon name="image" size={16} />
-                      插入图片
-                    </button>
-                  </div>
-                </fieldset>
-              </form>
-              {imageError ? <Notice error>{imageError}</Notice> : null}
-              <NodeRelations node={active} data={data} act={act} busy={busy} onSelect={choose} />
-            </div>
-          ) : (
-            <p className="studio-editor-hint">选择一个节点，在这里编辑名称与知识点。</p>
-          )}
-        </section>
-        <section id="knowledge-preview" className="studio-preview" aria-label="知识图谱实时呈现">
-          <div className="studio-preview-heading">
-            <h2>知识图谱</h2>
-            <span>{changed ? '预览未保存的修改' : '与你的知识同步'}</span>
-          </div>
-          <Suspense fallback={<p role="status">正在打开知识图谱…</p>}>
-            <KnowledgeGraph
-              embedded
-              data={preview}
+      {editing ? (
+        <div className="document-toolbar">
+          <button className="text-button" onClick={back} disabled={busy || uploading}>
+            <Icon name="chevron" size={16} />
+            返回目录
+          </button>
+          <span className="document-path" title={nodePath(active.id, nodes).join(' / ')}>
+            {nodePath(active.id, nodes).join(' / ')}
+          </span>
+          <span className={changed ? 'unsaved-state' : ''} role="status">
+            {uploading ? '正在插入图片…' : changed ? '尚未保存' : '已保存在本机'}
+          </span>
+        </div>
+      ) : null}
+      <div className={`knowledge-studio ${editing ? 'writing-mode' : 'directory-mode'}`}>
+        <section
+          id="knowledge-editor"
+          className="studio-editor"
+          aria-label={editing ? '编辑知识' : '知识树目录工作区'}
+        >
+          <div hidden={editing}>
+            <KnowledgeTree
+              data={data}
               spaceId={spaceId}
               selected={selected}
-              onSelect={choose}
-              onAdd={() => edit({ mode: 'add' })}
+              onOpen={open}
+              onSave={saveNode}
+              onMove={setMoving}
+              onDrop={move}
+              onRemove={(id) => void remove(id)}
+              busy={busy}
+              setDirty={trackDirectory}
             />
-          </Suspense>
-          {shown ? (
-            <article className="node-point" aria-label={`知识点 ${shown.title}`}>
-              <h3>{shown.title || '未命名知识'}</h3>
-              {shown.note ? (
-                <Markdown text={shown.note} />
-              ) : (
-                <p className="muted">这个节点还没有知识点。在左侧写下自己的理解，支持 Markdown 与图片。</p>
-              )}
-            </article>
+          </div>
+          {editing ? (
+            <form
+              className="document-editor"
+              onSubmit={(event) => {
+                event.preventDefault()
+                void save()
+              }}
+            >
+              <div className="document-pane-heading">
+                <h2>Markdown</h2>
+                <span>支持 Markdown 与图片</span>
+              </div>
+              <fieldset disabled={busy || uploading}>
+                <textarea
+                  autoFocus
+                  ref={noteArea}
+                  aria-label="实时编辑知识内容"
+                  maxLength={100000}
+                  value={note}
+                  onChange={(event) => update(event.target.value)}
+                  onPaste={(event) => {
+                    const file = Array.from(event.clipboardData.files).find((item) =>
+                      item.type.startsWith('image/'),
+                    )
+                    if (file) {
+                      event.preventDefault()
+                      void addImage(file)
+                    }
+                  }}
+                  onDragOver={(event) => {
+                    if (event.dataTransfer.types.includes('Files')) event.preventDefault()
+                  }}
+                  onDrop={(event) => {
+                    const file = event.dataTransfer.files[0]
+                    if (file) {
+                      event.preventDefault()
+                      void addImage(file)
+                    }
+                  }}
+                  onKeyDown={(event) => {
+                    if ((event.ctrlKey || event.metaKey) && event.key === 's') {
+                      event.preventDefault()
+                      void save()
+                    }
+                  }}
+                  placeholder="从这里写下你的知识点…"
+                />
+                <input
+                  ref={imageInput}
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp"
+                  hidden
+                  aria-hidden="true"
+                  onChange={(event) => {
+                    const file = event.target.files?.[0]
+                    if (file) void addImage(file)
+                    event.target.value = ''
+                  }}
+                />
+                <div className="document-actions">
+                  <button className="primary" disabled={!changed || busy || uploading} type="submit">
+                    {busy ? '正在保存…' : '保存修改'}
+                  </button>
+                  <button type="button" disabled={!changed || busy || uploading} onClick={discard}>
+                    放弃修改
+                  </button>
+                  <button
+                    type="button"
+                    className="text-button insert-image"
+                    disabled={busy || uploading}
+                    onClick={() => imageInput.current?.click()}
+                  >
+                    <Icon name="image" size={17} />
+                    插入图片
+                  </button>
+                </div>
+              </fieldset>
+              {imageError ? <Notice error>{imageError}</Notice> : null}
+            </form>
+          ) : null}
+        </section>
+        <section
+          id="knowledge-preview"
+          className="studio-preview"
+          aria-label={editing ? 'Markdown 实时预览' : '知识节点图'}
+        >
+          {editing ? (
+            <>
+              <div className="document-pane-heading">
+                <h2>预览</h2>
+                <span>实时更新</span>
+              </div>
+              <article className="document-preview node-point" aria-label={`知识点 ${active.title}`}>
+                <h3>{active.title}</h3>
+                {note ? (
+                  <Markdown text={note} />
+                ) : (
+                  <p className="document-preview-empty">写下第一段知识，预览会显示在这里。</p>
+                )}
+              </article>
+            </>
           ) : (
-            <p className="node-point-hint">点击图谱中的节点，查看里面的知识点。</p>
+            <>
+              <div className="studio-preview-heading">
+                <h2>节点图</h2>
+                <span>与目录同步</span>
+              </div>
+              <Suspense fallback={<p role="status">正在打开节点图…</p>}>
+                <KnowledgeGraph
+                  caption="点击节点，打开知识点。"
+                  rootTitle={data.spaces.find((space) => space.id === spaceId)?.name}
+                  disabled={busy || directoryChanged}
+                  data={data}
+                  spaceId={spaceId}
+                  selected={selected}
+                  onSelect={open}
+                />
+              </Suspense>
+            </>
           )}
         </section>
       </div>
+      {moveNode ? (
+        <NodeMoveForm
+          key={moveNode.id}
+          node={moveNode}
+          nodes={nodes}
+          onMove={move}
+          busy={busy}
+          error={error}
+          setDirty={setDirty}
+          onClose={() => {
+            setMoving('')
+            setDirty(false)
+          }}
+        />
+      ) : null}
     </>
   )
 }

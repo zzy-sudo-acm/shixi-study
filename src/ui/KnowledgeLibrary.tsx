@@ -27,39 +27,61 @@ function branchOf(data: Snapshot, root: KnowledgeNode) {
   }
 }
 
-export function KnowledgeLibrary({ data, rootId }: { data: Snapshot; rootId: string }) {
-  const roots = useMemo(() => rootsOf(data), [data])
-  const root = roots.find((node) => node.id === rootId) ?? null
-  const [selected, setSelected] = useState('')
+export function KnowledgeLibrary({
+  data,
+  rootId,
+  spaceId,
+  initialNode,
+  embedded = false,
+}: {
+  data: Snapshot
+  rootId: string
+  spaceId?: string
+  initialNode?: string
+  embedded?: boolean
+}) {
+  const roots = useMemo(
+    () => rootsOf(data).filter((node) => !spaceId || node.spaceId === spaceId),
+    [data, spaceId],
+  )
+  const initialRoot = useMemo(() => {
+    const byId = new Map(data.knowledgeNodes.map((node) => [node.id, node]))
+    let node = initialNode ? byId.get(initialNode) : undefined
+    while (node?.parentId && byId.has(node.parentId)) node = byId.get(node.parentId)
+    return node?.id
+  }, [data.knowledgeNodes, initialNode])
+  const root = roots.find((node) => node.id === (rootId || initialRoot)) ?? null
+  const [selected, setSelected] = useState(initialNode ?? '')
+  const back = spaceId ? `#space/${spaceId}/cards` : '#library'
   if (root) {
     const space = data.spaces.find((item) => item.id === root.spaceId)
     const branch = branchOf(data, root)
     const active = branch.knowledgeNodes.find((node) => node.id === selected) ?? null
     return (
       <div className="knowledge-library-detail">
-        <a className="text-button space-back" href="#library">
+        <a className="text-button space-back" href={back}>
           <Icon name="chevron" size={16} />
-          返回知识库
+          {embedded ? '返回知识卡片' : '返回知识库'}
         </a>
-        <PageHead
-          title={root.title}
-          description={`${space?.name ?? '未知领域'} · 这棵树共 ${branch.knowledgeNodes.length} 个节点`}
-          action={
-            <a className="button primary" href={`#space/${root.spaceId}/tree?node=${root.id}`}>
-              编辑这棵知识树
-            </a>
-          }
-        />
+        {embedded ? (
+          <div className="workspace-section-heading">
+            <h2>{root.title}</h2>
+            <span>{branch.knowledgeNodes.length} 个节点</span>
+          </div>
+        ) : (
+          <PageHead
+            title={root.title}
+            description={`${space?.name ?? '未知领域'} · 这棵树共 ${branch.knowledgeNodes.length} 个节点`}
+            action={
+              <a className="button primary" href={`#space/${root.spaceId}/tree?node=${root.id}`}>
+                编辑这棵知识树
+              </a>
+            }
+          />
+        )}
         <section className="library-graph-card" aria-label="单棵知识树图谱">
           <Suspense fallback={<p role="status">正在打开知识图谱…</p>}>
-            <KnowledgeGraph
-              embedded
-              data={branch}
-              spaceId={root.spaceId}
-              selected={selected}
-              onSelect={setSelected}
-              onAdd={() => {}}
-            />
+            <KnowledgeGraph data={branch} spaceId={root.spaceId} selected={selected} onSelect={setSelected} />
           </Suspense>
           {active ? (
             <article className="node-point" aria-label={`知识点 ${active.title}`}>
@@ -79,7 +101,14 @@ export function KnowledgeLibrary({ data, rootId }: { data: Snapshot; rootId: str
   }
   return (
     <>
-      <PageHead title="知识库" description="每一张卡片，都是一棵知识树的根。" />
+      {embedded ? (
+        <div className="workspace-section-heading">
+          <h2>知识卡片</h2>
+          <span>{roots.length} 棵知识树</span>
+        </div>
+      ) : (
+        <PageHead title="知识库" description="每一张卡片，都是一棵知识树的根。" />
+      )}
       {roots.length ? (
         <div className="library-root-grid">
           {roots.map((node, index) => {
@@ -89,7 +118,7 @@ export function KnowledgeLibrary({ data, rootId }: { data: Snapshot; rootId: str
               <a
                 key={node.id}
                 className="library-root-card"
-                href={`#library/${node.id}`}
+                href={spaceId ? `#space/${spaceId}/cards?root=${node.id}` : `#library/${node.id}`}
                 style={{ '--stagger': Math.min(index, 8) } as CSSProperties}
                 aria-label={`查看知识树 ${node.title}`}
               >
@@ -107,10 +136,12 @@ export function KnowledgeLibrary({ data, rootId }: { data: Snapshot; rootId: str
         </div>
       ) : (
         <Empty title="还没有知识树">
-          <p>在领域里新建根节点，知识树会一张一张出现在这里。</p>
-          <a className="button primary" href="#home">
-            去学习空间建立
-          </a>
+          <p>新建根节点，知识树会一张一张出现在这里。</p>
+          {spaceId ? null : (
+            <a className="button primary" href="#home">
+              去学习空间建立
+            </a>
+          )}
         </Empty>
       )}
     </>

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import type { Snapshot } from '../core/model'
-import { layoutKnowledgeGraph } from '../core/graph'
+import { layoutKnowledgeGraph, namedTreeNodes } from '../core/graph'
 import { Empty } from './shared'
 
 export function KnowledgeGraph({
@@ -8,15 +8,17 @@ export function KnowledgeGraph({
   spaceId,
   selected,
   onSelect,
-  onAdd,
-  embedded = false,
+  caption = '滑动画布浏览，点击节点查看知识点。',
+  rootTitle,
+  disabled = false,
 }: {
   data: Snapshot
   spaceId: string
   selected: string
   onSelect: (id: string) => void
-  onAdd: () => void
-  embedded?: boolean
+  caption?: string
+  rootTitle?: string
+  disabled?: boolean
 }) {
   const viewport = useRef<HTMLDivElement>(null)
   const [scale, setScale] = useState(1),
@@ -46,7 +48,15 @@ export function KnowledgeGraph({
       return false
     })
   }, [nodes, branch])
-  const graph = useMemo(() => layoutKnowledgeGraph(filtered, compact, limit), [filtered, compact, limit])
+  const named = useMemo(
+    () => (rootTitle ? namedTreeNodes(filtered, rootTitle, spaceId) : null),
+    [filtered, rootTitle, spaceId],
+  )
+  const graph = useMemo(
+    () => layoutKnowledgeGraph(named?.nodes ?? filtered, compact, limit + (named ? 1 : 0)),
+    [filtered, named, compact, limit],
+  )
+  const total = graph.total - (named ? 1 : 0)
   const relations = data.knowledgeRelations.filter(
     (r) => r.spaceId === spaceId && graph.byId.has(r.sourceNodeId) && graph.byId.has(r.targetNodeId),
   )
@@ -72,13 +82,7 @@ export function KnowledgeGraph({
     return (
       <Empty title="知识图谱从一个节点开始">
         <p>建立知识树，再把相关的概念连起来。</p>
-        {embedded ? (
-          <p>在左侧新建根节点，图谱会同步出现。</p>
-        ) : (
-          <button className="primary" onClick={onAdd}>
-            新建根节点
-          </button>
-        )}
+        <p>在目录中新建节点，图谱会同步出现。</p>
       </Empty>
     )
   return (
@@ -169,28 +173,39 @@ export function KnowledgeGraph({
                 )
               })}
             </svg>
-            {graph.nodes.map((row) => (
-              <button
-                key={row.node.id}
-                className={`graph-node stable-graph-node ${selected === row.node.id ? 'selected' : ''} ${connected.has(row.node.id) ? 'connected' : ''}`}
-                style={{ left: row.x, top: row.y }}
-                aria-pressed={selected === row.node.id}
-                title={row.node.title}
-                onClick={() => onSelect(row.node.id)}
-              >
-                <span>{row.node.title}</span>
-              </button>
-            ))}
+            {graph.nodes.map((row) =>
+              row.node.id === named?.rootId ? (
+                <div
+                  key={row.node.id}
+                  className="graph-node graph-tree-root"
+                  style={{ left: row.x, top: row.y }}
+                >
+                  <span>{row.node.title}</span>
+                </div>
+              ) : (
+                <button
+                  key={row.node.id}
+                  className={`graph-node stable-graph-node ${selected === row.node.id ? 'selected' : ''} ${connected.has(row.node.id) ? 'connected' : ''}`}
+                  style={{ left: row.x, top: row.y }}
+                  aria-pressed={selected === row.node.id}
+                  disabled={disabled}
+                  title={row.node.title}
+                  onClick={() => onSelect(row.node.id)}
+                >
+                  <span>{row.node.title}</span>
+                </button>
+              ),
+            )}
           </div>
         </div>
       </div>
       <div className="graph-caption">
-        <span>滑动画布浏览，点击节点查看详情。</span>
+        <span>{caption}</span>
         <span>
-          {graph.nodes.length} / {graph.total} 个节点 · {relations.length} 条可见关联
+          {graph.nodes.length - (named ? 1 : 0)} / {total} 个节点 · {relations.length} 条可见关联
         </span>
       </div>
-      {graph.total > limit ? (
+      {total > limit ? (
         <button className="text-button" onClick={() => setLimit((n) => n + 100)}>
           再展开 100 个节点
         </button>

@@ -4,7 +4,7 @@ import { ImageView } from './shared'
 const KatexSpan = lazy(() => import('./KatexSpan'))
 
 const INLINE_SOURCE =
-  /!\[([^\]]*)\]\(img:([\w-]+)\)|(\$\$[^\n$]+?\$\$|(?<!\\)\$[^\n$]+?(?<!\\)\$)|\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)|`([^`]+)`|\*\*([^*]+)\*\*|\*([^*]+)\*/
+  /!\[([^\]]*)\]\((img:[\w-]+|https?:\/\/[^)\s]+)\)|(\$\$[^\n$]+?\$\$|(?<!\\)\$[^\n$]+?(?<!\\)\$)|\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)|`([^`]+)`|\*\*([^*]+)\*\*|\*([^*]+)\*/
     .source
 
 function inline(text: string, keyPrefix: string): ReactNode[] {
@@ -16,7 +16,19 @@ function inline(text: string, keyPrefix: string): ReactNode[] {
   while ((match = pattern.exec(text))) {
     if (match.index > last) out.push(text.slice(last, match.index))
     if (match[2] !== undefined)
-      out.push(<ImageView key={`${keyPrefix}-${key++}`} id={match[2]} label={match[1] || '知识点图片'} />)
+      out.push(
+        match[2].startsWith('img:') ? (
+          <ImageView key={`${keyPrefix}-${key++}`} id={match[2].slice(4)} label={match[1] || '知识点图片'} />
+        ) : (
+          <img
+            key={`${keyPrefix}-${key++}`}
+            className="markdown-image"
+            src={match[2]}
+            alt={match[1] || '知识点图片'}
+            loading="lazy"
+          />
+        ),
+      )
     else if (match[3] !== undefined) {
       const display = match[3].startsWith('$$')
       const tex = match[3].slice(display ? 2 : 1, display ? -2 : -1)
@@ -40,7 +52,7 @@ function inline(text: string, keyPrefix: string): ReactNode[] {
   return out
 }
 
-const BLOCK_START = /^(```|#{1,3}\s|>\s?|[-*]\s+|\d+\.\s+)/
+const BLOCK_START = /^(```|#{1,6}\s|>\s?|[-*]\s+|\d+\.\s+)/
 
 export function Markdown({ text }: { text: string }) {
   const blocks: ReactNode[] = []
@@ -65,9 +77,9 @@ export function Markdown({ text }: { text: string }) {
       )
       continue
     }
-    const heading = /^(#{1,3})\s+(.*)$/.exec(line)
+    const heading = /^(#{1,6})\s+(.*)$/.exec(line)
     if (heading) {
-      const Tag = ['h4', 'h5', 'h6'][heading[1].length - 1] as 'h4'
+      const Tag = `h${heading[1].length}` as 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6'
       blocks.push(<Tag key={key++}>{inline(heading[2], `h${key}`)}</Tag>)
       i++
       continue

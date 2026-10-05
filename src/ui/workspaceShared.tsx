@@ -1,7 +1,7 @@
 import { useEffect, useId, useRef, useState, type ReactNode } from 'react'
 import { changeWorkspace } from '../core/db'
 import { friendlyError, type Snapshot } from '../core/model'
-import type { Progress, WorkspaceCommand } from '../core/workspace'
+import type { WorkspaceCommand } from '../core/workspace'
 import { Icon, Notice } from './shared'
 
 export type Act = (command: WorkspaceCommand) => Promise<boolean>
@@ -28,31 +28,6 @@ export function useWorkspaceActions(data: Snapshot, refresh: () => Promise<void>
     }
   }
   return { act, busy, error }
-}
-export function ProgressView({
-  progress,
-  label = '计划完成度',
-  small = false,
-}: {
-  progress: Progress
-  label?: string
-  small?: boolean
-}) {
-  return (
-    <div className={`plan-progress ${small ? 'small-progress' : ''}`}>
-      {progress.percent === null ? (
-        <p className="muted">尚未建立计划</p>
-      ) : (
-        <>
-          <div className="progress-label">
-            <span>{label}</span>
-            <strong>{progress.percent}%</strong>
-          </div>
-          <progress aria-label={label} max={progress.total} value={progress.completed} />
-        </>
-      )}
-    </div>
-  )
 }
 export function Modal({
   title,

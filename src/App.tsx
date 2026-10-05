@@ -159,7 +159,7 @@ export default function App() {
       </main>
     )
   const [routePath, routeQuery = ''] = route.split('?')
-  const [page, rawArgument = '', view = 'goals'] = routePath.split('/')
+  const [page, rawArgument = '', view = 'cards'] = routePath.split('/')
   let argument = rawArgument
   try {
     argument = decodeURIComponent(rawArgument)
@@ -248,7 +248,7 @@ export default function App() {
                 spaceId={argument}
                 view={view}
                 initialNode={params.get('node') ?? undefined}
-                focusStep={params.get('step') ?? undefined}
+                rootId={params.get('root') ?? ''}
                 refresh={refresh}
                 setDirty={setDirty}
               />

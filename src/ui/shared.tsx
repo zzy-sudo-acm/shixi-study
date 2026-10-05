@@ -1,4 +1,5 @@
 import { lazy, Suspense, useEffect, useId, useRef, useState, type ReactNode } from 'react'
+import { createPortal } from 'react-dom'
 import { readImage } from '../core/db'
 import type { Content, StoredImage } from '../core/model'
 const MathText = lazy(() => import('./MathText'))
@@ -31,7 +32,9 @@ export type IconName =
   | 'palette'
   | 'target'
   | 'folder'
+  | 'more'
 const paths: Record<IconName, ReactNode> = {
+  more: <path d="M5 12h.01M12 12h.01M19 12h.01" strokeWidth="3" />,
   code: <path d="m8 6-6 6 6 6m8-12 6 6-6 6m-3-15-2 18" />,
   calculator: (
     <>
@@ -240,9 +243,9 @@ export function ImageView({
   }, [id, provided])
   if (error)
     return (
-      <p role="alert" className="error-text">
+      <span role="alert" className="error-text">
         图片读取失败，请检查备份或重新添加这张图片。
-      </p>
+      </span>
     )
   return (
     <>
@@ -259,20 +262,23 @@ export function ImageView({
         {url ? <img src={url} alt={label} loading="lazy" /> : <span>读取图片…</span>}
         <span className="image-caption">点击放大</span>
       </button>
-      <dialog ref={modal} className="image-modal" aria-labelledby={headingId}>
-        <div className="modal-head">
-          <strong id={headingId}>{label}</strong>
-          <div className="actions">
-            <button type="button" onClick={() => setZoom((v) => !v)}>
-              {zoom ? '适应屏幕' : '原尺寸查看'}
-            </button>
-            <button type="button" aria-label="关闭图片" onClick={() => modal.current?.close()}>
-              <Icon name="close" />
-            </button>
+      {createPortal(
+        <dialog ref={modal} className="image-modal" aria-labelledby={headingId}>
+          <div className="modal-head">
+            <strong id={headingId}>{label}</strong>
+            <div className="actions">
+              <button type="button" onClick={() => setZoom((v) => !v)}>
+                {zoom ? '适应屏幕' : '原尺寸查看'}
+              </button>
+              <button type="button" aria-label="关闭图片" onClick={() => modal.current?.close()}>
+                <Icon name="close" />
+              </button>
+            </div>
           </div>
-        </div>
-        <div className={`zoom-area ${zoom ? 'original' : ''}`}>{url && <img src={url} alt={label} />}</div>
-      </dialog>
+          <div className={`zoom-area ${zoom ? 'original' : ''}`}>{url && <img src={url} alt={label} />}</div>
+        </dialog>,
+        document.body,
+      )}
     </>
   )
 }

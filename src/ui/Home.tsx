@@ -122,12 +122,14 @@ export function DeleteSpace({
   refresh,
   onClose,
   setDirty,
+  onDeleted,
 }: {
   space: Space
   data: Snapshot
   refresh: () => Promise<void>
   onClose: () => void
   setDirty: Dirty
+  onDeleted?: () => void
 }) {
   const [confirmed, setConfirmed] = useState(false),
     [name, setName] = useState('')
@@ -158,7 +160,8 @@ export function DeleteSpace({
             void act({ type: 'deleteSpace', id: space.id }).then((saved) => {
               if (saved) {
                 setDirty(false)
-                onClose()
+                if (onDeleted) onDeleted()
+                else onClose()
               }
             })
           }
@@ -187,8 +190,7 @@ export function Home({
   refresh: () => Promise<void>
   setDirty: Dirty
 }) {
-  const [form, setForm] = useState<Space | 'new' | null>(null),
-    [deleting, setDeleting] = useState<Space | null>(null)
+  const [form, setForm] = useState(false)
   return (
     <div className="learning-home">
       <section className="home-intro">
@@ -196,17 +198,17 @@ export function Home({
           <h1 tabIndex={-1}>我的学习空间</h1>
           <p className="home-statement">把所学，连成自己的世界。</p>
           <p className="home-description">
-            从一个问题开始。建立目标，整理知识，
+            从一个问题开始。整理知识，建立联系，
             <br />
             让每一次学习都有迹可循。
           </p>
           {!data.spaces.length ? <p className="home-empty-note">还没有任何领域。</p> : null}
-          <button className="primary" onClick={() => setForm('new')}>
+          <button className="primary" onClick={() => setForm(true)}>
             <Icon name="add" />
             新建领域
           </button>
         </div>
-        <KnowledgeOrb data={data} onCreate={() => setForm('new')} />
+        <KnowledgeOrb data={data} />
       </section>
       {data.migrationWarnings.length ? (
         <details className="migration-note">
@@ -225,7 +227,8 @@ export function Home({
           </div>
           <div className="space-grid">
             {data.spaces.map((space, index) => {
-              const count = data.knowledgeNodes.filter((n) => n.spaceId === space.id).length
+              const nodes = data.knowledgeNodes.filter((n) => n.spaceId === space.id)
+              const count = nodes.length
               return (
                 <article
                   className="space-card"
@@ -238,20 +241,33 @@ export function Home({
                     } as CSSProperties
                   }
                 >
-                  <a
-                    className="space-open"
-                    href={`#space/${space.id}/goals`}
-                    aria-label={`进入 ${space.name}`}
-                  >
+                  <div className="space-open">
+                    <a
+                      className="space-card-entry"
+                      href={`#space/${space.id}/cards`}
+                      aria-label={`进入 ${space.name}`}
+                    >
+                      <h3>{space.name}</h3>
+                      <span>{count} 个知识节点</span>
+                    </a>
                     {count ? (
-                      <div className="tree-figure">
+                      <div
+                        className="tree-figure"
+                        onClick={(event) => {
+                          if (!(event.target as Element).closest('a'))
+                            location.hash = `space/${space.id}/cards`
+                        }}
+                      >
                         <KnowledgeTreeFigure
-                          nodes={data.knowledgeNodes.filter((node) => node.spaceId === space.id)}
+                          nodes={nodes}
                           relations={data.knowledgeRelations.filter(
                             (relation) => relation.spaceId === space.id,
                           )}
                           color={space.color ?? colors[0]}
                           labeled
+                          rootTitle={space.name}
+                          rootHref={`#space/${space.id}/cards`}
+                          hrefForNode={(id) => `#space/${space.id}/cards?node=${id}`}
                         />
                       </div>
                     ) : (
@@ -259,29 +275,7 @@ export function Home({
                         {space.name}：还没有知识节点，进入领域种下第一个。
                       </p>
                     )}
-                  </a>
-                  <div className="space-actions">
-                    <button
-                      className="text-button"
-                      aria-label={`编辑 ${space.name}`}
-                      onClick={() => setForm(space)}
-                    >
-                      编辑
-                    </button>
-                    <button
-                      className="text-button"
-                      aria-label={`删除 ${space.name}`}
-                      onClick={() => setDeleting(space)}
-                    >
-                      删除
-                    </button>
-                    <a
-                      className="space-continue"
-                      href={`#space/${space.id}/goals`}
-                      aria-label={`继续学习 ${space.name}`}
-                    >
-                      <Icon name="arrow" size={18} />
-                    </a>
+                    {count ? <p className="space-figure-caption">点击节点阅读 · 滚动画布浏览</p> : null}
                   </div>
                 </article>
               )
@@ -290,23 +284,7 @@ export function Home({
         </>
       ) : null}
       {form ? (
-        <SpaceForm
-          key={typeof form === 'string' ? form : form.id}
-          existing={typeof form === 'string' ? undefined : form}
-          data={data}
-          refresh={refresh}
-          onClose={() => setForm(null)}
-          setDirty={setDirty}
-        />
-      ) : null}
-      {deleting ? (
-        <DeleteSpace
-          space={deleting}
-          data={data}
-          refresh={refresh}
-          onClose={() => setDeleting(null)}
-          setDirty={setDirty}
-        />
+        <SpaceForm data={data} refresh={refresh} onClose={() => setForm(false)} setDirty={setDirty} />
       ) : null}
     </div>
   )

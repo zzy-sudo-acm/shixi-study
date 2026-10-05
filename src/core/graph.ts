@@ -5,6 +5,21 @@ export interface KnowledgeBranch {
   node: KnowledgeNode
   children: KnowledgeBranch[]
 }
+export function namedTreeNodes(nodes: KnowledgeNode[], title: string, spaceId: string) {
+  let rootId = `@tree/${spaceId}`
+  const ids = new Set(nodes.map((node) => node.id))
+  while (ids.has(rootId)) rootId += '~'
+  return {
+    rootId,
+    nodes: [
+      { id: rootId, spaceId, title, parentId: null, createdAt: 0, updatedAt: 0 },
+      ...nodes.map((node) => ({
+        ...node,
+        parentId: node.parentId && ids.has(node.parentId) ? node.parentId : rootId,
+      })),
+    ],
+  }
+}
 export function buildKnowledgeTree(nodes: KnowledgeNode[]): KnowledgeBranch[] {
   const byId = new Map(nodes.map((node) => [node.id, { node, children: [] as KnowledgeBranch[] }]))
   const roots: KnowledgeBranch[] = []

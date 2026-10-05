@@ -249,27 +249,6 @@
   margin-top: 12px;
   font-size: 12px;
 }
-.learning-home .space-actions {
-  padding: 0 0 12px;
-  align-items: center;
-}
-.space-continue {
-  display: grid;
-  place-items: center;
-  width: 40px;
-  height: 36px;
-  margin-left: auto;
-  border-radius: 8px;
-}
-.space-continue:hover {
-  background: var(--soft);
-}
-.space-continue svg {
-  transition: transform 180ms var(--ease-spring);
-}
-.space-continue:is(:hover, :focus-visible) svg {
-  transform: translateX(4px);
-}
 .map-blank {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -509,7 +488,6 @@
   .map-space:is(:hover, :focus-visible, :active) .map-constellation,
   .origin-button:active,
   .origin-button:is(:hover, :focus-visible)::before,
-  .space-continue:is(:hover, :focus-visible) svg,
   .map-create:active,
   .map-pagination button:active,
   .map-blank-copy .primary:active {

@@ -1,19 +1,20 @@
-import { useEffect, useState, type CSSProperties } from 'react'
+import { lazy, useCallback, useEffect, useState, type CSSProperties } from 'react'
 import type { Snapshot } from '../core/model'
-import { activeGoals, spaceProgress } from '../core/workspace'
-import { Goals } from './Goals'
 import { KnowledgeStudio } from './KnowledgeStudio'
-import { NodeForm } from './NodeDetails'
-import { SpaceForm } from './Home'
-import { Icon, Notice, PageHead } from './shared'
-import { ProgressView, useWorkspaceActions, type Dirty } from './workspaceShared'
+import { DeleteSpace, SpaceForm } from './Home'
+import { Notice, PageHead } from './shared'
+import { useWorkspaceActions, type Dirty } from './workspaceShared'
+
+const KnowledgeLibrary = lazy(() =>
+  import('./KnowledgeLibrary').then((module) => ({ default: module.KnowledgeLibrary })),
+)
 
 export function SpacePage({
   data,
   spaceId,
   view,
   initialNode,
-  focusStep,
+  rootId,
   refresh,
   setDirty,
 }: {
@@ -21,18 +22,22 @@ export function SpacePage({
   spaceId: string
   view: string
   initialNode?: string
-  focusStep?: string
+  rootId: string
   refresh: () => Promise<void>
   setDirty: Dirty
 }) {
   const [selected, setSelected] = useState(initialNode ?? ''),
-    [editSpace, setEditSpace] = useState(false)
-  const [editor, setEditor] = useState<{
-    mode: 'add' | 'edit' | 'move'
-    id?: string
-    parentId?: string
-  } | null>(null)
+    [editSpace, setEditSpace] = useState(false),
+    [deletingSpace, setDeletingSpace] = useState(false)
   const { act, busy, error } = useWorkspaceActions(data, refresh)
+  const [hasEdits, setHasEdits] = useState(false)
+  const trackDirty = useCallback(
+    (value: boolean) => {
+      setHasEdits(value)
+      setDirty(value)
+    },
+    [setDirty],
+  )
   useEffect(() => {
     if (initialNode) setSelected(initialNode)
   }, [initialNode])
@@ -47,9 +52,8 @@ export function SpacePage({
         </a>
       </>
     )
-  const progress = spaceProgress(data, spaceId)
   const nodes = data.knowledgeNodes.filter((n) => n.spaceId === spaceId)
-  const tab = view === 'tree' || view === 'graph' ? 'tree' : 'goals'
+  const editing = view === 'tree' || view === 'graph'
   return (
     <div className="space-page" style={{ '--space-color': space.color ?? '#456785' } as CSSProperties}>
       <a className="space-back" href="#home">
@@ -58,79 +62,64 @@ export function SpacePage({
       <PageHead
         title={space.name}
         action={
-          <button className="text-button" onClick={() => setEditSpace(true)}>
-            编辑领域
-          </button>
+          <div className="actions">
+            <a className="button secondary" href={`#space/${spaceId}/${editing ? 'cards' : 'tree'}`}>
+              {editing ? '知识卡片' : '编辑知识树'}
+            </a>
+            <button className="text-button" disabled={hasEdits || busy} onClick={() => setEditSpace(true)}>
+              编辑领域
+            </button>
+            <button
+              className="text-button"
+              disabled={hasEdits || busy}
+              onClick={() => setDeletingSpace(true)}
+            >
+              删除领域
+            </button>
+          </div>
         }
       />
-      <div className="space-summary">
-        <ProgressView progress={progress} />
-        <p>
-          {activeGoals(data, spaceId)} 个进行中目标{' '}
-          <span>
-            {progress.completed} / {progress.total} 步骤完成
-          </span>
-          <span>{nodes.length} 个知识节点</span>
-        </p>
-      </div>
-      <nav className="space-tabs" aria-label="领域视图">
-        {[
-          ['goals', '目标', 'check'],
-          ['tree', '知识树', 'branch'],
-        ].map(([key, label, icon]) => (
-          <a
-            key={key}
-            href={`#space/${spaceId}/${key}`}
-            className={tab === key ? 'active' : ''}
-            aria-current={tab === key ? 'page' : undefined}
-          >
-            <Icon name={icon as 'check' | 'branch'} size={18} />
-            {label}
-          </a>
-        ))}
-      </nav>
+      <p className="space-node-count">{nodes.length} 个知识节点</p>
       {error ? <Notice error>{error}</Notice> : null}
       {busy ? (
         <p className="muted" role="status">
           正在保存…
         </p>
       ) : null}
-      {tab === 'goals' ? (
-        <Goals
-          data={data}
-          spaceId={spaceId}
-          act={act}
-          busy={busy}
-          error={error}
-          setDirty={setDirty}
-          focusStep={focusStep}
-        />
-      ) : (
+      {editing ? (
         <KnowledgeStudio
           data={data}
           spaceId={spaceId}
           selected={selected}
           onSelect={setSelected}
-          onEdit={setEditor}
-          act={act}
-          busy={busy}
-          setDirty={setDirty}
-        />
-      )}
-      {editor ? (
-        <NodeForm
-          key={`${editor.mode}-${editor.id ?? editor.parentId ?? 'new'}`}
-          existing={nodes.find((n) => n.id === editor.id)}
-          parentId={editor.parentId}
-          mode={editor.mode}
-          data={data}
-          spaceId={spaceId}
+          initialNode={initialNode}
           act={act}
           busy={busy}
           error={error}
+          setDirty={trackDirty}
+        />
+      ) : (
+        <KnowledgeLibrary
+          key={`${rootId}/${initialNode ?? ''}`}
+          data={data}
+          spaceId={spaceId}
+          rootId={rootId}
+          initialNode={initialNode}
+          embedded
+        />
+      )}
+      {deletingSpace ? (
+        <DeleteSpace
+          space={space}
+          data={data}
+          refresh={refresh}
           setDirty={setDirty}
-          onClose={() => setEditor(null)}
-          onSaved={setSelected}
+          onDeleted={() => {
+            location.hash = 'home'
+          }}
+          onClose={() => {
+            setDeletingSpace(false)
+          }}
         />
       ) : null}
       {editSpace ? (

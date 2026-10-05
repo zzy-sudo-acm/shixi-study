@@ -1,5 +1,6 @@
 import { readFile } from 'node:fs/promises'
 import { test, expect, type Page } from '@playwright/test'
+import { addNode } from './helpers'
 
 async function createSpaceWithNode(page: Page, space: string, node: string, note: string) {
   await page.goto('#home')
@@ -8,12 +9,8 @@ async function createSpaceWithNode(page: Page, space: string, node: string, note
   await page.getByRole('button', { name: '创建领域', exact: true }).click()
   await expect(page.getByRole('dialog')).toHaveCount(0)
   await page.getByRole('link', { name: `进入 ${space}`, exact: true }).click()
-  await page.getByRole('link', { name: '知识树', exact: true }).click()
-  await page.getByRole('button', { name: '新建根节点', exact: true }).click()
-  await page.getByRole('dialog').getByLabel('节点名称').fill(node)
-  await page.getByRole('dialog').getByLabel('笔记', { exact: true }).fill(note)
-  await page.getByRole('button', { name: '保存节点', exact: true }).click()
-  await expect(page.getByRole('dialog')).toHaveCount(0)
+  await page.getByRole('link', { name: '编辑知识树', exact: true }).click()
+  await addNode(page, node, note)
 }
 
 test('完整备份导出与覆盖恢复', async ({ page }) => {
